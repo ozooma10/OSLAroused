@@ -1,0 +1,6 @@
+SkyrimSE.code-workspace
+skyrimse.ppj
+.vscode/launch.json
+.vscode/tasks.json
+meta.ini
+*.pex
