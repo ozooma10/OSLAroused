@@ -8,6 +8,11 @@ bool Property RequireLowArousalToEndScene Auto
 actor[] ActiveSceneActors
 
 function UpdateAdapter()
+	; Do not process if adapter not loaded
+	if(!Main.OStimAdapterLoaded)
+		return
+	endif
+
 	OSexIntegrationMain OStim = OUtils.GetOStim()
     if(OStim && OStim.AnimationRunning())
 		if(OStim.GetODatabase().IsSexAnimation(OStim.GetCurrentAnimationOID()))
@@ -146,7 +151,7 @@ bool function LoadAdapter()
     if (Game.GetModByName("Ostim.esp") == 255)
 		return false
     endif
-
+	
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	if (OStim == none || OStim.GetAPIVersion() < 23)
 		debug.MessageBox("Your OStim version is out of date. OAroused requires a newer version.")
