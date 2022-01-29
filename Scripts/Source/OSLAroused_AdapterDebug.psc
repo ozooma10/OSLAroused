@@ -29,7 +29,7 @@ Function SimulateArousalGain()
         target = PlayerRef
     endif
 
-    Main.ModifyArousal(target, 10.0)
+    OSLArousedNative.ModifyArousal(target, 10.0)
 EndFunction
 
 Function SimulateArousalLoss()
@@ -38,7 +38,7 @@ Function SimulateArousalLoss()
         target = PlayerRef
     endif
 
-    Main.ModifyArousal(target, -5.0)
+    OSLArousedNative.ModifyArousal(target, -5.0)
 EndFunction
 
 Function QueryArousal()
@@ -47,5 +47,5 @@ Function QueryArousal()
         target = PlayerRef
     endif
 
-    OSLAroused_Main.Log(target.GetDisplayName()+ " Arousal Is: " + Main.GetArousal(target))
+    OSLAroused_Main.Log(target.GetDisplayName()+ " Arousal Is: " + OSLArousedNative.GetArousal(target))
 EndFunction

@@ -4,10 +4,6 @@ ScriptName OSLAroused_Main Extends Quest Hidden
 
 Actor Property PlayerRef Auto 
 
-string LastCheckTimeStorageKey = "OSLA_LastTime"
-string ArousalStorageKey = "OSLA_Arousal"
-string ArousalMultiplierStorageKey = "OSLA_Multiplier"
-
 float Property ScanDistance = 5120.0 AutoReadOnly
 
 keyword property EroticArmor auto
@@ -26,81 +22,15 @@ bool Property EnableArousalStatBuffs = true Auto
 ;spell horny 
 ;spell relieved 
 
-; ============== PUBLICish API ===================
-
-float function GetArousal(actor target)
-	float lastCheckTime = StorageUtil.GetFloatValue(target, LastCheckTimeStorageKey)
-	float curTime = Utility.GetCurrentGameTime()
-	float timePassed = curtime - lastCheckTime
-	
-	StorageUtil.SetFloatValue(target, LastCheckTimeStorageKey, curTime); Save last check time to NPC
-
-	float newArousal
-	if (lastCheckTime <= 0.0) || ((timePassed) > 3.0) ;never calculated, or very old data
-		newArousal = PO3_SKSEFunctions.GenerateRandomFloat(0.0, 75.0)
-		
-		if (lastCheckTime <= 0.0)
-			float randomArousal = PO3_SKSEFunctions.GenerateRandomFloat(0.75, 1.25)
-			StorageUtil.SetFloatValue(target, ArousalMultiplierStorageKey, PO3_SKSEFunctions.GenerateRandomFloat(0.75, 1.25))
-		endif 
-	else 
-		float currentVal = StorageUtil.GetFloatValue(target, ArousalStorageKey)
-		float arousalMultiplier = StorageUtil.GetFloatValue(target, ArousalMultiplierStorageKey)
-		newArousal = currentVal + ((timePassed * 25.0) * arousalMultiplier)
-	endif 
-	
-	return SetArousal(target, newArousal, false)
-EndFunction
-
-float Function SetArousal(actor npc, float value, bool updateAccessTime = true)
-	if updateAccessTime
-		StorageUtil.SetFloatValue(npc, LastCheckTimeStorageKey, utility.GetCurrentGameTime())
-	endif 
-
-	value = papyrusutil.ClampFloat(value, 0.0, 100.0)
-	
-	StorageUtil.SetFloatValue(npc, ArousalStorageKey, value)
-
-	if npc == playerref
-		ArousalBar.SetPercent(value / 100.0)
-
-		if EnableArousalStatBuffs
-			ApplyArousedEffects(value as int)
-		else  
-			RemoveAllArousalSpells()
-		endif
-	endif 
-
-	return value
-EndFunction
-
-float Function ModifyArousal(actor npc, float by)
-	Log("Modify Arousal Multiplier: " + StorageUtil.GetFloatValue(npc, ArousalMultiplierStorageKey))
-
-	if by > 0.0 
-		by *= StorageUtil.GetFloatValue(npc, ArousalMultiplierStorageKey)
-	endif 
-
-	return SetArousal(npc, GetArousal(npc) + by, false)
-EndFunction
-
-Function ModifyArousalMultiple(actor[] acts, float amount)
-	{increase arousal by the amount}
-	int i = 0 
-	int max = acts.Length
-	while i < max 
-		ModifyArousal(acts[i], (amount))
-		i += 1
-	EndWhile
-endfunction
-
 ; ============== CORE LIFECYCLE ===================
 
 Event OnInit()
 	EroticArmor = Keyword.GetKeyword("EroticArmor")
 	
 	;Initialize multiplier to 1 for player
-	StorageUtil.SetFloatValue(PlayerRef, ArousalMultiplierStorageKey, 1.0)
+	OSLArousedNative.SetArousalMultiplier(PlayerRef, 1.0)
+
+	RegisterForModEvent("OSLA_PlayerArousalUpdated", "OnPlayerArousalUpdated")
 
 	OnGameLoaded()
 
@@ -118,7 +48,7 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 
-	float arousal = GetArousal(PlayerRef)
+	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
 EndFunction
 
@@ -129,11 +59,15 @@ Event OnUpdate()
 	endif
 EndEvent
 
-Event OnUpdateGameTime()
-	GetArousal(PlayerRef)
+event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, Form sender)
+	ArousalBar.SetPercent(newArousal / 100.0)
 
-	RegisterForSingleUpdateGameTime(6)	
-EndEvent
+	if EnableArousalStatBuffs
+		ApplyArousedEffects(newArousal as int)
+	else  
+		RemoveAllArousalSpells()
+	endif
+endevent
 
 ; ========== AROUSAL EFFECTS ===========
 

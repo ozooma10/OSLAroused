@@ -13,7 +13,7 @@ actor[] ActiveSceneActors
 function UpdateAdapter()
     if(OStim && OStim.AnimationRunning())
 		if(ODatabase.IsSexAnimation(OStim.GetCurrentAnimationOID()))
-			Main.ModifyArousalMultiple(ActiveSceneActors, 1.5 * OStim.SexExcitementMult)
+			OSLArousedNative.ModifyArousalMultiple(ActiveSceneActors, 1.5 * OStim.SexExcitementMult)
 
 			actor[] nearby = MiscUtil.ScanCellNPCs(ActiveSceneActors[0], Main.ScanDistance)
 			float closeEnough  = Main.ScanDistance / 8
@@ -28,7 +28,7 @@ function UpdateAdapter()
 				i += 1
 			EndWhile
 
-			Main.ModifyArousalMultiple(PapyrusUtil.RemoveActor(nearby, none), 5.0 * OStim.SexExcitementMult)
+			OSLArousedNative.ModifyArousalMultiple(PapyrusUtil.RemoveActor(nearby, none), 5.0 * OStim.SexExcitementMult)
 		endif
         RegisterForSingleUpdate(15.0)
 	endif
@@ -47,12 +47,12 @@ Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
     reduceBy = reduceBy + PO3_SKSEFunctions.GenerateRandomFloat(-5.0, 5.0)
     reduceBy = -reduceBy 
 
-	Main.ModifyArousal(orgasmer, reduceBy)
+	OSLArousedNative.ModifyArousal(orgasmer, reduceBy)
 
 	CalculateStimMultipliers()
 
 	if orgasmer == playerref
-		if Main.GetArousal(playerref) < 15
+		if OSLArousedNative.GetArousal(playerref) < 15
 			if bEndOnDomOrgasm
 				OStim.EndOnDomOrgasm = true 
 			endif 
@@ -73,7 +73,7 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	previousModifiers = PapyrusUtil.FloatArray(3)
 	CalculateStimMultipliers()
 
-	Main.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult)
+	OSLArousedNative.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult)
 
 	if (RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(PlayerRef)))
 		if PlayerRef == OStim.GetDomActor()
@@ -94,7 +94,7 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	int max = ActiveSceneActors.Length
 	while i < max 
 		if OStim.GetTimesOrgasm(ActiveSceneActors[i]) < 1
-			main.ModifyArousal(ActiveSceneActors[i], 20.0)
+			OSLArousedNative.ModifyArousal(ActiveSceneActors[i], 20.0)
 		endif 
 
 		i += 1
@@ -116,7 +116,7 @@ Function CalculateStimMultipliers()
 	int i = 0
 	int max = ActiveSceneActors.Length
 	while i < max 
-		float arousal = main.GetArousal(ActiveSceneActors[i])
+		float arousal = OSLArousedNative.GetArousal(ActiveSceneActors[i])
 
 		float modifyBy
 
@@ -140,11 +140,11 @@ Function CalculateStimMultipliers()
 EndFunction
 
 bool function LoadAdapter()
-    if (Game.GetModByName("Ostim.esp"))
+    if (Game.GetModByName("Ostim.esp") != 255)
         OStim = OUtils.GetOStim()
     endif
 
-    ;If we didnt find OStim, Looks like something went wrong
+    ;Looks like Ostims not Installed
     if(OStim == none)
         return false
     endif
@@ -160,8 +160,4 @@ bool function LoadAdapter()
 	RegisterForModEvent("ostim_start", "OStimStart")
 	RegisterForModEvent("ostim_end", "OStimEnd")
     return true
-endfunction
-
-function Log(string msg) global
-    Debug.Trace("---OSLAroused--- " + msg)
 endfunction
