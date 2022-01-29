@@ -22,8 +22,8 @@ EndEvent
 
 Event OnPageReset(string page)
     if(page == "" || page == "General Settings")
-        CheckArousalKeyOid = AddKeyMapOption("Show Arousal Key", Main.CheckArousalKey)
-        EnableNudityCheckOid = AddToggleOption("Enable Nudity Increases Arousal", Main.EnableNudityIncreasesArousal)
+        CheckArousalKeyOid = AddKeyMapOption("Show Arousal Key", Main.GetShowArousalKeybind())
+        EnableNudityCheckOid = AddToggleOption("Enable Nudity Increases Arousal", Main.GetEnableNudityIncreasesArousal())
         EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
 
         AddHeaderOption("OStim Settings")
@@ -34,11 +34,12 @@ EndEvent
 event OnOptionSelect(int optionId)
     if(CurrentPage == "General Settings" || CurrentPage == "")
         if (optionId == EnableNudityCheckOid)
-            Main.EnableNudityIncreasesArousal = !Main.EnableNudityIncreasesArousal 
-            SetToggleOptionValue(EnableNudityCheckOid, Main.EnableNudityIncreasesArousal)
-        elseif (optionId == EnableNudityCheckOid)
-            Main.EnableNudityIncreasesArousal = !Main.EnableNudityIncreasesArousal 
-            SetToggleOptionValue(EnableNudityCheckOid, Main.EnableNudityIncreasesArousal)
+            bool newVal = !Main.GetEnableNudityIncreasesArousal()
+            Main.SetPlayerNudityIncreasesArousal(newVal) 
+            SetToggleOptionValue(EnableNudityCheckOid, newVal)
+        elseif (optionId == EnableStatBuffsOid)
+            Main.EnableArousalStatBuffs = !Main.EnableArousalStatBuffs 
+            SetToggleOptionValue(EnableNudityCheckOid, Main.EnableArousalStatBuffs)
         elseif (optionId == RequireLowArousalToEndSceneOid)
             OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
             SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
@@ -48,13 +49,13 @@ endevent
 
 Event OnOptionKeyMapChange(int optionId, int keyCode, string conflictControl, string conflictName)
     if(optionId == CheckArousalKeyOid)
-        Main.CheckArousalKey = keyCode
+        Main.SetShowArousalKeybind(keyCode)
         SetKeyMapOptionValue(CheckArousalKeyOid, keyCode)
     endif
 EndEvent
 
 event OnOptionHighlight(int optionId)
-    if(CurrentPage == "General Settings")
+    if(CurrentPage == "General Settings" || CurrentPage == "")
         if(optionId == CheckArousalKeyOid)
             SetInfoText("Key To Show Arousal Bar")
         elseif(optionId == EnableNudityCheckOid)

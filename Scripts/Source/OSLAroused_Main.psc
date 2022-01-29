@@ -15,8 +15,8 @@ OSLAroused_AdapterOStim Property OStimAdapter Auto
 
 OSLAroused_AdapterDebug Property DebugAdapter Auto
 
-int Property CheckArousalKey = 157 Auto
-bool Property EnableNudityIncreasesArousal = true Auto
+int CheckArousalKey = 157
+bool EnableNudityIncreasesArousal = true
 bool Property EnableArousalStatBuffs = true Auto
 
 ;spell horny 
@@ -50,6 +50,9 @@ Function OnGameLoaded()
 
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
+
+	;Need to notify skse dll whether to check for player nudity
+	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 EndFunction
 
 Event OnUpdate()
@@ -115,6 +118,27 @@ Event OnKeyDown(int keyCode)
 		ArousalBar.DisplayBarWithAutohide(10.0)
 	endif 	
 EndEvent
+
+
+; ========= SETTINGS UPDATE =================
+int function GetShowArousalKeybind()
+	return CheckArousalKey
+endfunction
+
+bool function GetEnableNudityIncreasesArousal()
+	return EnableNudityIncreasesArousal
+endfunction
+
+function SetPlayerNudityIncreasesArousal(bool newVal)
+	EnableNudityIncreasesArousal = newVal
+	OSLArousedNative.UpdatePlayerNudityCheck(newVal)
+endfunction
+
+function SetShowArousalKeybind(int newKey)
+	UnregisterForKey(CheckArousalKey)
+	CheckArousalKey = newKey
+	RegisterForKey(newKey)
+endfunction
 
 ; ========== DEBUG RELATED ==================
 

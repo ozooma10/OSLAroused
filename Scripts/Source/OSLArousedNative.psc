@@ -1,5 +1,8 @@
 scriptname OSLArousedNative hidden
 
+;Sets weather PlayerNudityCheck should be enabled or disabled in SKSE module
+function UpdatePlayerNudityCheck(bool enabled) global native
+
 ;Retrieves arousal value for a given Actor
 float function GetArousal(Actor actor) global native
 ;Retrieves arousal for passed in actors. Results in *same* order as passed in array
