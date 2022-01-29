@@ -55,13 +55,6 @@ Function OnGameLoaded()
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 EndFunction
 
-Event OnUpdate()
-	Log("Main Update OnUpdate")
-	if(OStimAdapterLoaded)
-		OStimAdapter.UpdateAdapter()
-	endif
-EndEvent
-
 event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, Form sender)
 	ArousalBar.SetPercent(newArousal / 100.0)
 

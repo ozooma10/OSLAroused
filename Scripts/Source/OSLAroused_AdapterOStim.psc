@@ -5,14 +5,12 @@ Actor Property PlayerRef Auto
 
 bool Property RequireLowArousalToEndScene Auto
 
-OSexIntegrationMain OStim
-ODatabaseScript ODatabase
-
 actor[] ActiveSceneActors
 
 function UpdateAdapter()
+	OSexIntegrationMain OStim = OUtils.GetOStim()
     if(OStim && OStim.AnimationRunning())
-		if(ODatabase.IsSexAnimation(OStim.GetCurrentAnimationOID()))
+		if(OStim.GetODatabase().IsSexAnimation(OStim.GetCurrentAnimationOID()))
 			OSLArousedNative.ModifyArousalMultiple(ActiveSceneActors, 1.5 * OStim.SexExcitementMult)
 
 			actor[] nearby = MiscUtil.ScanCellNPCs(ActiveSceneActors[0], Main.ScanDistance)
@@ -39,6 +37,7 @@ Event OnUpdate()
 endevent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
+	OSexIntegrationMain OStim = OUtils.GetOStim()
 	actor orgasmer = OStim.GetMostRecentOrgasmedActor()
 
 	float reduceBy = (OStim.GetTimeSinceStart() / 120) * OStim.SexExcitementMult
@@ -68,6 +67,7 @@ EndEvent
 bool bEndOnDomOrgasm
 bool bEndOnSubOrgasm
 Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
+	OSexIntegrationMain OStim = OUtils.GetOStim()
 	ActiveSceneActors = OStim.GetActors()
 
 	previousModifiers = PapyrusUtil.FloatArray(3)
@@ -89,6 +89,7 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 endevent
 
 Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
+	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; increase arousal for actors that did not orgasm
 	int i = 0 
 	int max = ActiveSceneActors.Length
@@ -112,6 +113,7 @@ endevent
 
 float[] previousModifiers
 Function CalculateStimMultipliers()
+	OSexIntegrationMain OStim = OUtils.GetOStim()
 
 	int i = 0
 	int max = ActiveSceneActors.Length
@@ -140,19 +142,14 @@ Function CalculateStimMultipliers()
 EndFunction
 
 bool function LoadAdapter()
-    if (Game.GetModByName("Ostim.esp") != 255)
-        OStim = OUtils.GetOStim()
-    endif
-
     ;Looks like Ostims not Installed
-    if(OStim == none)
-        return false
+    if (Game.GetModByName("Ostim.esp") == 255)
+		return false
     endif
 
-	odatabase = OStim.GetODatabase()
-	if OStim.GetAPIVersion() < 23
+	OSexIntegrationMain OStim = OUtils.GetOStim()
+	if (OStim == none || OStim.GetAPIVersion() < 23)
 		debug.MessageBox("Your OStim version is out of date. OAroused requires a newer version.")
-        OStim = none
 		return false
 	endif
 
