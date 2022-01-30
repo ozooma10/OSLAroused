@@ -125,7 +125,7 @@ event OnOptionSelect(int optionId)
             SetToggleOptionValue(EnableNudityCheckOid, newVal)
         elseif (optionId == EnableStatBuffsOid)
             Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
-            SetToggleOptionValue(EnableNudityCheckOid, Main.EnableArousalStatBuffs)
+            SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
         elseif (optionId == RequireLowArousalToEndSceneOid)
             OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
             SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
