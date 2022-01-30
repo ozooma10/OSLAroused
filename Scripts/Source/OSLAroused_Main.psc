@@ -23,8 +23,7 @@ float DefaultArousalMultiplier = 2.0
 
 int property kArousalMode_SLAroused = 0 autoreadonly
 int property kArousalMode_OAroused = 1 autoreadonly
-int SelectedArousalMode
-
+int SelectedArousalMode = 1
 
 ;OAroused Spells
 Spell Property SLADesireSpell Auto
@@ -84,6 +83,8 @@ event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, 
 	else  
 		RemoveAllArousalSpells()
 	endif
+
+	DebugAdapter.OnPlayerArousalUpdated(newArousal)
 endevent
 
 ; ========== AROUSAL EFFECTS ===========

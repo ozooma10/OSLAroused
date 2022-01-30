@@ -42,6 +42,7 @@ Event OnUpdate()
 endevent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
+	Log("OStim OStimOrgasm")
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	actor orgasmer = OStim.GetMostRecentOrgasmedActor()
 
@@ -72,6 +73,7 @@ EndEvent
 bool bEndOnDomOrgasm
 bool bEndOnSubOrgasm
 Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
+	Log("OStim Scene Start")
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	ActiveSceneActors = OStim.GetActors()
 
@@ -94,6 +96,7 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 endevent
 
 Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
+	Log("OStim Scene End")
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; increase arousal for actors that did not orgasm
 	int i = 0 
@@ -162,4 +165,11 @@ bool function LoadAdapter()
 	RegisterForModEvent("ostim_start", "OStimStart")
 	RegisterForModEvent("ostim_end", "OStimEnd")
     return true
+endfunction
+
+
+; ========== DEBUG RELATED ==================
+
+function Log(string msg) global
+    Debug.Trace("---OSLAroused--- [OStimAdapter] " + msg)
 endfunction
