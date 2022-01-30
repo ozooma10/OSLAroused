@@ -33,10 +33,6 @@ Spell Property SLADesireSpell Auto
 Spell Property OArousedHornySpell Auto
 Spell Property OArousedRelievedSpell Auto
 
-
-;spell horny 
-;spell relieved 
-
 ; ============== CORE LIFECYCLE ===================
 
 Event OnInit()
@@ -79,7 +75,12 @@ event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, 
 	ConditionVars.OSLAroused_PlayerTimeRate = OSLArousedNative.GetTimeRate(PlayerRef)
 
 	if EnableArousalStatBuffs
-		ApplyArousedEffects(newArousal as int)
+		; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
+		if(SelectedArousalMode == kArousalMode_OAroused)
+			ApplyOArousedEffects(newArousal as int)
+		else
+			ApplyArousedEffects()
+		endif
 	else  
 		RemoveAllArousalSpells()
 	endif
@@ -87,23 +88,37 @@ endevent
 
 ; ========== AROUSAL EFFECTS ===========
 
-Function ApplyArousedEffects(int arousal)
+function SetArousalEffectsEnabled(bool enabled)
+	EnableArousalStatBuffs = enabled
+	if EnableArousalStatBuffs
+		ApplyArousedEffects()
+	else  
+		RemoveAllArousalSpells()
+	endif
+endfunction
+
+Function ApplyArousedEffects()
 	if(SelectedArousalMode == kArousalMode_SLAroused)
 		PlayerRef.RemoveSpell(SLADesireSpell)
 		PlayerRef.AddSpell(SLADesireSpell, false)
 		Debug.Trace("Enabled SLA Desire Spell")
 	elseif(SelectedArousalMode == kArousalMode_OAroused)
-		if arousal >= 40
-			arousal -= 40
-			float percent = arousal / 60.0
-			ApplyHornySpell((percent * 25) as int)
-		elseif arousal <= 10
-			ApplyReliefSpell(10)
-		else 
-			RemoveAllArousalSpells()
-		endif 
+		int arousal = OSLArousedNative.GetArousal(PlayerRef) as int
+		ApplyOArousedEffects(arousal)
 	endif
 EndFunction
+
+Function ApplyOArousedEffects(int arousal)
+	if arousal >= 40
+		arousal -= 40
+		float percent = arousal / 60.0
+		ApplyHornySpell((percent * 25) as int)
+	elseif arousal <= 10
+		ApplyReliefSpell(10)
+	else 
+		RemoveAllArousalSpells()
+	endif 
+endfunction
 
 Function ApplyHornySpell(int magnitude)
 	OArousedHornySpell.SetNthEffectMagnitude(0, magnitude)
@@ -124,6 +139,7 @@ Function ApplyReliefSpell(int magnitude)
 EndFunction
 
 Function RemoveAllArousalSpells()
+	Debug.Trace("RemoveAllArousalSpells")
 	playerref.RemoveSpell(SLADesireSpell)
 	playerref.RemoveSpell(OArousedHornySpell)
 	playerref.RemoveSpell(OArousedRelievedSpell)
@@ -161,6 +177,11 @@ function SetCurrentArousalMode(int newMode)
 		return
 	endif
 	SelectedArousalMode = newMode
+	;Update arousal spells
+	RemoveAllArousalSpells()
+	if(EnableArousalStatBuffs)
+		ApplyArousedEffects()
+	endif
 endfunction
 
 function SetDefaultArousalMultiplier(float newVal)
