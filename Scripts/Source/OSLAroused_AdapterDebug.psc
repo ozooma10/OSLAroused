@@ -29,7 +29,7 @@ Function SimulateArousalGain()
         target = PlayerRef
     endif
 
-    OSLAroused_ModInterface.ModifyArousal(target, 10.0)
+    OSLAroused_ModInterface.ModifyArousal(target, 5.0)
 EndFunction
 
 Function SimulateArousalLoss()

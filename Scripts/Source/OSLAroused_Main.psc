@@ -9,6 +9,7 @@ float Property ScanDistance = 5120.0 AutoReadOnly
 keyword property EroticArmor auto
 
 OSLAroused_ArousalBar Property ArousalBar Auto
+OSLAroused_Conditions Property ConditionVars Auto 
 
 bool property OStimAdapterLoaded = false Auto Hidden
 OSLAroused_AdapterOStim Property OStimAdapter Auto
@@ -24,6 +25,15 @@ int property kArousalMode_SLAroused = 0 autoreadonly
 int property kArousalMode_OAroused = 1 autoreadonly
 int SelectedArousalMode
 
+
+;OAroused Spells
+Spell Property SLADesireSpell Auto
+
+;SL Aroused Spells
+Spell Property OArousedHornySpell Auto
+Spell Property OArousedRelievedSpell Auto
+
+
 ;spell horny 
 ;spell relieved 
 
@@ -32,6 +42,8 @@ int SelectedArousalMode
 Event OnInit()
 	EroticArmor = Keyword.GetKeyword("EroticArmor")
 	
+	;horny.SetNthEffectArea
+
 	;Initialize multiplier to 2 for player
 	OSLArousedNative.SetArousalMultiplier(PlayerRef, 2.0)
 
@@ -63,6 +75,9 @@ EndFunction
 event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, Form sender)
 	ArousalBar.SetPercent(newArousal / 100.0)
 
+	ConditionVars.OSLAroused_PlayerArousal = newArousal
+	ConditionVars.OSLAroused_PlayerTimeRate = OSLArousedNative.GetTimeRate(PlayerRef)
+
 	if EnableArousalStatBuffs
 		ApplyArousedEffects(newArousal as int)
 	else  
@@ -73,39 +88,45 @@ endevent
 ; ========== AROUSAL EFFECTS ===========
 
 Function ApplyArousedEffects(int arousal)
-	if arousal >= 40
-		arousal -= 40
-		float percent = arousal / 60.0
-		ApplyHornySpell((percent * 25) as int)
-	elseif arousal <= 10
-		ApplyReliefSpell(10)
-	else 
-		RemoveAllArousalSpells()
-	endif 
-	
+	if(SelectedArousalMode == kArousalMode_SLAroused)
+		PlayerRef.RemoveSpell(SLADesireSpell)
+		PlayerRef.AddSpell(SLADesireSpell, false)
+		Debug.Trace("Enabled SLA Desire Spell")
+	elseif(SelectedArousalMode == kArousalMode_OAroused)
+		if arousal >= 40
+			arousal -= 40
+			float percent = arousal / 60.0
+			ApplyHornySpell((percent * 25) as int)
+		elseif arousal <= 10
+			ApplyReliefSpell(10)
+		else 
+			RemoveAllArousalSpells()
+		endif 
+	endif
 EndFunction
 
 Function ApplyHornySpell(int magnitude)
-	;horny.SetNthEffectMagnitude(0, magnitude)
-	;horny.SetNthEffectMagnitude(1, magnitude)
+	OArousedHornySpell.SetNthEffectMagnitude(0, magnitude)
+	OArousedHornySpell.SetNthEffectMagnitude(1, magnitude)
 
-	;playerref.RemoveSpell(relieved)
-	;playerref.RemoveSpell(horny)
-	;playerref.AddSpell(horny, false)
+	playerref.RemoveSpell(OArousedRelievedSpell)
+	playerref.RemoveSpell(OArousedHornySpell)
+	playerref.AddSpell(OArousedHornySpell, false)
 EndFunction
 
 Function ApplyReliefSpell(int magnitude)
-	;relieved.SetNthEffectMagnitude(0, magnitude)
-	;relieved.SetNthEffectMagnitude(1, magnitude)
+	OArousedRelievedSpell.SetNthEffectMagnitude(0, magnitude)
+	OArousedRelievedSpell.SetNthEffectMagnitude(1, magnitude)
 
-	;playerref.RemoveSpell(horny)
-	;playerref.RemoveSpell(relieved)
-	;playerref.AddSpell(relieved, false)
+	playerref.RemoveSpell(OArousedHornySpell)
+	playerref.RemoveSpell(OArousedRelievedSpell)
+	playerref.AddSpell(OArousedRelievedSpell, false)
 EndFunction
 
 Function RemoveAllArousalSpells()
-	;playerref.RemoveSpell(horny)
-	;playerref.RemoveSpell(relieved)
+	playerref.RemoveSpell(SLADesireSpell)
+	playerref.RemoveSpell(OArousedHornySpell)
+	playerref.RemoveSpell(OArousedRelievedSpell)
 EndFunction
 
 Event OnKeyDown(int keyCode)
