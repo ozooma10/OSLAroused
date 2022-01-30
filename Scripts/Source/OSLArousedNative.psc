@@ -39,5 +39,7 @@ float function GetExposure(Actor actor) global native
 ;Gets the number of days since this actor last orgasmed
 float function GetDaysSinceLastOrgasm(Actor actor) global native
 
+function SetTimeRate(Actor actor, float value) global native
+
 ;Gets the Actors current time rate
 float function GetTimeRate(Actor actor) global native

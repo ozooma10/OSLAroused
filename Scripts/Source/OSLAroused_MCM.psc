@@ -13,10 +13,11 @@ int Property ArousalModeOid Auto
 ; OStim Specific Settings
 int Property RequireLowArousalToEndSceneOid Auto
 
-
-;---- Misc Properties ----
+;---- Puppet Properties ----
 Actor Property PuppetActor Auto
-
+int Property SetArousalOid Auto
+int Property SetMultiplierOid Auto
+int Property SetTimeRateOid Auto
 
 
 int function GetVersion()
@@ -25,9 +26,10 @@ endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
-    Pages = new String[2]
+    Pages = new String[3]
     Pages[0] = "General Settings"
     Pages[1] = "Status"
+    Pages[2] = "Puppeteer"
 
     ArousalModeNames = new string[2]
     ArousalModeNames[0] = "SexLab Aroused"
@@ -44,6 +46,8 @@ Event OnPageReset(string page)
         MainRightColumn()
     elseif(page == "Status")
         StatusPage()
+    elseif(page == "Puppeteer")
+        PuppeteerPage()
     endif
 EndEvent
 
@@ -85,6 +89,33 @@ function StatusPage()
     endif
 endfunction
 
+function PuppeteerPage()
+    if(PuppetActor == none)
+        AddHeaderOption("No Target Selected")
+        return
+    endif
+
+    AddEmptyOption()
+    AddHeaderOption(PuppetActor.GetLeveledActorBase().GetName())
+
+    int currentArousalMode = Main.GetCurrentArousalMode()
+    if(currentArousalMode == Main.kArousalMode_OAroused)
+        float exposure = OSLArousedNative.GetExposure(PuppetActor)
+        SetArousalOid = AddSliderOption("Arousal", exposure, "{0}")
+    
+        float exposureRate = OSLArousedNative.GetArousalMultiplier(PuppetActor)
+        SetMultiplierOid = AddSliderOption("Arousal Multiplier", exposureRate, "{0}")
+    elseif(currentArousalMode == Main.kArousalMode_SLAroused)
+        float exposure = OSLArousedNative.GetExposure(PuppetActor)
+        SetArousalOid = AddSliderOption("Exposure", exposure, "{0}")
+    
+        float exposureRate = OSLArousedNative.GetArousalMultiplier(PuppetActor)
+        SetMultiplierOid = AddSliderOption("Exposure Rate", exposureRate, "{1}")
+        
+        float timeRate = OSLArousedNative.GetTimeRate(PuppetActor)
+        SetTimeRateOid = AddSliderOption("Time Rate", timeRate, "{0}")
+    endif
+endfunction
 
 event OnOptionSelect(int optionId)
     if(CurrentPage == "General Settings" || CurrentPage == "")
@@ -126,7 +157,6 @@ event OnOptionHighlight(int optionId)
 endevent
 
 event OnOptionMenuOpen(int optionId)
-    
     if(optionId == ArousalModeOid)
         SetMenuDialogStartIndex(Main.GetCurrentArousalMode())
         SetMenuDialogDefaultIndex(0)
@@ -141,7 +171,64 @@ event OnOptionMenuAccept(int optionId, int index)
     endif
 endevent
 
+event OnOptionSliderOpen(int option)
+    if(CurrentPage == "Puppeteer")
+        if(option == SetArousalOid)
+            float arousal = 0
+            if(Main.GetCurrentArousalMode() == Main.kArousalMode_SLAroused)
+                arousal = OSLArousedNative.GetExposure(PuppetActor)
+            else
+                arousal = OSLArousedNative.GetArousal(PuppetActor)
+            endif
+            SetSliderDialogStartValue(arousal)
+            SetSliderDialogDefaultValue(0)
+            SetSliderDialogRange(0, 100)
+            SetSliderDialogInterval(1)
+        elseif (option == SetMultiplierOid)
+            float mult = OSLArousedNative.GetArousalMultiplier(PuppetActor)
+            SetSliderDialogStartValue(mult)
+            SetSliderDialogDefaultValue(2.0)
+            SetSliderDialogRange(0, 10.0)
+            SetSliderDialogInterval(0.1)
+        elseif (option == SetTimeRateOid)
+            float timeRate = OSLArousedNative.GetTimeRate(PuppetActor)
+            SetSliderDialogStartValue(timeRate)
+            SetSliderDialogDefaultValue(10.0)
+            SetSliderDialogRange(0, 100.0)
+            SetSliderDialogInterval(1.0)
+        endif
+    endif
+endevent
 
+event OnOptionSliderAccept(int option, float value)
+    if(currentPage == "Puppeteer")
+        if(option == SetArousalOid)
+            OSLArousedNative.SetArousal(PuppetActor, value)
+            SetSliderOptionValue(SetArousalOid, value, "{0}")
+        elseif(option == SetMultiplierOid)
+            OSLArousedNative.SetArousalMultiplier(PuppetActor, value)
+            SetSliderOptionValue(SetMultiplierOid, value, "{1}")
+        elseif(option == SetTimeRateOid)
+            OSLArousedNative.SetTimeRate(PuppetActor, value)
+            SetSliderOptionValue(SetTimeRateOid, value, "{0}")
+        endif
+    endif
+endevent
+
+event OnOptionDefault(int option)
+    if(currentPage == "Puppeteer")
+        if(option == SetArousalOid)
+            OSLArousedNative.SetArousal(PuppetActor, 0)
+            SetSliderOptionValue(SetArousalOid, 0, "{0}")
+        elseif(option == SetMultiplierOid)
+            OSLArousedNative.SetArousalMultiplier(PuppetActor, 2.0)
+            SetSliderOptionValue(SetMultiplierOid, 2.0, "{1}")
+        elseif(option == SetTimeRateOid)
+            OSLArousedNative.SetTimeRate(PuppetActor, 10.0)
+            SetSliderOptionValue(SetTimeRateOid, 10.0, "{0}")
+        endif
+    endif
+endevent
 
 event OnKeyDown(int keyCode)
     if(!Utility.IsInMenuMode() && keyCode == Main.GetShowArousalKeybind())

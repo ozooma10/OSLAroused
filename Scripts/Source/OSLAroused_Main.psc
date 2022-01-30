@@ -32,8 +32,8 @@ int SelectedArousalMode
 Event OnInit()
 	EroticArmor = Keyword.GetKeyword("EroticArmor")
 	
-	;Initialize multiplier to 1 for player
-	OSLArousedNative.SetArousalMultiplier(PlayerRef, 1.0)
+	;Initialize multiplier to 2 for player
+	OSLArousedNative.SetArousalMultiplier(PlayerRef, 2.0)
 
 	RegisterForModEvent("OSLA_PlayerArousalUpdated", "OnPlayerArousalUpdated")
 
