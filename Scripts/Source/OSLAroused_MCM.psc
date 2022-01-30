@@ -7,8 +7,17 @@ int Property CheckArousalKeyOid Auto
 int Property EnableNudityCheckOid Auto
 int Property EnableStatBuffsOid Auto
 
+string[] ArousalModeNames
+int Property ArousalModeOid Auto
+
 ; OStim Specific Settings
 int Property RequireLowArousalToEndSceneOid Auto
+
+
+;---- Misc Properties ----
+Actor Property PuppetActor Auto
+
+
 
 int function GetVersion()
     return 1
@@ -16,20 +25,66 @@ endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
-    Pages = new String[1]
+    Pages = new String[2]
     Pages[0] = "General Settings"
+    Pages[1] = "Status"
+
+    ArousalModeNames = new string[2]
+    ArousalModeNames[0] = "SexLab Aroused"
+    ArousalModeNames[1] = "OAroused"
+
+    PuppetActor = Game.GetPlayer()
 EndEvent
 
 Event OnPageReset(string page)
+    SetCursorFillMode(TOP_TO_BOTTOM)
     if(page == "" || page == "General Settings")
-        CheckArousalKeyOid = AddKeyMapOption("Show Arousal Key", Main.GetShowArousalKeybind())
-        EnableNudityCheckOid = AddToggleOption("Enable Nudity Increases Arousal", Main.GetEnableNudityIncreasesArousal())
-        EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
-
-        AddHeaderOption("OStim Settings")
-        RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
+        MainLeftColumn()
+        SetCursorPosition(1)
+        MainRightColumn()
+    elseif(page == "Status")
+        StatusPage()
     endif
 EndEvent
+
+function MainLeftColumn()
+    CheckArousalKeyOid = AddKeyMapOption("Show Arousal Key", Main.GetShowArousalKeybind())
+    EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
+    ArousalModeOid = AddMenuOption("Arousal Mode", ArousalModeNames[Main.GetCurrentArousalMode()])
+endfunction
+
+function MainRightColumn()
+    AddHeaderOption("Nudity Settings")
+    EnableNudityCheckOid = AddToggleOption("Player Nudity Increases Others Arousal", Main.GetEnableNudityIncreasesArousal())
+
+    AddHeaderOption("OStim Settings")
+    RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
+endfunction
+
+function StatusPage()
+    if(PuppetActor == none)
+        AddHeaderOption("No Target Selected")
+        return
+    endif
+    AddHeaderOption(PuppetActor.GetLeveledActorBase().GetName())
+
+    int currentArousalMode = Main.GetCurrentArousalMode()
+    if(currentArousalMode == Main.kArousalMode_OAroused)
+        AddTextOption("Current Arousal", OSLArousedNative.GetArousal(PuppetActor), OPTION_FLAG_DISABLED)
+        AddTextOption("Arousal Multiplier", OSLArousedNative.GetArousalMultiplier(PuppetActor), OPTION_FLAG_DISABLED)
+    elseif(currentArousalMode == Main.kArousalMode_SLAroused)
+        float timeRate = OSLArousedNative.GetTimeRate(PuppetActor)
+        float lastOrgasm = OSLArousedNative.GetDaysSinceLastOrgasm(PuppetActor)
+
+        AddTextOption("Arousal = Exposure + Time Arousal", OSLArousedNative.GetArousal(PuppetActor), OPTION_FLAG_DISABLED)
+        AddTextOption("Current Exposure", OSLArousedNative.GetExposure(PuppetActor), OPTION_FLAG_DISABLED)
+        AddTextOption("Exposure Rate", OSLArousedNative.GetArousalMultiplier(PuppetActor), OPTION_FLAG_DISABLED)
+        AddTextOption("Time Arousal = D x (Time Rate)", lastOrgasm * timeRate, OPTION_FLAG_DISABLED)
+        AddTextOption("D = Days Since Last Orgasm", OSLArousedNative.GetDaysSinceLastOrgasm(PuppetActor), OPTION_FLAG_DISABLED)
+        AddTextOption("Time Rate", timeRate, OPTION_FLAG_DISABLED)
+    endif
+endfunction
+
 
 event OnOptionSelect(int optionId)
     if(CurrentPage == "General Settings" || CurrentPage == "")
@@ -64,6 +119,37 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Will Enable Arousal based Stat Buffs")
         elseif(optionId == RequireLowArousalToEndSceneOid)
             SetInfoText("OStim Scene will not end until Participant arousal is low")
+        elseif(optionId == ArousalModeOid)
+            SetInfoText("SL Arousal emulates OG Sexlab Behavior. OArousal emulatues OArousal Behavior")
         EndIf
     EndIf
+endevent
+
+event OnOptionMenuOpen(int optionId)
+    
+    if(optionId == ArousalModeOid)
+        SetMenuDialogStartIndex(Main.GetCurrentArousalMode())
+        SetMenuDialogDefaultIndex(0)
+        SetMenuDialogOptions(ArousalModeNames)
+    endif
+endevent
+
+event OnOptionMenuAccept(int optionId, int index)
+    if(optionId == ArousalModeOid)
+        Main.SetCurrentArousalMode(index)
+        SetMenuOptionValue(optionId, ArousalModeNames[index])
+    endif
+endevent
+
+
+
+event OnKeyDown(int keyCode)
+    if(!Utility.IsInMenuMode() && keyCode == Main.GetShowArousalKeybind())
+        Actor target = Game.GetCurrentCrosshairRef() as Actor
+        if(target != none)
+            PuppetActor = target
+        Else
+            PuppetActor = Game.GetPlayer()
+        endif
+    endif
 endevent

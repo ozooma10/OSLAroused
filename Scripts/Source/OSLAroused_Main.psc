@@ -18,6 +18,11 @@ OSLAroused_AdapterDebug Property DebugAdapter Auto
 int CheckArousalKey = 157
 bool EnableNudityIncreasesArousal = true
 bool Property EnableArousalStatBuffs = true Auto
+float DefaultArousalMultiplier = 2.0
+
+int property kArousalMode_SLAroused = 0 autoreadonly
+int property kArousalMode_OAroused = 1 autoreadonly
+int SelectedArousalMode
 
 ;spell horny 
 ;spell relieved 
@@ -118,8 +123,31 @@ int function GetShowArousalKeybind()
 	return CheckArousalKey
 endfunction
 
+float function GetDefaultArousalMultiplier()
+	return DefaultArousalMultiplier
+endfunction
+
 bool function GetEnableNudityIncreasesArousal()
 	return EnableNudityIncreasesArousal
+endfunction
+
+int function GetCurrentArousalMode()
+	return SelectedArousalMode
+endfunction
+
+function SetCurrentArousalMode(int newMode)
+	if(newMode < 0 || newMode > 1)
+		return
+	endif
+	SelectedArousalMode = newMode
+endfunction
+
+function SetDefaultArousalMultiplier(float newVal)
+	if(newVal < 0 || newVal > 10)
+		return
+	endif
+	DefaultArousalMultiplier = newVal
+	OSLArousedNative.UpdateDefaultArousalMultiplier(newVal)
 endfunction
 
 function SetPlayerNudityIncreasesArousal(bool newVal)
