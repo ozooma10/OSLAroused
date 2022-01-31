@@ -19,6 +19,7 @@ int Property SetArousalOid Auto
 int Property SetMultiplierOid Auto
 int Property SetTimeRateOid Auto
 
+float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
 int function GetVersion()
     return 1
@@ -104,7 +105,7 @@ function PuppeteerPage()
         SetArousalOid = AddSliderOption("Arousal", exposure, "{0}")
     
         float exposureRate = OSLArousedNative.GetArousalMultiplier(PuppetActor)
-        SetMultiplierOid = AddSliderOption("Arousal Multiplier", exposureRate, "{0}")
+        SetMultiplierOid = AddSliderOption("Arousal Multiplier", exposureRate, "{1}")
     elseif(currentArousalMode == Main.kArousalMode_SLAroused)
         float exposure = OSLArousedNative.GetExposure(PuppetActor)
         SetArousalOid = AddSliderOption("Exposure", exposure, "{0}")
@@ -187,7 +188,7 @@ event OnOptionSliderOpen(int option)
         elseif (option == SetMultiplierOid)
             float mult = OSLArousedNative.GetArousalMultiplier(PuppetActor)
             SetSliderDialogStartValue(mult)
-            SetSliderDialogDefaultValue(2.0)
+            SetSliderDialogDefaultValue(kDefaultArousalMultiplier)
             SetSliderDialogRange(0, 10.0)
             SetSliderDialogInterval(0.1)
         elseif (option == SetTimeRateOid)
@@ -221,8 +222,8 @@ event OnOptionDefault(int option)
             OSLArousedNative.SetArousal(PuppetActor, 0)
             SetSliderOptionValue(SetArousalOid, 0, "{0}")
         elseif(option == SetMultiplierOid)
-            OSLArousedNative.SetArousalMultiplier(PuppetActor, 2.0)
-            SetSliderOptionValue(SetMultiplierOid, 2.0, "{1}")
+            OSLArousedNative.SetArousalMultiplier(PuppetActor, kDefaultArousalMultiplier)
+            SetSliderOptionValue(SetMultiplierOid, kDefaultArousalMultiplier, "{1}")
         elseif(option == SetTimeRateOid)
             OSLArousedNative.SetTimeRate(PuppetActor, 10.0)
             SetSliderOptionValue(SetTimeRateOid, 10.0, "{0}")

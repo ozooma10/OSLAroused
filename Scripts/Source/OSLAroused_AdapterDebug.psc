@@ -13,6 +13,7 @@ Function LoadAdapter()
     RegisterForKey(63) ; F5
 
     RegisterForKey(34) ; G
+    RegisterForKey(35) ; H
 
     ArousalDisplay.InitializeText()
 EndFunction
@@ -32,6 +33,9 @@ Event OnKeyDown(int keyCode)
             OSexIntegrationMain ostim = OUtils.GetOStim()
             ostim.StartScene(crosshairTarget, PlayerRef)
         endif
+    elseif(keycode == 35)   ;H
+        OSexIntegrationMain ostim = OUtils.GetOStim()
+        ostim.SetActorExcitement(PlayerRef, 90)
     endif
 EndEvent
 

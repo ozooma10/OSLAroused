@@ -19,7 +19,7 @@ OSLAroused_AdapterDebug Property DebugAdapter Auto
 int CheckArousalKey = 157
 bool EnableNudityIncreasesArousal = true
 bool Property EnableArousalStatBuffs = true Auto
-float DefaultArousalMultiplier = 2.0
+float DefaultArousalMultiplier = 1.0
 
 int property kArousalMode_SLAroused = 0 autoreadonly
 int property kArousalMode_OAroused = 1 autoreadonly
@@ -40,7 +40,7 @@ Event OnInit()
 	;horny.SetNthEffectArea
 
 	;Initialize multiplier to 2 for player
-	OSLArousedNative.SetArousalMultiplier(PlayerRef, 2.0)
+	OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
 
 	RegisterForModEvent("OSLA_PlayerArousalUpdated", "OnPlayerArousalUpdated")
 
