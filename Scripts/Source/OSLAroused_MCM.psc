@@ -4,8 +4,9 @@ OSLAroused_Main Property Main Auto
 OSLAroused_AdapterOStim Property OStimAdapter Auto
 
 int Property CheckArousalKeyOid Auto
-int Property EnableNudityCheckOid Auto
 int Property EnableStatBuffsOid Auto
+int Property EnableNudityCheckOid Auto
+int HourlyNudityArousalModOid
 
 string[] ArousalModeNames
 int Property ArousalModeOid Auto
@@ -69,6 +70,7 @@ endfunction
 function MainRightColumn()
     AddHeaderOption("Nudity Settings")
     EnableNudityCheckOid = AddToggleOption("Player Nudity Increases Others Arousal", Main.GetEnableNudityIncreasesArousal())
+    HourlyNudityArousalModOid = AddSliderOption("Hourly Arousal Increase From Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
 
     AddHeaderOption("OStim Settings")
     RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
@@ -174,6 +176,8 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Key To Show Arousal Bar")
         elseif(optionId == EnableNudityCheckOid)
             SetInfoText("If Enabled, Player Nudity will increase nearby NPC arrousal")
+        elseif(optionId == HourlyNudityArousalModOid)
+            SetInfoText("Arousal Gained per hour when observing a nude character.")
         elseif(optionId == EnableStatBuffsOid)
             SetInfoText("Will Enable Arousal based Stat Buffs")
         elseif(optionId == RequireLowArousalToEndSceneOid)
@@ -208,7 +212,14 @@ event OnOptionMenuAccept(int optionId, int index)
 endevent
 
 event OnOptionSliderOpen(int option)
-    if(CurrentPage == "Puppeteer")
+    if(CurrentPage == "" || CurrentPage == "General Settings")
+        if(option == HourlyNudityArousalModOid)
+            SetSliderDialogStartValue(Main.GetHourlyNudityArousalModifier())
+            SetSliderDialogDefaultValue(20.0)
+            SetSliderDialogRange(0, 50)
+            SetSliderDialogInterval(0.1)
+        endif
+    elseif(CurrentPage == "Puppeteer")
         if(option == SetArousalOid)
             float arousal = 0
             if(Main.GetCurrentArousalMode() == Main.kArousalMode_SLAroused)
@@ -237,7 +248,12 @@ event OnOptionSliderOpen(int option)
 endevent
 
 event OnOptionSliderAccept(int option, float value)
-    if(currentPage == "Puppeteer")
+    if(CurrentPage == "" || CurrentPage == "General Settings")
+        if(option == HourlyNudityArousalModOid)
+            Main.SetHourlyNudityArousalModifier(value)
+            SetSliderOptionValue(HourlyNudityArousalModOid, value, "{1}")
+        endif
+    elseif(currentPage == "Puppeteer")
         if(option == SetArousalOid)
             OSLArousedNative.SetArousal(PuppetActor, value)
             SetSliderOptionValue(SetArousalOid, value, "{0}")
@@ -252,7 +268,12 @@ event OnOptionSliderAccept(int option, float value)
 endevent
 
 event OnOptionDefault(int option)
-    if(currentPage == "Puppeteer")
+    if(CurrentPage == "" || CurrentPage == "General Settings")
+        if(option == HourlyNudityArousalModOid)
+            Main.SetHourlyNudityArousalModifier(20.0)
+            SetSliderOptionValue(HourlyNudityArousalModOid, 20.0, "{1}")
+        endif
+    elseif(currentPage == "Puppeteer")
         if(option == SetArousalOid)
             OSLArousedNative.SetArousal(PuppetActor, 0)
             SetSliderOptionValue(SetArousalOid, 0, "{0}")

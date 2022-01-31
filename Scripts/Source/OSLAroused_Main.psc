@@ -16,8 +16,10 @@ OSLAroused_AdapterOStim Property OStimAdapter Auto
 
 OSLAroused_AdapterDebug Property DebugAdapter Auto
 
+; ============ SETTINGS ============
 int CheckArousalKey = 157
 bool EnableNudityIncreasesArousal = true
+float HourlyNudityArousalModifier = 20.0
 bool Property EnableArousalStatBuffs = true Auto
 float DefaultArousalMultiplier = 1.0
 
@@ -25,6 +27,8 @@ int property kArousalMode_SLAroused = 0 autoreadonly
 int property kArousalMode_OAroused = 1 autoreadonly
 int SelectedArousalMode = 1
 
+
+; ============ SPELLS =============
 ;OAroused Spells
 Spell Property SLADesireSpell Auto
 
@@ -63,9 +67,10 @@ Function OnGameLoaded()
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
 
+	;Bootstrap settings
 	;Need to notify skse dll whether to check for player nudity
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
-	
+	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
 	;This updates Abilities and Sends mode to native
 	SetCurrentArousalMode(SelectedArousalMode)
 EndFunction
@@ -172,6 +177,10 @@ bool function GetEnableNudityIncreasesArousal()
 	return EnableNudityIncreasesArousal
 endfunction
 
+float function GetHourlyNudityArousalModifier()
+	return HourlyNudityArousalModifier
+endfunction
+
 int function GetCurrentArousalMode()
 	return SelectedArousalMode
 endfunction
@@ -201,6 +210,12 @@ endfunction
 function SetPlayerNudityIncreasesArousal(bool newVal)
 	EnableNudityIncreasesArousal = newVal
 	OSLArousedNative.UpdatePlayerNudityCheck(newVal)
+endfunction
+
+function SetHourlyNudityArousalModifier(float newVal)
+	HourlyNudityArousalModifier = newVal
+	log("Update Hourly: " + newVal)
+	OSLArousedNative.UpdateHourlyNudityArousalModifier(newVal)
 endfunction
 
 function SetShowArousalKeybind(int newKey)

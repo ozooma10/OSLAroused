@@ -1,14 +1,5 @@
 scriptname OSLArousedNative hidden
 
-;Sets weather PlayerNudityCheck should be enabled or disabled in SKSE module
-function UpdatePlayerNudityCheck(bool enabled) global native
-
-;Sets Which arousal mode to use
-function UpdateArousalMode(int newArousalMode) global native
-
-;Sets Which arousal mode to use
-function UpdateDefaultArousalMultiplier(float newMultiplier) global native
-
 ;Retrieves arousal value for a given Actor
 ;In SLAroused mode, This is a calculated value based off exposure and time rate
 float function GetArousal(Actor actor) global native
@@ -47,8 +38,22 @@ float function GetTimeRate(Actor actor) global native
 ;Informs dll if player is in a sex scene
 function SetPlayerInSexScene(bool value) global native
 
+; ==================== SETTINGS =========================
+
+;Sets weather PlayerNudityCheck should be enabled or disabled in SKSE module
+function UpdatePlayerNudityCheck(bool enabled) global native
+
+;Sets Amount to increase arousal per game hour when exposed to nudity
+function UpdateHourlyNudityArousalModifier(float arousalMod) global native
+
+;Sets Which arousal mode to use
+function UpdateArousalMode(int newArousalMode) global native
+
+;Sets Which arousal mode to use
+function UpdateDefaultArousalMultiplier(float newMultiplier) global native
 
 ;====== DEBUG ============
+
 function DumpArousalData() global native
 function ClearSecondaryArousalData() global native
 function ClearAllArousalData() global native
