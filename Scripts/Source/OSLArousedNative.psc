@@ -43,3 +43,6 @@ function SetTimeRate(Actor actor, float value) global native
 
 ;Gets the Actors current time rate
 float function GetTimeRate(Actor actor) global native
+
+;Informs dll if player is in a sex scene
+function SetPlayerInSexScene(bool value) global native
