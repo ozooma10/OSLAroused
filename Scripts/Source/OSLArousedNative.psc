@@ -46,3 +46,9 @@ float function GetTimeRate(Actor actor) global native
 
 ;Informs dll if player is in a sex scene
 function SetPlayerInSexScene(bool value) global native
+
+
+;====== DEBUG ============
+function DumpArousalData() global native
+function ClearSecondaryArousalData() global native
+function ClearAllArousalData() global native

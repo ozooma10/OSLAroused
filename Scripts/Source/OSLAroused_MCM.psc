@@ -21,16 +21,22 @@ int Property SetTimeRateOid Auto
 
 float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
+;------ Debug Properties -------
+int DumpArousalData
+int ClearSecondaryArousalData
+int ClearAllArousalData
+
 int function GetVersion()
     return 1
 endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
-    Pages = new String[3]
+    Pages = new String[4]
     Pages[0] = "General Settings"
     Pages[1] = "Status"
     Pages[2] = "Puppeteer"
+    Pages[3] = "Debug"
 
     ArousalModeNames = new string[2]
     ArousalModeNames[0] = "SexLab Aroused"
@@ -49,6 +55,8 @@ Event OnPageReset(string page)
         StatusPage()
     elseif(page == "Puppeteer")
         PuppeteerPage()
+    elseif(page == "Debug")
+        DebugPage()
     endif
 EndEvent
 
@@ -118,6 +126,13 @@ function PuppeteerPage()
     endif
 endfunction
 
+function DebugPage()
+    AddHeaderOption("Native Data")
+    DumpArousalData = AddTextOption("Dump Arousal Data", "RUN")
+    ClearSecondaryArousalData = AddTextOption("Clear Secondary Arousal Data", "RUN")
+    ClearAllArousalData = AddTextOption("Clear All Arousal Data", "RUN")
+endfunction
+
 event OnOptionSelect(int optionId)
     if(CurrentPage == "General Settings" || CurrentPage == "")
         if (optionId == EnableNudityCheckOid)
@@ -131,6 +146,18 @@ event OnOptionSelect(int optionId)
             OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
             SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
         EndIf
+    ElseIf(CurrentPage == "Debug")
+        if(optionId == DumpArousalData)
+            OSLArousedNative.DumpArousalData()
+        elseif(optionId == ClearSecondaryArousalData)
+            if (ShowMessage("Are you sure you want to Clear Secondary NPC Arousal Data? This is non-reversible"))
+                OSLArousedNative.ClearSecondaryArousalData()
+            endif
+        elseif(optionId == ClearAllArousalData)
+            if (ShowMessage("Are you sure you want to Clear All Arousal Data? This is non-reversible"))
+                OSLArousedNative.ClearAllArousalData()
+            endif
+        endif
     EndIf
 endevent
 
@@ -154,6 +181,14 @@ event OnOptionHighlight(int optionId)
         elseif(optionId == ArousalModeOid)
             SetInfoText("SL Arousal emulates OG Sexlab Behavior. OArousal emulatues OArousal Behavior")
         EndIf
+    elseif(CurrentPage == "Debug")
+        if(optionId == DumpArousalData)
+            SetInfoText("Dump all stored arousal data to SKSE log file")
+        elseif(optionId == ClearSecondaryArousalData)
+            SetInfoText("Clear NPC Arousal data from Save (This Maintains Player/Unique Data)")
+        elseif(optionId == ClearAllArousalData)
+            SetInfoText("Clear All Arousal data from Save")
+        endif
     EndIf
 endevent
 
