@@ -70,7 +70,7 @@ endfunction
 function MainRightColumn()
     AddHeaderOption("Nudity Settings")
     EnableNudityCheckOid = AddToggleOption("Player Nudity Increases Others Arousal", Main.GetEnableNudityIncreasesArousal())
-    HourlyNudityArousalModOid = AddSliderOption("Hourly Arousal Increase From Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
+    HourlyNudityArousalModOid = AddSliderOption("Hourly Arousal From Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
 
     AddHeaderOption("OStim Settings")
     RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
