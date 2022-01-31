@@ -62,8 +62,7 @@ Function QueryArousal()
     if(target == none)
         target = PlayerRef
     endif
-    
-    OSLAroused_Main.Log(target.GetDisplayName()+ " Arousal Is: " + OSLAroused_ModInterface.GetArousal(target))
+    OSLAroused_ModInterface.GetArousal(target)
 EndFunction
 
 Function OnPlayerArousalUpdated(float arousal)

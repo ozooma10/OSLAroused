@@ -65,6 +65,9 @@ Function OnGameLoaded()
 
 	;Need to notify skse dll whether to check for player nudity
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
+	
+	;This updates Abilities and Sends mode to native
+	SetCurrentArousalMode(SelectedArousalMode)
 EndFunction
 
 event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, Form sender)
@@ -174,10 +177,12 @@ int function GetCurrentArousalMode()
 endfunction
 
 function SetCurrentArousalMode(int newMode)
+	log("Setting Current Arousal Mode to: " + newMode)
 	if(newMode < 0 || newMode > 1)
 		return
 	endif
 	SelectedArousalMode = newMode
+	OSLArousedNative.UpdateArousalMode(newMode)
 	;Update arousal spells
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
