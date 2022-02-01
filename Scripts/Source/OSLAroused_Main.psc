@@ -6,8 +6,6 @@ Actor Property PlayerRef Auto
 
 float Property ScanDistance = 5120.0 AutoReadOnly
 
-keyword property EroticArmor auto
-
 OSLAroused_ArousalBar Property ArousalBar Auto
 OSLAroused_Conditions Property ConditionVars Auto 
 
@@ -39,10 +37,6 @@ Spell Property OArousedRelievedSpell Auto
 ; ============== CORE LIFECYCLE ===================
 
 Event OnInit()
-	EroticArmor = Keyword.GetKeyword("EroticArmor")
-	
-	;horny.SetNthEffectArea
-
 	;Initialize multiplier to 2 for player
 	OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
 
@@ -72,7 +66,7 @@ Function OnGameLoaded()
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
 	;This updates Abilities and Sends mode to native
-	SetCurrentArousalMode(SelectedArousalMode)
+	SetCurrentArousalMode(SelectedArousalMode)	
 EndFunction
 
 event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, Form sender)

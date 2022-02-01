@@ -27,23 +27,37 @@ int DumpArousalData
 int ClearSecondaryArousalData
 int ClearAllArousalData
 
+;------ Keywords -------
+int ArmorListMenuOid
+Armor SelectedArmor
+string[] FoundArmorNames
+int[] FoundArmorIds
+
+int EroticArmorOid
+
+Keyword EroticArmorKeyword
+
+
 int function GetVersion()
     return 1
 endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
-    Pages = new String[4]
+    Pages = new String[5]
     Pages[0] = "General Settings"
     Pages[1] = "Status"
     Pages[2] = "Puppeteer"
-    Pages[3] = "Debug"
+    Pages[3] = "Keywords"
+    Pages[4] = "Debug"
 
     ArousalModeNames = new string[2]
     ArousalModeNames[0] = "SexLab Aroused"
     ArousalModeNames[1] = "OAroused"
 
     PuppetActor = Game.GetPlayer()
+
+	EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")
 EndEvent
 
 Event OnPageReset(string page)
@@ -56,6 +70,8 @@ Event OnPageReset(string page)
         StatusPage()
     elseif(page == "Puppeteer")
         PuppeteerPage()
+    elseif(page == "Keywords")
+        KeywordPage()
     elseif(page == "Debug")
         DebugPage()
     endif
@@ -128,6 +144,13 @@ function PuppeteerPage()
     endif
 endfunction
 
+function KeywordPage()
+    AddHeaderOption("Keyword Management")
+    ArmorListMenuOid = AddMenuOption("Click to Load Armor List", "")
+    SetCursorPosition(1)
+    EroticArmorOid = AddToggleOption("EroticArmor", false, OPTION_FLAG_DISABLED)
+endfunction
+
 function DebugPage()
     AddHeaderOption("Native Data")
     DumpArousalData = AddTextOption("Dump Arousal Data", "RUN")
@@ -148,6 +171,7 @@ event OnOptionSelect(int optionId)
             OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
             SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
         EndIf
+    ElseIf (CurrentPage == "Keywords")
     ElseIf(CurrentPage == "Debug")
         if(optionId == DumpArousalData)
             OSLArousedNative.DumpArousalData()
@@ -197,17 +221,31 @@ event OnOptionHighlight(int optionId)
 endevent
 
 event OnOptionMenuOpen(int optionId)
-    if(optionId == ArousalModeOid)
-        SetMenuDialogStartIndex(Main.GetCurrentArousalMode())
-        SetMenuDialogDefaultIndex(0)
-        SetMenuDialogOptions(ArousalModeNames)
+    if(CurrentPage == "General Settings" || CurrentPage == "")
+        if(optionId == ArousalModeOid)
+            SetMenuDialogStartIndex(Main.GetCurrentArousalMode())
+            SetMenuDialogDefaultIndex(0)
+            SetMenuDialogOptions(ArousalModeNames)
+        endif
+    elseif (CurrentPage == "Keywords")
+        if(optionId == ArmorListMenuOid)
+            LoadArmorList()
+        endif
     endif
 endevent
 
 event OnOptionMenuAccept(int optionId, int index)
-    if(optionId == ArousalModeOid)
-        Main.SetCurrentArousalMode(index)
-        SetMenuOptionValue(optionId, ArousalModeNames[index])
+    if(CurrentPage == "General Settings" || CurrentPage == "")
+        if(optionId == ArousalModeOid)
+            Main.SetCurrentArousalMode(index)
+            SetMenuOptionValue(optionId, ArousalModeNames[index])
+        endif
+    ElseIf (CurrentPage == "Keywords")
+        If (optionId == ArmorListMenuOid)
+            SelectedArmor = Game.GetPlayer().GetNthForm(FoundArmorIds[index]) as Armor
+            SetMenuOptionValue(optionId, FoundArmorNames[index])
+            ArmorSelected()
+        EndIf
     endif
 endevent
 
@@ -297,3 +335,41 @@ event OnKeyDown(int keyCode)
         endif
     endif
 endevent
+
+;Based off code from MrowrPurr :)
+function LoadArmorList()
+    SelectedArmor = none
+    Actor player = Game.GetPlayer()
+    int numItems = player.GetNumItems()
+    int index = 0
+    FoundArmorNames = new string[128]
+    FoundArmorIds = new int[128]
+    int foundItemIndex = 0
+    while(index < numItems && foundItemIndex < 128)
+        Armor armorItem = player.GetNthForm(index) as Armor
+        if(armorItem)
+            Debug.Trace("Found: " + armorItem.GetName())
+            FoundArmorNames[foundItemIndex] = armorItem.GetName()
+            FoundArmorIds[foundItemIndex] = index
+            foundItemIndex += 1
+        endif
+        index += 1
+    endwhile
+
+    FoundArmorNames = Utility.ResizeStringArray(FoundArmorNames, foundItemIndex)
+    FoundArmorIds = Utility.ResizeIntArray(FoundArmorIds, foundItemIndex)
+    SetMenuDialogOptions(FoundArmorNames)
+endfunction
+
+function ArmorSelected()
+    if(!SelectedArmor)
+        return
+    endif
+    
+    if(EroticArmorKeyword)
+        SetOptionFlags(EroticArmorOid, OPTION_FLAG_NONE)
+        SetToggleOptionValue(EroticArmorOid, SelectedArmor.HasKeyword(EroticArmorKeyword))
+    else
+        SetToggleOptionValue(EroticArmorOid, false)
+    endif
+endfunction
