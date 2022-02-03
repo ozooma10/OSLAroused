@@ -1,7 +1,6 @@
 Scriptname OSLAroused_MCM extends SKI_ConfigBase hidden
 
 OSLAroused_Main Property Main Auto
-OSLAroused_AdapterOStim Property OStimAdapter Auto
 
 int Property CheckArousalKeyOid Auto
 int Property EnableStatBuffsOid Auto
@@ -37,6 +36,10 @@ int EroticArmorOid
 Keyword EroticArmorKeyword
 bool EroticArmorState
 
+int BikiniArmorOid
+Keyword BikiniArmorKeyword
+bool BikiniArmorState
+
 
 int function GetVersion()
     return 1
@@ -58,6 +61,7 @@ Event OnConfigInit()
     PuppetActor = Game.GetPlayer()
 
 	EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")
+	BikiniArmorKeyword = Keyword.GetKeyword("_SLS_BikiniArmor")
 EndEvent
 
 Event OnPageReset(string page)
@@ -89,7 +93,7 @@ function MainRightColumn()
     HourlyNudityArousalModOid = AddSliderOption("Hourly Arousal From Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
 
     AddHeaderOption("OStim Settings")
-    RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
+    ; RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
 endfunction
 
 function StatusPage()
@@ -149,6 +153,7 @@ function KeywordPage()
     ArmorListMenuOid = AddMenuOption("Click to Load Armor List", "")
     SetCursorPosition(1)
     EroticArmorOid = AddToggleOption("EroticArmor", false, OPTION_FLAG_DISABLED)
+    BikiniArmorOid = AddToggleOption("SLS Bikini Armor", false, OPTION_FLAG_DISABLED)
 endfunction
 
 function DebugPage()
@@ -168,18 +173,28 @@ event OnOptionSelect(int optionId)
             Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
             SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
         elseif (optionId == RequireLowArousalToEndSceneOid)
-            OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
-            SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
+            ; OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
+            ; SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
         EndIf
     ElseIf (CurrentPage == "Keywords")
         if(optionId == EroticArmorOid)
             if(EroticArmorState)
+                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, EroticArmorKeyword)
+                EroticArmorState = !removeSuccess ;if remove success fails, indicate keyword still on
             else
                 bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, EroticArmorKeyword)
-                Log("Update Erotic Keyword Status: " + updateSuccess)
                 EroticArmorState = updateSuccess
-                SetToggleOptionValue(EroticArmorOid, EroticArmorState)
             endif
+            SetToggleOptionValue(EroticArmorOid, EroticArmorState)
+        elseif(optionId == BikiniArmorOid)
+            if(BikiniArmorState)
+                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, BikiniArmorKeyword)
+                BikiniArmorState = !removeSuccess ;if remove success fails, indicate keyword still on
+            else
+                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, BikiniArmorKeyword)
+                BikiniArmorState = updateSuccess
+            endif
+            SetToggleOptionValue(BikiniArmorOid, BikiniArmorState)
         endif
     ElseIf(CurrentPage == "Debug")
         if(optionId == DumpArousalData)
@@ -381,6 +396,14 @@ function ArmorSelected()
         SetToggleOptionValue(EroticArmorOid, EroticArmorState)
     else
         SetToggleOptionValue(EroticArmorOid, false)
+    endif
+
+    if(BikiniArmorKeyword)
+        SetOptionFlags(BikiniArmorOid, OPTION_FLAG_NONE)
+        BikiniArmorState = SelectedArmor.HasKeyword(BikiniArmorKeyword)
+        SetToggleOptionValue(BikiniArmorOid, BikiniArmorState)
+    else
+        SetToggleOptionValue(BikiniArmorOid, false)
     endif
 endfunction
 

@@ -56,6 +56,7 @@ function UpdateDefaultArousalMultiplier(float newMultiplier) global native
 ; ==================== KEYWORDS =========================
 
 bool function AddKeywordToForm(Form form, Keyword keyword) global native
+bool function RemoveKeywordFromForm(Form form, Keyword keyword) global native
 
 ;====== DEBUG ============
 
