@@ -48,9 +48,14 @@ function UpdateHourlyNudityArousalModifier(float arousalMod) global native
 
 ;Sets Which arousal mode to use
 function UpdateArousalMode(int newArousalMode) global native
-
+ 
 ;Sets Which arousal mode to use
 function UpdateDefaultArousalMultiplier(float newMultiplier) global native
+
+
+; ==================== KEYWORDS =========================
+
+bool function AddKeywordToForm(Form form, Keyword keyword) global native
 
 ;====== DEBUG ============
 

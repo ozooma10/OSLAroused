@@ -34,8 +34,8 @@ string[] FoundArmorNames
 int[] FoundArmorIds
 
 int EroticArmorOid
-
 Keyword EroticArmorKeyword
+bool EroticArmorState
 
 
 int function GetVersion()
@@ -172,6 +172,15 @@ event OnOptionSelect(int optionId)
             SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
         EndIf
     ElseIf (CurrentPage == "Keywords")
+        if(optionId == EroticArmorOid)
+            if(EroticArmorState)
+            else
+                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, EroticArmorKeyword)
+                Log("Update Erotic Keyword Status: " + updateSuccess)
+                EroticArmorState = updateSuccess
+                SetToggleOptionValue(EroticArmorOid, EroticArmorState)
+            endif
+        endif
     ElseIf(CurrentPage == "Debug")
         if(optionId == DumpArousalData)
             OSLArousedNative.DumpArousalData()
@@ -368,8 +377,14 @@ function ArmorSelected()
     
     if(EroticArmorKeyword)
         SetOptionFlags(EroticArmorOid, OPTION_FLAG_NONE)
-        SetToggleOptionValue(EroticArmorOid, SelectedArmor.HasKeyword(EroticArmorKeyword))
+        EroticArmorState = SelectedArmor.HasKeyword(EroticArmorKeyword)
+        SetToggleOptionValue(EroticArmorOid, EroticArmorState)
     else
         SetToggleOptionValue(EroticArmorOid, false)
     endif
+endfunction
+
+
+function Log(string msg) global
+    Debug.Trace("---OSLAroused--- [MCM] " + msg)
 endfunction
