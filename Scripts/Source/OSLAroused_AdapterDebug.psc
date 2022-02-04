@@ -25,14 +25,9 @@ Event OnKeyDown(int keyCode)
     elseif(keycode == 62)   ;F4
     elseif(keycode == 63)   ;F5
     elseif(keycode == 34)   ;G
-        actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
-        if(crosshairTarget)
-            OSexIntegrationMain ostim = OUtils.GetOStim()
-            ostim.StartScene(crosshairTarget, Game.GetPlayer())
-        endif
+        TryInitiateSex()
     elseif(keycode == 35)   ;H
-        OSexIntegrationMain ostim = OUtils.GetOStim()
-        ostim.SetActorExcitement(Game.GetPlayer(), 90)
+        RaiseStim()
     endif
 EndEvent
 
@@ -65,3 +60,16 @@ EndFunction
 Function OnPlayerArousalUpdated(float arousal)
     ArousalDisplay.SetArousalValue(arousal as int)
 endfunction
+
+Function TryInitiateSex()
+    ; actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+    ; if(crosshairTarget)
+    ;     OSexIntegrationMain ostim = OUtils.GetOStim()
+    ;     ostim.StartScene(crosshairTarget, Game.GetPlayer())
+    ; endif
+EndFunction
+
+Function RaiseStim()
+    ; OSexIntegrationMain ostim = OUtils.GetOStim()
+    ; ostim.SetActorExcitement(Game.GetPlayer(), 90)
+EndFunction

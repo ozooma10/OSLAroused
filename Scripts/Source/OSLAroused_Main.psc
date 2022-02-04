@@ -59,15 +59,16 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 
-	float arousal = OSLArousedNative.GetArousal(PlayerRef)
-	ArousalBar.InitializeBar(arousal / 100)
-
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
 	; This updates Abilities and Sends mode to native
 	SetCurrentArousalMode(SelectedArousalMode)	
+
+	
+	float arousal = OSLArousedNative.GetArousal(PlayerRef)
+	ArousalBar.InitializeBar(arousal / 100)
 EndFunction
 
 ;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
