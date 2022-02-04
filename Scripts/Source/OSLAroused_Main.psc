@@ -8,6 +8,8 @@ EndFunction
 
 Actor Property PlayerRef Auto 
 
+slaFrameworkScr Property SlaFrameworkStub Auto
+
 float Property ScanDistance = 5120.0 AutoReadOnly
 
 OSLAroused_ArousalBar Property ArousalBar Auto
@@ -53,6 +55,8 @@ Event OnInit()
 EndEvent
 
 Function OnGameLoaded()
+	SlaFrameworkStub.OnGameLoaded()
+
 	OStimAdapterLoaded = OStimAdapter.LoadAdapter()
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
 	DebugAdapter.LoadAdapter()
@@ -65,7 +69,6 @@ Function OnGameLoaded()
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
 	; This updates Abilities and Sends mode to native
 	SetCurrentArousalMode(SelectedArousalMode)	
-
 	
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
@@ -92,6 +95,8 @@ event OnPlayerArousalUpdated(string eventName, string strArg, float newArousal, 
 	endif
 
 	DebugAdapter.OnPlayerArousalUpdated(newArousal)
+
+	SlaFrameworkStub.OnActorArousalUpdated(PlayerRef, newArousal)
 endevent
 
 ; ========== AROUSAL EFFECTS ===========
@@ -184,7 +189,7 @@ int function GetCurrentArousalMode()
 endfunction
 
 function SetCurrentArousalMode(int newMode)
-	log("Setting Current Arousal Mode to: " + newMode)
+	;log("Setting Current Arousal Mode to: " + newMode)
 	if(newMode < 0 || newMode > 1)
 		return
 	endif

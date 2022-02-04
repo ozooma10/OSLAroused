@@ -17,7 +17,7 @@ EndFunction
 
 Event OnKeyDown(int keyCode)
     if(keyCode == 59)       ;F1
-        SimulateArousalGain()
+        float arousal = SimulateArousalGain()
     elseif(keycode == 60)   ;F2
         SimulateArousalLoss()
     elseif(keycode == 61)   ;F3
@@ -31,13 +31,13 @@ Event OnKeyDown(int keyCode)
     endif
 EndEvent
 
-Function SimulateArousalGain()
+float Function SimulateArousalGain()
     Actor target = Game.GetCurrentCrosshairRef() as Actor
     if(target == none)
         target = Game.GetPlayer()
     endif
 
-    OSLAroused_ModInterface.ModifyArousal(target, 5.0)
+    return OSLAroused_ModInterface.ModifyArousal(target, 5.0)
 EndFunction
 
 Function SimulateArousalLoss()

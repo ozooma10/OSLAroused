@@ -7,9 +7,9 @@ float function GetArousal(Actor target) global
     return arousal
 endfunction
 
-function ModifyArousal(Actor target, float value) global
+float function ModifyArousal(Actor target, float value) global
     Log("ModifyArousal: " + target.GetDisplayName() + "modified by val: " + value)
-    OSLArousedNative.ModifyArousal(target, value)
+    return OSLArousedNative.ModifyArousal(target, value)
 endfunction
 
 function ModifyArousalMultiple(Actor[] actorArray, float value) global
