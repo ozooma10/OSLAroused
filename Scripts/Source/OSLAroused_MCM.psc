@@ -2,6 +2,10 @@ Scriptname OSLAroused_MCM extends SKI_ConfigBase hidden
 
 OSLAroused_Main Property Main Auto
 
+OSLAroused_MCM Function Get() Global
+	return Game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_MCM
+EndFunction
+
 int Property CheckArousalKeyOid Auto
 int Property EnableStatBuffsOid Auto
 int Property EnableNudityCheckOid Auto
@@ -33,7 +37,7 @@ string[] FoundArmorNames
 int[] FoundArmorIds
 
 int EroticArmorOid
-Keyword EroticArmorKeyword
+Keyword Property EroticArmorKeyword Auto
 bool EroticArmorState
 
 int BikiniArmorOid

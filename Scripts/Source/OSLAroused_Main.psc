@@ -3,8 +3,7 @@ ScriptName OSLAroused_Main Extends Quest Hidden
 ; All the good things are from Sairion and all the bad things are by me :) 
 
 OSLAroused_Main Function Get() Global
-	Quest q = Game.GetFormFromFile(0x000806, "OSLAroused.esp") as Quest
-	return (q as OSLAroused_Main)
+	return game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_Main
 EndFunction
 
 Actor Property PlayerRef Auto 

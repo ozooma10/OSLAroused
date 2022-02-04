@@ -8,14 +8,14 @@ float[] function GetArousalMultiple(Actor[] actorArray) global native
 
 ;Sets the arousal value for a given actor
 ;In SLAroused Mode this is the Exposure Value (Arousal is calculated)
-function SetArousal(Actor actor, float value) global native
-Function SetArousalMultiple(Actor[] actorArray, float value) global native
+float function SetArousal(Actor actor, float value) global native
+function SetArousalMultiple(Actor[] actorArray, float value) global native
 
 ;Modifies the arousal value by the specified amount (Relative to current arousal value)
-function ModifyArousal(Actor actor, float value) global native
+float function ModifyArousal(Actor actor, float value) global native
 
 ;Modifies all actors in array by sepcified amount (relative to current arousal)
-Function ModifyArousalMultiple(Actor[] actorArray, float value) global native
+function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 
 ;Sets the arousal multiplier for a given actor
 function SetArousalMultiplier(Actor actor, float value) global native

@@ -28,11 +28,11 @@ Event OnKeyDown(int keyCode)
         actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
         if(crosshairTarget)
             OSexIntegrationMain ostim = OUtils.GetOStim()
-            ostim.StartScene(crosshairTarget, PlayerRef)
+            ostim.StartScene(crosshairTarget, Game.GetPlayer())
         endif
     elseif(keycode == 35)   ;H
         OSexIntegrationMain ostim = OUtils.GetOStim()
-        ostim.SetActorExcitement(PlayerRef, 90)
+        ostim.SetActorExcitement(Game.GetPlayer(), 90)
     endif
 EndEvent
 
