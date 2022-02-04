@@ -77,7 +77,12 @@ Function OnGameLoaded()
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
 
-	;Initial Naked State
+	;Initial Player Naked State
+	if(OSLArousedNative.IsActorNaked(PlayerRef))
+		OnActorNakedUpdated("", "", 1, PlayerRef)
+	else
+		OnActorNakedUpdated("", "", 0, PlayerRef)
+	endif
 EndFunction
 
 ;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
@@ -133,9 +138,9 @@ Function ApplyArousedEffects()
 	if(SelectedArousalMode == kArousalMode_SLAroused)
 		PlayerRef.RemoveSpell(SLADesireSpell)
 		PlayerRef.AddSpell(SLADesireSpell, false)
-		Debug.Trace("Enabled SLA Desire Spell")
 	elseif(SelectedArousalMode == kArousalMode_OAroused)
-		int arousal = OSLArousedNative.GetArousal(PlayerRef) as int
+		;Use no side effects variant since this method can get called within the arousal updated callback loop
+		int arousal = OSLArousedNative.GetArousalNoSideEffects(PlayerRef) as int
 		ApplyOArousedEffects(arousal)
 	endif
 EndFunction

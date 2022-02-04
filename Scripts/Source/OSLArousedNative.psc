@@ -2,9 +2,14 @@ scriptname OSLArousedNative hidden
 
 ;Retrieves arousal value for a given Actor
 ;In SLAroused mode, This is a calculated value based off exposure and time rate
+;NOTE: THIS FUNCTION HAS SIDE EFFECTS. Will internally update arousal based off time. Use GetArousalNoSideEffects if you want a pure read.
 float function GetArousal(Actor actor) global native
 ;Retrieves arousal for passed in actors. Results in *same* order as passed in array
 float[] function GetArousalMultiple(Actor[] actorArray) global native
+
+;Retrieves arousal value for a given Actor. Performs no side effects and will not update internal state.
+;Usually you will want to use GetArousal, this is for special cases
+float function GetArousalNoSideEffects(Actor actor) global native
 
 ;Sets the arousal value for a given actor
 ;In SLAroused Mode this is the Exposure Value (Arousal is calculated)
@@ -34,6 +39,11 @@ function SetTimeRate(Actor actor, float value) global native
 
 ;Gets the Actors current time rate
 float function GetTimeRate(Actor actor) global native
+
+; =================== ACTOR STATE =======================
+
+;Returns if Actor is Naked
+bool function IsActorNaked(Actor actor) global native
 
 ;Informs dll if player is in a sex scene
 function SetPlayerInSexScene(bool value) global native
