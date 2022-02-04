@@ -3,12 +3,12 @@ ScriptName OSLAroused_Main Extends Quest Hidden
 ; All the good things are from Sairion and all the bad things are by me :) 
 
 OSLAroused_Main Function Get() Global
-	return game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_Main
+	return Game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_Main
 EndFunction
 
 Actor Property PlayerRef Auto 
 
-slaFrameworkScr Property SlaFrameworkStub Auto
+slaFrameworkScr SlaFrameworkStub
 
 float Property ScanDistance = 5120.0 AutoReadOnly
 
@@ -45,9 +45,7 @@ Spell Property OArousedRelievedSpell Auto
 Event OnInit()
 	;Initialize multiplier to 2 for player
 	OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
-
-	RegisterForModEvent("OSLA_PlayerArousalUpdated", "OnPlayerArousalUpdated")
-
+	
 	OnGameLoaded()
 
 	Log("OSLAroused installed")
@@ -55,7 +53,13 @@ Event OnInit()
 EndEvent
 
 Function OnGameLoaded()
-	SlaFrameworkStub.OnGameLoaded()
+	RegisterForModEvent("OSLA_PlayerArousalUpdated", "OnPlayerArousalUpdated")
+	RegisterForModEvent("OSLA_ActorNakedUpdated", "OnActorNakedUpdated")
+	
+	SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
+	if(SlaFrameworkStub)
+		SlaFrameworkStub.OnGameLoaded()
+	endif
 
 	OStimAdapterLoaded = OStimAdapter.LoadAdapter()
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
@@ -72,6 +76,8 @@ Function OnGameLoaded()
 	
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
+
+	;Initial Naked State
 EndFunction
 
 ;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
@@ -96,8 +102,21 @@ event OnPlayerArousalUpdated(string eventName, string strArg, float newArousal, 
 
 	DebugAdapter.OnPlayerArousalUpdated(newArousal)
 
-	SlaFrameworkStub.OnActorArousalUpdated(PlayerRef, newArousal)
+	if(SlaFrameworkStub)
+		SlaFrameworkStub.OnActorArousalUpdated(PlayerRef, newArousal)
+	endif
 endevent
+
+event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat, Form sender)
+	bool isActorNaked = actorNakedFloat > 0
+	Actor act = sender as Actor
+	
+	Log("OnActorNakedUpdated: Actor: " + act + " - IsNaked: " + isActorNaked)
+	if(SlaFrameworkStub && act)
+		SlaFrameworkStub.OnActorNakedUpdated(act, isActorNaked)
+	endif
+endevent
+
 
 ; ========== AROUSAL EFFECTS ===========
 

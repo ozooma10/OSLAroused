@@ -15,15 +15,26 @@ endfunction
 
 ;Additive exposure
 Int Function UpdateActorExposure(Actor act, Int modVal, String debugMsg = "")
-    log("UpdateActorExposure: " + modVal + " msg: " + debugMsg)
+    log("UpdateActorExposure: " + modVal)
     return OSLArousedNative.ModifyArousal(act, modVal) as Int
 EndFunction
 
 function OnActorArousalUpdated(Actor act, float newArousal)
-    log("Updating SLAFramework Val: " + newArousal)
+    log("OnActorArousalUpdated: " + newArousal)
     ;Update Factions
     if(slaArousalFaction)
         act.SetFactionRank(slaArousalFaction, newArousal as int)
+    endif
+endfunction
+
+function OnActorNakedUpdated(Actor act, bool newNaked)
+    log("OnActorNakedUpdated: " + act + " - " + newNaked)
+    if(slaNakedFaction)
+        if(newNaked)
+            act.SetFactionRank(slaNakedFaction, 0)
+        else
+            act.SetFactionRank(slaNakedFaction, -2)
+        endif
     endif
 endfunction
 
