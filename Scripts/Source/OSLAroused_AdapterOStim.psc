@@ -1,8 +1,5 @@
 ScriptName OSLAroused_AdapterOStim Extends Quest Hidden
 
-OSLAroused_Main Property Main Auto
-Actor Property PlayerRef Auto
-
 bool Property RequireLowArousalToEndScene Auto
 
 actor[] ActiveSceneActors
@@ -12,10 +9,28 @@ float[] previousModifiers
 bool bEndOnDomOrgasm
 bool bEndOnSubOrgasm
 
+bool function LoadAdapter()
+	;Looks like Ostims not Installed
+    if (Game.GetModByName("Ostim.esp") == 255)
+		return false
+    endif
+	
+	OSexIntegrationMain OStim = OUtils.GetOStim()
+	if (OStim == none || OStim.GetAPIVersion() < 23)
+		debug.MessageBox("Your OStim version is out of date. OAroused requires a newer version.")
+		return false
+	endif
+
+	RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
+	RegisterForModEvent("ostim_start", "OStimStart")
+	RegisterForModEvent("ostim_end", "OStimEnd")
+    return true
+endfunction
 
 function UpdateAdapter()
 	; Do not process if adapter not loaded
-	if(!Main.OStimAdapterLoaded)
+	OSLAroused_Main main = OSLAroused_Main.Get()
+	if(!main.OStimAdapterLoaded)
 		return
 	endif
 
@@ -24,8 +39,8 @@ function UpdateAdapter()
 		if(OStim.GetODatabase().IsSexAnimation(OStim.GetCurrentAnimationOID()))
 			OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 1.5 * OStim.SexExcitementMult)
 
-			actor[] nearby = MiscUtil.ScanCellNPCs(ActiveSceneActors[0], Main.ScanDistance)
-			float closeEnough  = Main.ScanDistance / 8
+			actor[] nearby = MiscUtil.ScanCellNPCs(ActiveSceneActors[0], main.ScanDistance)
+			float closeEnough  = main.ScanDistance / 8
 
 			int i = 0
 			int max = nearby.Length
@@ -49,17 +64,17 @@ Event OnUpdate()
 endevent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
-	Log("OStim OStimOrgasm")
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 
+	OSLAroused_Main main = OSLAroused_Main.Get()
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
-		OArousedSceneOrgasm(OStim)
+		OArousedSceneOrgasm(main, OStim)
 	endif
 EndEvent
 
 Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	Log("OStim Scene Start")
-
+	OSLAroused_Main main = OSLAroused_Main.Get()
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	ActiveSceneActors = OStim.GetActors()
 
@@ -68,12 +83,14 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	endif
 
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
-		OArousedSceneStart(OStim)
+		OArousedSceneStart(main, OStim)
 	endif
 endevent
 
 Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	Log("OStim Scene End")
+
+	OSLAroused_Main main = OSLAroused_Main.Get()
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 
 	if(OStim.IsPlayerInvolved())
@@ -85,36 +102,19 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	endif
 endevent
 
-bool function LoadAdapter()
-    ;Looks like Ostims not Installed
-    if (Game.GetModByName("Ostim.esp") == 255)
-		return false
-    endif
-	
-	OSexIntegrationMain OStim = OUtils.GetOStim()
-	if (OStim == none || OStim.GetAPIVersion() < 23)
-		debug.MessageBox("Your OStim version is out of date. OAroused requires a newer version.")
-		return false
-	endif
-
-	RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
-	RegisterForModEvent("ostim_start", "OStimStart")
-	RegisterForModEvent("ostim_end", "OStimEnd")
-    return true
-endfunction
-
 ; =========== OAroused Mode =================
-function OArousedSceneStart(OSexIntegrationMain OStim)
+function OArousedSceneStart(OSLAroused_Main main, OSexIntegrationMain OStim)
 	previousModifiers = Utility.CreateFloatArray(3)
-	CalculateStimMultipliers()
+	CalculateStimMultipliers(OStim)
 
 	OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult)
 
-	if (RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(PlayerRef)))
-		if PlayerRef == OStim.GetDomActor()
+	Actor player = main.PlayerRef
+	if (RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(player)))
+		if player == OStim.GetDomActor()
 			bEndOnDomOrgasm = OStim.EndOnDomOrgasm
 			OStim.EndOnDomOrgasm = false 
-		elseif PlayerRef == OStim.GetSubActor()
+		elseif player == OStim.GetSubActor()
 			bEndOnSubOrgasm = OStim.EndOnSubOrgasm
 			OStim.EndOnSubOrgasm = false 
 		endif 
@@ -145,8 +145,9 @@ function OArousedSceneEnd(OSexIntegrationMain OStim)
 	endif 
 endfunction
 
-function OArousedSceneOrgasm(OSexIntegrationMain OStim)
+function OArousedSceneOrgasm(OSLAroused_Main main, OSexIntegrationMain OStim)
 	actor orgasmer = OStim.GetMostRecentOrgasmedActor()
+	actor player = main.PlayerRef
 
 	float reduceBy = (OStim.GetTimeSinceStart() / 120) * OStim.SexExcitementMult
     reduceBy = papyrusutil.ClampFloat(reduceBy, 0.75, 1.5)
@@ -156,10 +157,10 @@ function OArousedSceneOrgasm(OSexIntegrationMain OStim)
 
 	OSLAroused_ModInterface.ModifyArousal(orgasmer, reduceBy)
 
-	CalculateStimMultipliers()
+	CalculateStimMultipliers(OStim)
 
-	if orgasmer == playerref
-		if OSLAroused_ModInterface.GetArousal(playerref) < 15
+	if orgasmer == player
+		if OSLAroused_ModInterface.GetArousal(player) < 15
 			if bEndOnDomOrgasm
 				OStim.EndOnDomOrgasm = true 
 			endif 
@@ -172,9 +173,7 @@ function OArousedSceneOrgasm(OSexIntegrationMain OStim)
 	endif 
 endfunction
 
-Function CalculateStimMultipliers()
-	OSexIntegrationMain OStim = OUtils.GetOStim()
-
+Function CalculateStimMultipliers(OSexIntegrationMain OStim)
 	int i = 0
 	int max = ActiveSceneActors.Length
 	while i < max 

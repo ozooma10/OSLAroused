@@ -1,8 +1,5 @@
 ScriptName OSLAroused_AdapterDebug Extends Quest Hidden
 
-OSLAroused_Main Property Main Auto
-Actor Property PlayerRef Auto
-
 OSLAroused_ArousalDisplayWidget Property ArousalDisplay Auto
 
 Function LoadAdapter()
@@ -42,7 +39,7 @@ EndEvent
 Function SimulateArousalGain()
     Actor target = Game.GetCurrentCrosshairRef() as Actor
     if(target == none)
-        target = PlayerRef
+        target = Game.GetPlayer()
     endif
 
     OSLAroused_ModInterface.ModifyArousal(target, 5.0)
@@ -51,7 +48,7 @@ EndFunction
 Function SimulateArousalLoss()
     Actor target = Game.GetCurrentCrosshairRef() as Actor
     if(target == none)
-        target = PlayerRef
+        target = Game.GetPlayer()
     endif
 
     OSLAroused_ModInterface.ModifyArousal(target, -5.0)
@@ -60,7 +57,7 @@ EndFunction
 Function QueryArousal()
     Actor target = Game.GetCurrentCrosshairRef() as Actor
     if(target == none)
-        target = PlayerRef
+        target = Game.GetPlayer()
     endif
     OSLAroused_ModInterface.GetArousal(target)
 EndFunction

@@ -2,6 +2,11 @@ ScriptName OSLAroused_Main Extends Quest Hidden
 ; This Script is Based off OAroused by Sairion350
 ; All the good things are from Sairion and all the bad things are by me :) 
 
+OSLAroused_Main Function Get() Global
+	Quest q = Game.GetFormFromFile(0x000806, "OSLAroused.esp") as Quest
+	return (q as OSLAroused_Main)
+EndFunction
+
 Actor Property PlayerRef Auto 
 
 float Property ScanDistance = 5120.0 AutoReadOnly
@@ -49,9 +54,6 @@ Event OnInit()
 EndEvent
 
 Function OnGameLoaded()
-	;horny = Game.GetFormFromFile(0x805, "oslaroused.esp") as spell
-	;relieved = Game.GetFormFromFile(0x806, "oslaroused.esp") as spell
-
 	OStimAdapterLoaded = OStimAdapter.LoadAdapter()
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
 	DebugAdapter.LoadAdapter()
@@ -61,15 +63,18 @@ Function OnGameLoaded()
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
 
-	;Bootstrap settings
-	;Need to notify skse dll whether to check for player nudity
+	; Bootstrap settings
+	; Need to notify skse dll whether to check for player nudity
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
-	;This updates Abilities and Sends mode to native
+	; This updates Abilities and Sends mode to native
 	SetCurrentArousalMode(SelectedArousalMode)	
 EndFunction
 
-event OnPlayerArousalUpdated(string eventName, string strVal, float newArousal, Form sender)
+;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
+;Works as expected need to debug through papyrus
+event OnPlayerArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
+	Log("OnPlayerArousalUpdated: " + newArousal)
 	ArousalBar.SetPercent(newArousal / 100.0)
 
 	ConditionVars.OSLAroused_PlayerArousal = newArousal
@@ -142,7 +147,6 @@ Function ApplyReliefSpell(int magnitude)
 EndFunction
 
 Function RemoveAllArousalSpells()
-	Debug.Trace("RemoveAllArousalSpells")
 	playerref.RemoveSpell(SLADesireSpell)
 	playerref.RemoveSpell(OArousedHornySpell)
 	playerref.RemoveSpell(OArousedRelievedSpell)
