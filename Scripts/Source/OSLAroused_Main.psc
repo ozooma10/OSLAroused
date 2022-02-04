@@ -53,7 +53,7 @@ Event OnInit()
 EndEvent
 
 Function OnGameLoaded()
-	RegisterForModEvent("OSLA_PlayerArousalUpdated", "OnPlayerArousalUpdated")
+	RegisterForModEvent("OSLA_ActorArousalUpdated", "OnActorArousalUpdated")
 	RegisterForModEvent("OSLA_ActorNakedUpdated", "OnActorNakedUpdated")
 	
 	SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
@@ -87,28 +87,31 @@ EndFunction
 
 ;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
 ;Works as expected need to debug through papyrus
-event OnPlayerArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
-	Log("OnPlayerArousalUpdated: " + newArousal)
-	ArousalBar.SetPercent(newArousal / 100.0)
+event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
+	Actor act = sender as Actor
 
-	ConditionVars.OSLAroused_PlayerArousal = newArousal
-	ConditionVars.OSLAroused_PlayerTimeRate = OSLArousedNative.GetTimeRate(PlayerRef)
+	if(act == PlayerRef)
+		ArousalBar.SetPercent(newArousal / 100.0)
 
-	if EnableArousalStatBuffs
-		; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
-		if(SelectedArousalMode == kArousalMode_OAroused)
-			ApplyOArousedEffects(newArousal as int)
-		else
-			ApplyArousedEffects()
+		ConditionVars.OSLAroused_PlayerArousal = newArousal
+		ConditionVars.OSLAroused_PlayerTimeRate = OSLArousedNative.GetTimeRate(PlayerRef)
+
+		if EnableArousalStatBuffs
+			; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
+			if(SelectedArousalMode == kArousalMode_OAroused)
+				ApplyOArousedEffects(newArousal as int)
+			else
+				ApplyArousedEffects()
+			endif
+		else  
+			RemoveAllArousalSpells()
 		endif
-	else  
-		RemoveAllArousalSpells()
+
+		DebugAdapter.OnPlayerArousalUpdated(newArousal)
 	endif
 
-	DebugAdapter.OnPlayerArousalUpdated(newArousal)
-
 	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnActorArousalUpdated(PlayerRef, newArousal)
+		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal)
 	endif
 endevent
 
@@ -116,7 +119,6 @@ event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat
 	bool isActorNaked = actorNakedFloat > 0
 	Actor act = sender as Actor
 	
-	Log("OnActorNakedUpdated: Actor: " + act + " - IsNaked: " + isActorNaked)
 	if(SlaFrameworkStub && act)
 		SlaFrameworkStub.OnActorNakedUpdated(act, isActorNaked)
 	endif
@@ -124,7 +126,6 @@ endevent
 
 
 ; ========== AROUSAL EFFECTS ===========
-
 function SetArousalEffectsEnabled(bool enabled)
 	EnableArousalStatBuffs = enabled
 	if EnableArousalStatBuffs

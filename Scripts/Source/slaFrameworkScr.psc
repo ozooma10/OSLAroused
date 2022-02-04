@@ -20,7 +20,6 @@ Int Function UpdateActorExposure(Actor act, Int modVal, String debugMsg = "")
 EndFunction
 
 function OnActorArousalUpdated(Actor act, float newArousal)
-    log("OnActorArousalUpdated: " + newArousal)
     ;Update Factions
     if(slaArousalFaction)
         act.SetFactionRank(slaArousalFaction, newArousal as int)
@@ -28,7 +27,6 @@ function OnActorArousalUpdated(Actor act, float newArousal)
 endfunction
 
 function OnActorNakedUpdated(Actor act, bool newNaked)
-    log("OnActorNakedUpdated: " + act + " - " + newNaked)
     if(slaNakedFaction)
         if(newNaked)
             act.SetFactionRank(slaNakedFaction, 0)
