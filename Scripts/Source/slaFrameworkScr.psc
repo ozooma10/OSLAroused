@@ -11,6 +11,7 @@ function OnGameLoaded()
     slaNakedFaction = Game.GetFormFromFile(0x77F87, "SexLabAroused.esm") as Faction
 
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
+	RegisterForSingleUpdate(120)
 endfunction
 
 ;Additive exposure
@@ -44,6 +45,14 @@ Event ModifyExposure(Form actForm, float val)
     endif
 EndEvent
 
+
+;Send an updatecomplete event every 120 seconds
+;Since OSLAroused update cycle occurs outside of Papyrus and not "Heartbeat" based like in sla, nothing really to bind to
+Event OnUpdate()
+    log("OnUpdate")
+	RegisterForSingleUpdate(120) ;Another update in two more minutes
+    SendModEvent("sla_UpdateComplete")
+EndEvent
 
 function Log(string msg) global
     Debug.Trace("----OSLAroused---- [slaFrameworkScr] - " + msg)

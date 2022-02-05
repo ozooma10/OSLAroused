@@ -7,13 +7,13 @@ float function GetArousal(Actor target) global
     return arousal
 endfunction
 
-float function ModifyArousal(Actor target, float value) global
-    Log("ModifyArousal: " + target.GetDisplayName() + "modified by val: " + value)
+float function ModifyArousal(Actor target, float value, string reason = "unspecified") global
+    Log("ModifyArousal: " + target.GetDisplayName() + "modified by val: " + value + " Reason: " + reason)
     return OSLArousedNative.ModifyArousal(target, value)
 endfunction
 
-function ModifyArousalMultiple(Actor[] actorArray, float value) global
-    Log("ModifyArousalMultiple: " + actorArray.Length + " actors modified by val: " + value)
+function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = "unspecified") global
+    Log("ModifyArousalMultiple: " + actorArray.Length + " actors modified by val: " + value + " Reason: " + reason)
     OSLArousedNative.ModifyArousalMultiple(actorArray, value)
 endfunction
 

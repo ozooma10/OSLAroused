@@ -18,6 +18,9 @@ OSLAroused_Conditions Property ConditionVars Auto
 bool property OStimAdapterLoaded = false Auto Hidden
 OSLAroused_AdapterOStim Property OStimAdapter Auto
 
+bool property SexLabAdapterLoaded = false Auto Hidden
+OSLAroused_AdapterSexLab Property SexLabAdapter Auto
+
 OSLAroused_AdapterDebug Property DebugAdapter Auto
 
 ; ============ SETTINGS ============
@@ -63,6 +66,10 @@ Function OnGameLoaded()
 
 	OStimAdapterLoaded = OStimAdapter.LoadAdapter()
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
+
+	SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
+	Log("SexLab IntegrationStatus: " + SexLabAdapterLoaded)
+
 	DebugAdapter.LoadAdapter()
 
 	RegisterForKey(CheckArousalKey)
