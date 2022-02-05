@@ -30,6 +30,9 @@ endfunction
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 
+	actor orgasmer = OStim.GetMostRecentOrgasmedActor()
+	OSLArousedNative.RegisterActorOrgasm(orgasmer)
+
 	OSLAroused_Main main = OSLAroused_Main.Get()
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
 		OArousedSceneOrgasm(main, OStim)

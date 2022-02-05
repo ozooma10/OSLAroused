@@ -54,6 +54,9 @@ function RegisterSceneStart(bool bIsOStim, int sceneId, Actor[] participants) gl
 ;Called when scene ends to flag removal
 function RemoveScene(bool bIsOstim, int sceneId) global native
 
+;Called when an actor from a scene orgasms
+function RegisterActorOrgasm(Actor actorRef) global native
+
 ; ==================== SETTINGS =========================
 
 ;Sets weather PlayerNudityCheck should be enabled or disabled in SKSE module
