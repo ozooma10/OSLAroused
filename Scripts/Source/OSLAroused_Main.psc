@@ -97,6 +97,8 @@ EndFunction
 event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
 
+	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " - newVal: " + newArousal)
+
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
@@ -125,6 +127,7 @@ endevent
 event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat, Form sender)
 	bool isActorNaked = actorNakedFloat > 0
 	Actor act = sender as Actor
+	Log("OnActorNakedUpdated for: " + act.GetDisplayName() + " - newNaked: " + isActorNaked)
 	
 	if(SlaFrameworkStub && act)
 		SlaFrameworkStub.OnActorNakedUpdated(act, isActorNaked)

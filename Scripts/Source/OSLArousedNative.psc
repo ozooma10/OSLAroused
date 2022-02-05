@@ -74,6 +74,10 @@ function UpdateDefaultArousalMultiplier(float newMultiplier) global native
 bool function AddKeywordToForm(Form form, Keyword keyword) global native
 bool function RemoveKeywordFromForm(Form form, Keyword keyword) global native
 
+; ==================== UTILITIES =========================
+
+float function GenerateRandomFloat(float min, float max) global native
+
 ;====== DEBUG ============
 
 function DumpArousalData() global native

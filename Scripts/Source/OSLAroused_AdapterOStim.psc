@@ -75,7 +75,7 @@ function OArousedSceneStart(OSLAroused_Main main, OSexIntegrationMain OStim)
 	previousModifiers = Utility.CreateFloatArray(3)
 	CalculateStimMultipliers(OStim)
 
-	OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult)
+	OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult, "OStim Scene Start")
 
 	Actor player = main.PlayerRef
 	if (RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(player)))
@@ -95,7 +95,7 @@ function OArousedSceneEnd(OSexIntegrationMain OStim)
 	int max = ActiveSceneActors.Length
 	while i < max 
 		if OStim.GetTimesOrgasm(ActiveSceneActors[i]) < 1
-			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], 20.0)
+			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], 20.0, "OStim end - no orgasm")
 		endif 
 
 		i += 1
@@ -118,10 +118,10 @@ function OArousedSceneOrgasm(OSLAroused_Main main, OSexIntegrationMain OStim)
 	float reduceBy = (OStim.GetTimeSinceStart() / 120) * OStim.SexExcitementMult
     reduceBy = papyrusutil.ClampFloat(reduceBy, 0.75, 1.5)
     reduceBy = reduceBy * 55.0
-    reduceBy = reduceBy + PO3_SKSEFunctions.GenerateRandomFloat(-5.0, 5.0)
+    reduceBy = reduceBy + OSLArousedNative.GenerateRandomFloat(-5.0, 5.0)
     reduceBy = -reduceBy 
 
-	OSLAroused_ModInterface.ModifyArousal(orgasmer, reduceBy)
+	OSLAroused_ModInterface.ModifyArousal(orgasmer, reduceBy, "ostim orgasm")
 
 	CalculateStimMultipliers(OStim)
 
@@ -137,7 +137,7 @@ function OArousedSceneOrgasm(OSLAroused_Main main, OSexIntegrationMain OStim)
 
 		Main.ArousalBar.DisplayBarWithAutohide(10.0)
 	endif 
-endfunction
+endfunction 
 
 Function CalculateStimMultipliers(OSexIntegrationMain OStim)
 	int i = 0
