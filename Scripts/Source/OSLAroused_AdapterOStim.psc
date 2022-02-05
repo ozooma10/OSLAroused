@@ -27,42 +27,6 @@ bool function LoadAdapter()
     return true
 endfunction
 
-function UpdateAdapter()
-	; Do not process if adapter not loaded
-	OSLAroused_Main main = OSLAroused_Main.Get()
-	if(!main.OStimAdapterLoaded)
-		return
-	endif
-
-	OSexIntegrationMain OStim = OUtils.GetOStim()
-    if(OStim && OStim.AnimationRunning())
-		if(OStim.GetODatabase().IsSexAnimation(OStim.GetCurrentAnimationOID()))
-			OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 1.5 * OStim.SexExcitementMult)
-
-			actor[] nearby = MiscUtil.ScanCellNPCs(ActiveSceneActors[0], main.ScanDistance)
-			float closeEnough  = main.ScanDistance / 8
-
-			int i = 0
-			int max = nearby.Length
-			Log("Scan returned: " + max)
-			while i < max
-				if (!ActiveSceneActors[0].IsDetectedBy(nearby[i]) && (ActiveSceneActors[0].GetDistance(nearby[i]) > closeEnough)) || OStim.IsActorInvolved(nearby[i])
-					nearby[i] = none
-				endif 
-
-				i += 1
-			EndWhile
-
-			OSLAroused_ModInterface.ModifyArousalMultiple(PapyrusUtil.RemoveActor(nearby, none), 5.0 * OStim.SexExcitementMult)
-		endif
-        RegisterForSingleUpdate(15.0)
-	endif
-endfunction
-
-Event OnUpdate()
-    UpdateAdapter()
-endevent
-
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 
@@ -85,6 +49,8 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
 		OArousedSceneStart(main, OStim)
 	endif
+
+	OSLArousedNative.RegisterSceneStart(true, -1, ActiveSceneActors)
 endevent
 
 Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
@@ -100,6 +66,8 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
 		OArousedSceneEnd(OStim)
 	endif
+
+	OSLArousedNative.RemoveScene(true, -1)
 endevent
 
 ; =========== OAroused Mode =================
@@ -119,8 +87,6 @@ function OArousedSceneStart(OSLAroused_Main main, OSexIntegrationMain OStim)
 			OStim.EndOnSubOrgasm = false 
 		endif 
 	endif 
-
-	RegisterForSingleUpdate(1.0)
 endfunction
 
 function OArousedSceneEnd(OSexIntegrationMain OStim)

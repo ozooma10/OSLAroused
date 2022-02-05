@@ -62,14 +62,14 @@ Function OnPlayerArousalUpdated(float arousal)
 endfunction
 
 Function TryInitiateSex()
-    ; actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
-    ; if(crosshairTarget)
-    ;     OSexIntegrationMain ostim = OUtils.GetOStim()
-    ;     ostim.StartScene(crosshairTarget, Game.GetPlayer())
-    ; endif
+    actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+    if(crosshairTarget)
+        OSexIntegrationMain ostim = OUtils.GetOStim()
+        ostim.StartScene(crosshairTarget, Game.GetPlayer())
+    endif
 EndFunction
 
 Function RaiseStim()
-    ; OSexIntegrationMain ostim = OUtils.GetOStim()
-    ; ostim.SetActorExcitement(Game.GetPlayer(), 90)
+    OSexIntegrationMain ostim = OUtils.GetOStim()
+    ostim.SetActorExcitement(Game.GetPlayer(), 90)
 EndFunction

@@ -48,6 +48,12 @@ bool function IsActorNaked(Actor actor) global native
 ;Informs dll if player is in a sex scene
 function SetPlayerInSexScene(bool value) global native
 
+;Called on scene start to register new scene in native
+function RegisterSceneStart(bool bIsOStim, int sceneId, Actor[] participants) global native
+
+;Called when scene ends to flag removal
+function RemoveScene(bool bIsOstim, int sceneId) global native
+
 ; ==================== SETTINGS =========================
 
 ;Sets weather PlayerNudityCheck should be enabled or disabled in SKSE module
