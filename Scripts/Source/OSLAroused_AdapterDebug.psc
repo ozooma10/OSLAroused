@@ -37,7 +37,7 @@ float Function SimulateArousalGain()
         target = Game.GetPlayer()
     endif
 
-    return OSLAroused_ModInterface.ModifyArousal(target, 5.0)
+    return OSLAroused_ModInterface.ModifyArousal(target, 5.0, "Debug Gain Arousal")
 EndFunction
 
 Function SimulateArousalLoss()
@@ -46,7 +46,7 @@ Function SimulateArousalLoss()
         target = Game.GetPlayer()
     endif
 
-    OSLAroused_ModInterface.ModifyArousal(target, -5.0)
+    OSLAroused_ModInterface.ModifyArousal(target, -5.0, "Debug Reduce Arousal")
 EndFunction
 
 Function QueryArousal()

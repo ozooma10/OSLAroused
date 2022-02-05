@@ -16,8 +16,7 @@ endfunction
 
 ;Additive exposure
 Int Function UpdateActorExposure(Actor act, Int modVal, String debugMsg = "")
-    log("UpdateActorExposure: " + modVal)
-    return OSLArousedNative.ModifyArousal(act, modVal) as Int
+    return OSLAroused_ModInterface.ModifyArousal(act, modVal, "slaframework UpdateActorExposure") as Int
 EndFunction
 
 function OnActorArousalUpdated(Actor act, float newArousal)
@@ -41,7 +40,7 @@ Event ModifyExposure(Form actForm, float val)
     Log("ModifyExposure Event via Modevent for: " + actForm + " val: " + val)
     Actor akRef = actForm as Actor
     if(akRef)
-        OSLArousedNative.ModifyArousal(akRef, val)
+        OSLAroused_ModInterface.ModifyArousal(akRef, val, "slaframework ModifyExposure")
     endif
 EndEvent
 

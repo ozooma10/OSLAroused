@@ -18,7 +18,7 @@ float Function GetArousal(Actor act)
 EndFunction
 
 float Function ModifyArousal(Actor act, float by)
-    return OSLArousedNative.ModifyArousal(act, by)
+    return OSLAroused_ModInterface.ModifyArousal(act, by, "oaroused modify")
 EndFunction
 
 float Function SetArousal(Actor act, float value, bool updateAccessTime = true)
