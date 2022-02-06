@@ -45,9 +45,6 @@ float function GetTimeRate(Actor actor) global native
 ;Returns if Actor is Naked
 bool function IsActorNaked(Actor actor) global native
 
-;Informs dll if player is in a sex scene
-function SetPlayerInSexScene(bool value) global native
-
 ;Called on scene start to register new scene in native
 function RegisterSceneStart(bool bIsOStim, int sceneId, Actor[] participants) global native
 

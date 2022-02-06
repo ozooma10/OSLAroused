@@ -45,10 +45,6 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	ActiveSceneActors = OStim.GetActors()
 
-	if(OStim.IsPlayerInvolved())
-		OSLArousedNative.SetPlayerInSexScene(true)
-	endif
-
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
 		OArousedSceneStart(main, OStim)
 	endif
@@ -60,13 +56,8 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	Log("OStim Scene End")
 
 	OSLAroused_Main main = OSLAroused_Main.Get()
-	OSexIntegrationMain OStim = OUtils.GetOStim()
-
-	if(OStim.IsPlayerInvolved())
-		OSLArousedNative.SetPlayerInSexScene(false)
-	endif
-
 	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
+		OSexIntegrationMain OStim = OUtils.GetOStim()
 		OArousedSceneEnd(OStim)
 	endif
 
