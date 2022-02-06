@@ -6,10 +6,13 @@ OSLAroused_MCM Function Get() Global
 	return Game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_MCM
 EndFunction
 
-int Property CheckArousalKeyOid Auto
-int Property EnableStatBuffsOid Auto
-int Property EnableNudityCheckOid Auto
+int CheckArousalKeyOid
+int EnableStatBuffsOid
+int EnableNudityCheckOid
 int HourlyNudityArousalModOid
+
+int StageChangeIncreasesArousalOid
+int VictimGainsArousalOid
 
 string[] ArousalModeNames
 int Property ArousalModeOid Auto
@@ -89,6 +92,11 @@ function MainLeftColumn()
     CheckArousalKeyOid = AddKeyMapOption("Show Arousal Key", Main.GetShowArousalKeybind())
     EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
     ArousalModeOid = AddMenuOption("Arousal Mode", ArousalModeNames[Main.GetCurrentArousalMode()])
+
+    AddHeaderOption("Scene Settings")
+    StageChangeIncreasesArousalOid = AddToggleOption("Stage change Increases Arousal", Main.StageChangeIncreasesArousal)
+    VictimGainsArousalOid = AddToggleOption("Victim Gains Arousal", Main.VictimGainsArousal)
+
 endfunction
 
 function MainRightColumn()
@@ -97,7 +105,7 @@ function MainRightColumn()
     HourlyNudityArousalModOid = AddSliderOption("Hourly Arousal From Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
 
     AddHeaderOption("OStim Settings")
-    ; RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", OStimAdapter.RequireLowArousalToEndScene)
+    RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", Main.RequireLowArousalToEndScene)
 endfunction
 
 function StatusPage()
@@ -177,8 +185,14 @@ event OnOptionSelect(int optionId)
             Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
             SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
         elseif (optionId == RequireLowArousalToEndSceneOid)
-            ; OStimAdapter.RequireLowArousalToEndScene = !OStimAdapter.RequireLowArousalToEndScene 
-            ; SetToggleOptionValue(RequireLowArousalToEndSceneOid, OStimAdapter.RequireLowArousalToEndScene)
+            Main.RequireLowArousalToEndScene = !Main.RequireLowArousalToEndScene 
+            SetToggleOptionValue(RequireLowArousalToEndSceneOid, Main.RequireLowArousalToEndScene)
+        elseif (optionId == StageChangeIncreasesArousalOid)
+            Main.StageChangeIncreasesArousal = !Main.StageChangeIncreasesArousal
+            SetToggleOptionValue(StageChangeIncreasesArousalOid, Main.StageChangeIncreasesArousal)
+        elseif (optionId == VictimGainsArousalOid)
+            Main.VictimGainsArousal = !Main.VictimGainsArousal
+            SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
         EndIf
     ElseIf (CurrentPage == "Keywords")
         if(optionId == EroticArmorOid)
@@ -236,6 +250,10 @@ event OnOptionHighlight(int optionId)
             SetInfoText("OStim Scene will not end until Participant arousal is low")
         elseif(optionId == ArousalModeOid)
             SetInfoText("SL Arousal emulates OG Sexlab Behavior. OArousal emulatues OArousal Behavior")
+        elseif(optionId == StageChangeIncreasesArousalOid)
+            SetInfoText("Changing Scene stage increases participant arousal")
+        elseif(optionId == VictimGainsArousalOid)
+            SetInfoText("Victim gains arousal in scenes")
         EndIf
     elseif(CurrentPage == "Debug")
         if(optionId == DumpArousalData)

@@ -34,6 +34,11 @@ int property kArousalMode_SLAroused = 0 autoreadonly
 int property kArousalMode_OAroused = 1 autoreadonly
 int SelectedArousalMode = 1
 
+bool Property StageChangeIncreasesArousal = true Auto
+bool Property VictimGainsArousal = false Auto
+
+; OStim Specific
+bool Property RequireLowArousalToEndScene Auto
 
 ; ============ SPELLS =============
 ;OAroused Spells

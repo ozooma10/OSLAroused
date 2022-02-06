@@ -1,10 +1,14 @@
 ScriptName OSLAroused_AdapterSexLab Extends Quest Hidden
 
+OSLAroused_Main Main
+
 bool function LoadAdapter()
 	;Looks like Sexlab not Installed
     if (Game.GetModByName("SexLab.esm") == 255)
 		return false
     endif
+
+    Main = OSLAroused_Main.Get()
 
 	RegisterForModEvent("HookAnimationStart", "OnAnimationStart")
 	RegisterForModEvent("HookAnimationEnd", "OnAnimationEnd")
@@ -22,7 +26,6 @@ event OnAnimationStart(int tid, bool hasPlayer)
     sslThreadController controller = sexlab.GetController(tid)
     OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
-	OSLAroused_Main main = OSLAroused_Main.Get()
     ;OArousal mode sends a blast on scene start
     if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
         OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, 5.0, "Sexlab Animation Start")
@@ -32,14 +35,16 @@ endevent
 event OnAnimationEnd(int tid, bool hasPlayer)
     OSLArousedNative.RemoveScene(false, tid)
 
-	OSLAroused_Main main = OSLAroused_Main.Get()
-    if(main.GetCurrentArousalMode() == main.kArousalMode_OAroused)
+    if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
         OArousedModeAnimationEnd(tid)
     endif
 endevent
 
 Event OnStageStart(int tid, bool HasPlayer)
-    Log("OnStageStart")
+    If (!Main.StageChangeIncreasesArousal)
+        return
+    EndIf
+
     SexLabFramework sexlab = SexLabUtil.GetAPI() 
     if(!sexlab)
         return
@@ -50,12 +55,18 @@ Event OnStageStart(int tid, bool HasPlayer)
     if(actors.length < 1)
         return
     endif
-    
-    if(controller.Animation.HasTag("Foreplay"))
-        OSLAroused_ModInterface.ModifyArousalMultiple(actors, 1, "sexlab foreplay")
-    endif
 
-    ;@TODO: Notify skse of scene change to propgate arousal to nearby npcs
+    if(Main.VictimGainsArousal || controller.Victims.Length == 0)
+        OSLAroused_ModInterface.ModifyArousalMultiple(actors, 1, "sexlab scene change")
+    else
+        int i = actors.Length
+        while(i > 0)
+            i -= 1
+            If (!controller.IsVictim(actors[i]))
+                OSLAroused_ModInterface.ModifyArousal(actors[i], 1, "sexlab scene change")
+            EndIf
+        endwhile
+    endif
 endevent
 
 Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
@@ -93,12 +104,12 @@ function OArousedModeAnimationEnd(int tid)
     endif
     ;increase arousal for actors who did not org
     sslThreadController controller = sexlab.GetController(tid)
-    int i = controller.ActorAlias.Length
+    int i = controller.Positions.Length
     while(i > 0)
         i -= 1
-        sslActorAlias slot = controller.ActorAlias[i]
-        If (slot && slot.GetOrgasmCount() < 1)
-            OSLAroused_ModInterface.ModifyArousal(slot.ActorRef, 20.0, "sexlab end - no orgasm")
+        actor act = controller.Positions[i]
+        If ((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() < 1 && (!controller.IsVictim(act) || Main.VictimGainsArousal))
+            OSLAroused_ModInterface.ModifyArousal(act, 20.0, "sexlab end - no orgasm")
         EndIf
     endwhile
 endfunction

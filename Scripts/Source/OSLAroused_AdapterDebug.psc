@@ -64,12 +64,15 @@ endfunction
 Function TryInitiateSex()
     actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
     if(crosshairTarget)
-        OSexIntegrationMain ostim = OUtils.GetOStim()
-        ostim.StartScene(crosshairTarget, Game.GetPlayer())
+        ; OSexIntegrationMain ostim = OUtils.GetOStim()
+        ; ostim.StartScene(crosshairTarget, Game.GetPlayer())
+        SexLabFramework sexlab = SexLabUtil.GetAPI()
+        sslBaseAnimation[] anims = sexlab.GetAnimationsByTag(2, "Oral")
+        sexlab.StartSex(SexlabUtil.MakeActorArray(Game.GetPlayer(), crosshairTarget), anims, Game.GetPlayer())
     endif
 EndFunction
 
 Function RaiseStim()
-    OSexIntegrationMain ostim = OUtils.GetOStim()
-    ostim.SetActorExcitement(Game.GetPlayer(), 90)
+    ; OSexIntegrationMain ostim = OUtils.GetOStim()
+    ; ostim.SetActorExcitement(Game.GetPlayer(), 90)
 EndFunction

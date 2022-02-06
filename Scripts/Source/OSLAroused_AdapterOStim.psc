@@ -1,7 +1,5 @@
 ScriptName OSLAroused_AdapterOStim Extends Quest Hidden
 
-bool Property RequireLowArousalToEndScene Auto
-
 actor[] ActiveSceneActors
 
 ; OAroused Mode Vars
@@ -53,7 +51,7 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	endif
 
 	Actor player = main.PlayerRef
-	if (RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(player)))
+	if (main.RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(player)))
 		if player == OStim.GetDomActor()
 			bEndOnDomOrgasm = OStim.EndOnDomOrgasm
 			OStim.EndOnDomOrgasm = false 
