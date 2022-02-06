@@ -11,6 +11,8 @@ int EnableStatBuffsOid
 int EnableNudityCheckOid
 int HourlyNudityArousalModOid
 
+int EnableDebugModeOid
+
 int StageChangeIncreasesArousalOid
 int VictimGainsArousalOid
 
@@ -148,8 +150,10 @@ endfunction
 function DebugPage()
     AddHeaderOption("Native Data")
     DumpArousalData = AddTextOption("Dump Arousal Data", "RUN")
-    ClearSecondaryArousalData = AddTextOption("Clear Secondary Arousal Data", "RUN")
+    ;ClearSecondaryArousalData = AddTextOption("Clear Secondary Arousal Data", "RUN")
     ClearAllArousalData = AddTextOption("Clear All Arousal Data", "RUN")
+
+    EnableDebugModeOid = AddToggleOption("Enable Debug Logging", Main.EnableDebugMode)
 endfunction
 
 event OnOptionSelect(int optionId)
@@ -202,6 +206,9 @@ event OnOptionSelect(int optionId)
             if (ShowMessage("Are you sure you want to Clear All Arousal Data? This is non-reversible"))
                 OSLArousedNative.ClearAllArousalData()
             endif
+        ElseIf (optionId == EnableDebugModeOid)
+            Main.EnableDebugMode = !Main.EnableDebugMode
+            SetToggleOptionValue(EnableDebugModeOid, Main.EnableDebugMode)
         endif
     EndIf
 endevent

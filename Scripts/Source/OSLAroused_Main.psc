@@ -33,6 +33,8 @@ float DefaultArousalMultiplier = 1.0
 bool Property StageChangeIncreasesArousal = true Auto
 bool Property VictimGainsArousal = false Auto
 
+bool Property EnableDebugMode = true Auto
+
 ; OStim Specific
 bool Property RequireLowArousalToEndScene Auto
 
@@ -240,6 +242,8 @@ endfunction
 
 ; ========== DEBUG RELATED ==================
 
-function Log(string msg) global
-    Debug.Trace("---OSLAroused--- " + msg)
+function Log(string msg)
+	If (EnableDebugMode)
+		Debug.Trace("---OSLAroused--- " + msg)
+	EndIf
 endfunction
