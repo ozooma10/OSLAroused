@@ -30,10 +30,6 @@ float HourlyNudityArousalModifier = 20.0
 bool Property EnableArousalStatBuffs = true Auto
 float DefaultArousalMultiplier = 1.0
 
-int property kArousalMode_SLAroused = 0 autoreadonly
-int property kArousalMode_OAroused = 1 autoreadonly
-int SelectedArousalMode = 1
-
 bool Property StageChangeIncreasesArousal = true Auto
 bool Property VictimGainsArousal = false Auto
 
@@ -83,9 +79,12 @@ Function OnGameLoaded()
 	; Need to notify skse dll whether to check for player nudity
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
-	; This updates Abilities and Sends mode to native
-	SetCurrentArousalMode(SelectedArousalMode)	
 	
+	RemoveAllArousalSpells()
+	if(EnableArousalStatBuffs)
+		ApplyArousedEffects()
+	endif
+
 	float arousal = OSLArousedNative.GetArousal(PlayerRef)
 	ArousalBar.InitializeBar(arousal / 100)
 
@@ -112,11 +111,7 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 
 		if EnableArousalStatBuffs
 			; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
-			if(SelectedArousalMode == kArousalMode_OAroused)
-				ApplyOArousedEffects(newArousal as int)
-			else
-				ApplyArousedEffects()
-			endif
+			ApplyArousedEffects()
 		else  
 			RemoveAllArousalSpells()
 		endif
@@ -151,14 +146,8 @@ function SetArousalEffectsEnabled(bool enabled)
 endfunction
 
 Function ApplyArousedEffects()
-	if(SelectedArousalMode == kArousalMode_SLAroused)
-		PlayerRef.RemoveSpell(SLADesireSpell)
-		PlayerRef.AddSpell(SLADesireSpell, false)
-	elseif(SelectedArousalMode == kArousalMode_OAroused)
-		;Use no side effects variant since this method can get called within the arousal updated callback loop
-		int arousal = OSLArousedNative.GetArousalNoSideEffects(PlayerRef) as int
-		ApplyOArousedEffects(arousal)
-	endif
+	PlayerRef.RemoveSpell(SLADesireSpell)
+	PlayerRef.AddSpell(SLADesireSpell, false)
 EndFunction
 
 Function ApplyOArousedEffects(int arousal)
@@ -222,24 +211,6 @@ endfunction
 
 float function GetHourlyNudityArousalModifier()
 	return HourlyNudityArousalModifier
-endfunction
-
-int function GetCurrentArousalMode()
-	return SelectedArousalMode
-endfunction
-
-function SetCurrentArousalMode(int newMode)
-	;log("Setting Current Arousal Mode to: " + newMode)
-	if(newMode < 0 || newMode > 1)
-		return
-	endif
-	SelectedArousalMode = newMode
-	OSLArousedNative.UpdateArousalMode(newMode)
-	;Update arousal spells
-	RemoveAllArousalSpells()
-	if(EnableArousalStatBuffs)
-		ApplyArousedEffects()
-	endif
 endfunction
 
 function SetDefaultArousalMultiplier(float newVal)

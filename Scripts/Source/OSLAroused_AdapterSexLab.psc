@@ -27,17 +27,26 @@ event OnAnimationStart(int tid, bool hasPlayer)
     OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
     ;OArousal mode sends a blast on scene start
-    if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
-        OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, 5.0, "Sexlab Animation Start")
-    endif
+    OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, 5.0, "Sexlab Animation Start")
 endevent
 
 event OnAnimationEnd(int tid, bool hasPlayer)
     OSLArousedNative.RemoveScene(false, tid)
 
-    if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
-        OArousedModeAnimationEnd(tid)
+    SexLabFramework sexlab = SexLabUtil.GetAPI() 
+    if(!sexlab)
+        return
     endif
+    ;increase arousal for actors who did not org
+    sslThreadController controller = sexlab.GetController(tid)
+    int i = controller.Positions.Length
+    while(i > 0)
+        i -= 1
+        actor act = controller.Positions[i]
+        If ((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() < 1 && (!controller.IsVictim(act) || Main.VictimGainsArousal))
+            OSLAroused_ModInterface.ModifyArousal(act, 20.0, "sexlab end - no orgasm")
+        EndIf
+    endwhile
 endevent
 
 Event OnStageStart(int tid, bool HasPlayer)
@@ -95,24 +104,6 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     ;@TODO: Check for belt
     OSLAroused_ModInterface.ModifyArousal(act, exposureMod, "sexlab orgasm")
 EndEvent
-
-
-function OArousedModeAnimationEnd(int tid)
-    SexLabFramework sexlab = SexLabUtil.GetAPI() 
-    if(!sexlab)
-        return
-    endif
-    ;increase arousal for actors who did not org
-    sslThreadController controller = sexlab.GetController(tid)
-    int i = controller.Positions.Length
-    while(i > 0)
-        i -= 1
-        actor act = controller.Positions[i]
-        If ((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() < 1 && (!controller.IsVictim(act) || Main.VictimGainsArousal))
-            OSLAroused_ModInterface.ModifyArousal(act, 20.0, "sexlab end - no orgasm")
-        EndIf
-    endwhile
-endfunction
 
 ; ========== DEBUG RELATED ==================
 
