@@ -6,10 +6,26 @@ bool function LoadAdapter()
 		return false
     endif
 
+	RegisterForModEvent("HookAnimationStart", "OnAnimationStart")
+	RegisterForModEvent("HookAnimationEnd", "OnAnimationEnd")
 	RegisterForModEvent("HookStageStart", "OnStageStart")
 	RegisterForModEvent("SexLabOrgasm", "OnSexLabOrgasm")
     return true
 endfunction
+
+event OnAnimationStart(int tid, bool hasPlayer)
+    Log("OnAnimationStart")
+    SexLabFramework sexlab = SexLabUtil.GetAPI() 
+    if(!sexlab)
+        return
+    endif
+    sslThreadController controller = sexlab.GetController(tid)
+    OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
+endevent
+
+event OnAnimationEnd(int tid, bool hasPlayer)
+    OSLArousedNative.RemoveScene(false, tid)
+endevent
 
 Event OnStageStart(int tid, bool HasPlayer)
     Log("OnStageStart")
@@ -42,6 +58,8 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     if(!controller)
         return
     endif
+
+    OSLArousedNative.RegisterActorOrgasm(act)
 
     ;Update arousal for any victims
     ;@TODO: Tie this into a lewdness system
