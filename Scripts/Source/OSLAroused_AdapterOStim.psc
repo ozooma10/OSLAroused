@@ -44,32 +44,13 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	OSLAroused_Main main = OSLAroused_Main.Get()
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	ActiveSceneActors = OStim.GetActors()
-
-	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
-		OArousedSceneStart(main, OStim)
-	endif
-
-	OSLArousedNative.RegisterSceneStart(true, -1, ActiveSceneActors)
-endevent
-
-Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
-	Log("OStim Scene End")
-
-	OSLAroused_Main main = OSLAroused_Main.Get()
-	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
-		OSexIntegrationMain OStim = OUtils.GetOStim()
-		OArousedSceneEnd(OStim)
-	endif
-
-	OSLArousedNative.RemoveScene(true, -1)
-endevent
-
-; =========== OAroused Mode =================
-function OArousedSceneStart(OSLAroused_Main main, OSexIntegrationMain OStim)
 	previousModifiers = Utility.CreateFloatArray(3)
+
 	CalculateStimMultipliers(OStim)
 
-	OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult, "OStim Scene Start")
+	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
+		OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult, "OStim Scene Start")
+	endif
 
 	Actor player = main.PlayerRef
 	if (RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(player)))
@@ -80,21 +61,21 @@ function OArousedSceneStart(OSLAroused_Main main, OSexIntegrationMain OStim)
 			bEndOnSubOrgasm = OStim.EndOnSubOrgasm
 			OStim.EndOnSubOrgasm = false 
 		endif 
-	endif 
-endfunction
+	endif
 
-function OArousedSceneEnd(OSexIntegrationMain OStim)
-	; increase arousal for actors that did not orgasm
-	int i = 0 
-	int max = ActiveSceneActors.Length
-	while i < max 
-		if OStim.GetTimesOrgasm(ActiveSceneActors[i]) < 1
-			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], 20.0, "OStim end - no orgasm")
-		endif 
+	OSLArousedNative.RegisterSceneStart(true, -1, ActiveSceneActors)
+endevent
 
-		i += 1
-	endwhile
+Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
+	Log("OStim Scene End")
 
+	OSLAroused_Main main = OSLAroused_Main.Get()
+	OSexIntegrationMain OStim = OUtils.GetOStim()
+
+	if(Main.GetCurrentArousalMode() == Main.kArousalMode_OAroused)
+		OArousedSceneEnd(OStim)
+	endif
+	
 	if bEndOnDomOrgasm
 		bEndOnDomOrgasm = false 
 		OStim.EndOnDomOrgasm = true 
@@ -103,6 +84,20 @@ function OArousedSceneEnd(OSexIntegrationMain OStim)
 		bEndOnSubOrgasm = false 
 		OStim.EndOnSubOrgasm = true 
 	endif 
+
+	OSLArousedNative.RemoveScene(true, -1)
+endevent
+
+; =========== OAroused Mode =================
+function OArousedSceneEnd(OSexIntegrationMain OStim)
+	; increase arousal for actors that did not orgasm
+	int i = ActiveSceneActors.Length
+	while i > 0
+		i -= 1
+		if OStim.GetTimesOrgasm(ActiveSceneActors[i]) < 1
+			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], 20.0, "OStim end - no orgasm")
+		endif 
+	endwhile
 endfunction
 
 function OArousedSceneOrgasm(OSLAroused_Main main, OSexIntegrationMain OStim)
