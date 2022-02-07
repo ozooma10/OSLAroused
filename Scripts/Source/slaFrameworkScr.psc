@@ -1,18 +1,27 @@
 Scriptname slaFrameworkScr extends Quest
 {This is a stubbed version of slaFrameworkScr that redirects external mod requests to use OSLAroused}
 
+Faction Property slaArousal Auto
+Faction Property slaExposure Auto
+
 Faction slaArousalFaction
 Faction slaExposureFaction
 Faction slaNakedFaction
 
 function OnGameLoaded()
     slaArousalFaction = Game.GetFormFromFile(0x3FC36, "SexLabAroused.esm") as Faction
+    slaArousal = slaArousalFaction
     slaExposureFaction = Game.GetFormFromFile(0x25837, "SexLabAroused.esm") as Faction
+    slaExposure = slaExposureFaction
     slaNakedFaction = Game.GetFormFromFile(0x77F87, "SexLabAroused.esm") as Faction
 
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
 	RegisterForSingleUpdate(120)
 endfunction
+
+Int Function GetVersion()
+	Return 20140124
+EndFunction
 
 int Function GetActorArousal(Actor akRef)
     if(akRef == none || akRef.IsChild())
@@ -80,9 +89,9 @@ function OnActorNakedUpdated(Actor act, bool newNaked)
 endfunction
 
 Event ModifyExposure(Form actForm, float val)
-    Log("ModifyExposure Event via Modevent for: " + actForm + " val: " + val)
     Actor akRef = actForm as Actor
     if(akRef)
+        Log("ModifyExposure Event via Modevent for: " + akRef.GetDisplayName() + " val: " + val)
         OSLAroused_ModInterface.ModifyArousal(akRef, val, "slaframework ModifyExposure")
     endif
 EndEvent

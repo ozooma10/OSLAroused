@@ -104,7 +104,7 @@ event OnActorArousalUpdated(string eventName, string strArg, float newExposure, 
 	float lastOrgasmArousal = OSLArousedNative.GetLastOrgasmFrustrationArousal(act)
 	float newArousal = newExposure + lastOrgasmArousal
 
-	Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " - newExposure: " + newExposure + " - LastOrg: " + lastOrgasmArousal + " newarou: " + newArousal)
+	Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
