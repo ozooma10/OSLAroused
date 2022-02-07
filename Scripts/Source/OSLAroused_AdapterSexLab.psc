@@ -18,12 +18,16 @@ bool function LoadAdapter()
 endfunction
 
 event OnAnimationStart(int tid, bool hasPlayer)
-    Log("OnAnimationStart")
     SexLabFramework sexlab = SexLabUtil.GetAPI() 
     if(!sexlab)
         return
     endif
     sslThreadController controller = sexlab.GetController(tid)
+    ;If this event came from ostimlab (ie its a OStim scene, then dont process)
+    If (controller.HasTag("OStimLab"))
+        return
+    EndIf
+    Log("OnAnimationStart")
     OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
     ;OArousal mode sends a blast on scene start
@@ -39,6 +43,12 @@ event OnAnimationEnd(int tid, bool hasPlayer)
     endif
     ;increase arousal for actors who did not org
     sslThreadController controller = sexlab.GetController(tid)
+
+    ;If this event came from ostimlab (ie its a OStim scene, then dont process)
+    If (controller.HasTag("OStimLab"))
+        return
+    EndIf
+
     int i = controller.Positions.Length
     while(i > 0)
         i -= 1
@@ -60,6 +70,12 @@ Event OnStageStart(int tid, bool HasPlayer)
     endif
 
     sslThreadController controller = sexlab.GetController(tid)
+
+    ;If this event came from ostimlab (ie its a OStim scene, then dont process)
+    If (controller.HasTag("OStimLab"))
+        return
+    EndIf
+
     Actor[] actors = controller.Positions
     if(actors.length < 1)
         return
@@ -79,7 +95,6 @@ Event OnStageStart(int tid, bool HasPlayer)
 endevent
 
 Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
-    Log("OnSexLabOrgasm: " + actorForm + " enjoyment: " + enjoyment)
     Actor act = actorForm as Actor
     SexLabFramework sexlab = SexLabUtil.GetAPI() 
     if(!act || !sexlab)
@@ -90,6 +105,12 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
         return
     endif
 
+    ;If this event came from ostimlab (ie its a OStim scene, then dont process)
+    If (controller.HasTag("OStimLab"))
+        return
+    EndIf
+
+    Log("OnSexLabOrgasm: " + actorForm + " enjoyment: " + enjoyment)
     OSLArousedNative.RegisterActorOrgasm(act)
 
     ;Update arousal for any victims
