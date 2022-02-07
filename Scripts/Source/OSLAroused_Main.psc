@@ -100,11 +100,14 @@ EndFunction
 
 ;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
 ;Works as expected need to debug through papyrus
-event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
+event OnActorArousalUpdated(string eventName, string strArg, float newExposure, Form sender)
 	Actor act = sender as Actor
 
-	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " - newVal: " + newArousal)
+	;Need to get amount of arousal to add on top of exposure 
+	float lastOrgasmArousal = OSLArousedNative.GetLastOrgasmFrustrationArousal(act)
+	float newArousal = newExposure + lastOrgasmArousal
 
+	Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " - newExposure: " + newExposure + " - LastOrg: " + lastOrgasmArousal + " newarou: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
@@ -122,7 +125,7 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 	endif
 
 	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal)
+		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newExposure)
 	endif
 endevent
 

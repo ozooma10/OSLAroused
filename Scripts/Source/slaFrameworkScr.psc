@@ -43,6 +43,13 @@ Int Function UpdateActorExposure(Actor act, Int modVal, String debugMsg = "")
     return OSLAroused_ModInterface.ModifyArousal(act, modVal, "slaframework UpdateActorExposure") as Int
 EndFunction
 
+Int Function SetActorExposure(Actor akRef, Int val)
+    if(akRef == none)
+        return -2
+    endif
+    return OSLAroused_ModInterface.SetArousal(akRef, val) as int
+EndFunction
+
 ;Additive exposure rate
 float function UpdateActorExposureRate(Actor akRef, float val)
     If (akRef == none)
@@ -52,10 +59,13 @@ float function UpdateActorExposureRate(Actor akRef, float val)
     return OSLAroused_ModInterface.ModifyArousalMultiplier(akRef, val, "slaframework UpdateActorExposureRate")
 endfunction
 
-function OnActorArousalUpdated(Actor act, float newArousal)
+function OnActorArousalUpdated(Actor act, float newArousal, float newExposure)
     ;Update Factions
     if(slaArousalFaction)
         act.SetFactionRank(slaArousalFaction, newArousal as int)
+    endif
+    if(slaExposureFaction)
+        act.SetFactionRank(slaExposureFaction, newExposure as int)
     endif
 endfunction
 
@@ -84,6 +94,9 @@ Function UpdateActorOrgasmDate(Actor akRef)
     OSLAroused_ModInterface.RegisterOrgasm(akRef)
 EndFunction
 
+Float Function GetActorDaysSinceLastOrgasm(Actor akRef)
+    return OSLAroused_ModInterface.GetActorDaysSinceLastOrgasm(akRef)
+EndFunction
 
 ;Send an updatecomplete event every 120 seconds
 ;Since OSLAroused update cycle occurs outside of Papyrus and not "Heartbeat" based like in sla, nothing really to bind to
@@ -92,6 +105,23 @@ Event OnUpdate()
 	RegisterForSingleUpdate(120) ;Another update in two more minutes
     SendModEvent("sla_UpdateComplete")
 EndEvent
+
+
+;==== NOT IMPLEMENTED
+bool Function IsActorArousalLocked(Actor akRef)
+    return false
+EndFunction
+
+bool Function IsActorArousalBlocked(Actor akRef)
+    return false
+EndFunction
+
+Function SetActorExhibitionist(Actor akRef, bool val = false)
+    return
+endfunction
+bool Function IsActorExhibitionist(Actor akRef)
+    return false
+endfunction
 
 function Log(string msg) global
     Debug.Trace("----OSLAroused---- [slaFrameworkScr] - " + msg)

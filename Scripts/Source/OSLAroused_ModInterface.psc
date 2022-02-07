@@ -20,6 +20,11 @@ float function ModifyArousal(Actor target, float value, string reason = "unspeci
     return OSLArousedNative.ModifyArousal(target, value)
 endfunction
 
+float function SetArousal(Actor target, float value, string reason = "unspecified") global
+    Log("ModifyASetArousalrousal: " + target.GetDisplayName() + " set to val: " + value + " Reason: " + reason)
+    return OSLArousedNative.SetArousal(target, value)
+endfunction
+
 function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = "unspecified") global
     Log("ModifyArousalMultiple: " + actorArray.Length + " actors modified by val: " + value + " Reason: " + reason)
     OSLArousedNative.ModifyArousalMultiple(actorArray, value)
@@ -33,6 +38,10 @@ endfunction
 function RegisterOrgasm(Actor target) global
     Log("RegisterOrgasm: " + target.GetDisplayName())
     OSLArousedNative.RegisterActorOrgasm(target)
+endfunction
+
+float function GetActorDaysSinceLastOrgasm(Actor target) global
+    return OSLArousedNative.GetDaysSinceLastOrgasm(target)
 endfunction
 
 function Log(string msg) global
