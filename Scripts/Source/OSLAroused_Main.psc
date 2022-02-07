@@ -51,7 +51,8 @@ Spell Property OArousedRelievedSpell Auto
 Event OnInit()
 	;Initialize multiplier to 2 for player
 	OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
-	
+	OSLArousedNative.SetArousal(PlayerRef, 5)
+
 	OnGameLoaded()
 
 	Log("OSLAroused installed")
