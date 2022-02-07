@@ -21,8 +21,6 @@ OSLAroused_AdapterOStim Property OStimAdapter Auto
 bool property SexLabAdapterLoaded = false Auto Hidden
 OSLAroused_AdapterSexLab Property SexLabAdapter Auto
 
-OSLAroused_AdapterDebug Property DebugAdapter Auto
-
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 bool EnableNudityIncreasesArousal = true
@@ -74,8 +72,6 @@ Function OnGameLoaded()
 	SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
 	Log("SexLab IntegrationStatus: " + SexLabAdapterLoaded)
 
-	DebugAdapter.LoadAdapter()
-
 	RegisterForKey(CheckArousalKey)
 
 	; Bootstrap settings
@@ -122,7 +118,6 @@ event OnActorArousalUpdated(string eventName, string strArg, float newExposure, 
 			RemoveAllArousalSpells()
 		endif
 
-		DebugAdapter.OnPlayerArousalUpdated(newArousal)
 	endif
 
 	if(SlaFrameworkStub)
