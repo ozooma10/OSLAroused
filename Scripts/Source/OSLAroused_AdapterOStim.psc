@@ -35,7 +35,7 @@ Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 	actor player = main.PlayerRef
 
 	float reduceBy = (OStim.GetTimeSinceStart() / 120) * OStim.SexExcitementMult
-    reduceBy = papyrusutil.ClampFloat(reduceBy, 0.75, 1.5)
+    reduceBy = OSLArousedNative.ClampFloat(reduceBy, 0.75, 1.5)
     reduceBy = reduceBy * 55.0
     reduceBy = reduceBy + OSLArousedNative.GenerateRandomFloat(-5.0, 5.0)
     reduceBy = -reduceBy 

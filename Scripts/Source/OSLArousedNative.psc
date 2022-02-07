@@ -81,6 +81,7 @@ bool function RemoveKeywordFromForm(Form form, Keyword keyword) global native
 ; ==================== UTILITIES =========================
 
 float function GenerateRandomFloat(float min, float max) global native
+float function ClampFloat(float val, float min, float max) global native
 
 ;====== DEBUG ============
 
