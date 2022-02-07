@@ -14,10 +14,43 @@ function OnGameLoaded()
 	RegisterForSingleUpdate(120)
 endfunction
 
+int Function GetActorArousal(Actor akRef)
+    if(akRef == none || akRef.IsChild())
+        return -2
+    endif
+
+    return OSLAroused_ModInterface.GetArousal(akRef) as int
+EndFunction
+
+int Function GetActorExposure(Actor akRef)
+    if(akRef == none)
+        return -2
+    endif
+
+    return OSLAroused_ModInterface.GetExposure(akRef) as int
+EndFunction
+
+float Function GetActorExposureRate(Actor akRef)
+    if(akRef == None)
+        return -2
+    endif
+
+    return OSLAroused_ModInterface.GetArousalMultiplier(akRef)
+EndFunction
+
 ;Additive exposure
 Int Function UpdateActorExposure(Actor act, Int modVal, String debugMsg = "")
     return OSLAroused_ModInterface.ModifyArousal(act, modVal, "slaframework UpdateActorExposure") as Int
 EndFunction
+
+;Additive exposure rate
+float function UpdateActorExposureRate(Actor akRef, float val)
+    If (akRef == none)
+        return -2
+    EndIf
+
+    return OSLAroused_ModInterface.ModifyArousalMultiplier(akRef, val, "slaframework UpdateActorExposureRate")
+endfunction
 
 function OnActorArousalUpdated(Actor act, float newArousal)
     ;Update Factions
@@ -43,6 +76,13 @@ Event ModifyExposure(Form actForm, float val)
         OSLAroused_ModInterface.ModifyArousal(akRef, val, "slaframework ModifyExposure")
     endif
 EndEvent
+
+Function UpdateActorOrgasmDate(Actor akRef)
+    if(akRef == none)
+        return
+    endif
+    OSLAroused_ModInterface.RegisterOrgasm(akRef)
+EndFunction
 
 
 ;Send an updatecomplete event every 120 seconds

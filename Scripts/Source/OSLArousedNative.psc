@@ -22,6 +22,10 @@ float function ModifyArousal(Actor actor, float value) global native
 ;Modifies all actors in array by sepcified amount (relative to current arousal)
 function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 
+
+;Modifies the arousal multiplier by the specified amount
+float function ModifyArousalMultiplier(Actor actor, float value) global native
+
 ;Sets the arousal multiplier for a given actor
 function SetArousalMultiplier(Actor actor, float value) global native
 
