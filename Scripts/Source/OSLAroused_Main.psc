@@ -21,6 +21,9 @@ OSLAroused_AdapterOStim Property OStimAdapter Auto
 bool property SexLabAdapterLoaded = false Auto Hidden
 OSLAroused_AdapterSexLab Property SexLabAdapter Auto
 
+bool property SlaStubLoaded = false Auto Hidden
+bool property OArousedStubLoaded = false Auto Hidden
+
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 bool EnableNudityIncreasesArousal = true
@@ -67,9 +70,17 @@ Function OnGameLoaded()
 	RegisterForModEvent("OSLA_ActorArousalUpdated", "OnActorArousalUpdated")
 	RegisterForModEvent("OSLA_ActorNakedUpdated", "OnActorNakedUpdated")
 	
-	SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
-	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnGameLoaded()
+
+    if (Game.GetModByName("SexLabAroused.esm") != 255)
+		SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
+		if(SlaFrameworkStub)
+			SlaStubLoaded = true
+			SlaFrameworkStub.OnGameLoaded()
+		endif
+	endif
+
+	if (Game.GetModByName("OAroused.esp") != 255)
+		OArousedStubLoaded = true
 	endif
 
 	OStimAdapterLoaded = OStimAdapter.LoadAdapter()

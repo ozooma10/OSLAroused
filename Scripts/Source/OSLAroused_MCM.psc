@@ -51,9 +51,24 @@ int BikiniArmorOid
 Keyword BikiniArmorKeyword
 bool BikiniArmorState
 
+int SLAArmorPrettyOid
+Keyword SLAArmorPrettyKeyword
+bool SLAArmorPrettyState
+
+int SLAArmorHalfNakedOid
+Keyword SLAArmorHalfNakedKeyword
+bool SLAArmorHalfNakedState
+
+int SLAArmorSpendexOid
+Keyword SLAArmorSpendexKeyword
+bool SLAArmorSpendexState
+
+int SLAHasStockingsOid
+Keyword SLAHasStockingsKeyword
+bool SLAHasStockingsState
 
 int function GetVersion()
-    return 1
+    return 2
 endfunction
 
 Event OnConfigInit()
@@ -63,12 +78,21 @@ Event OnConfigInit()
     Pages[1] = "Status"
     Pages[2] = "Puppeteer"
     Pages[3] = "Keywords"
-    Pages[4] = "Debug"
+    Pages[4] = "System"
 
+    Debug.Trace("OSLAroused: Config Init")
+EndEvent
+
+Event OnGameLoaded()
+    Debug.Trace("OSLAroused: OnGameLoaded")
     PuppetActor = Game.GetPlayer()
-
+    
 	EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")
 	BikiniArmorKeyword = Keyword.GetKeyword("_SLS_BikiniArmor")
+	SLAArmorPrettyKeyword = Keyword.GetKeyword("SLA_ArmorPretty")
+	SLAArmorHalfNakedKeyword = Keyword.GetKeyword("SLA_ArmorHalfNaked")
+	SLAArmorSpendexKeyword = Keyword.GetKeyword("SLA_ArmorSpendex")
+	SLAHasStockingsKeyword = Keyword.GetKeyword("SLA_HasStockings")
 EndEvent
 
 Event OnPageReset(string page)
@@ -83,8 +107,8 @@ Event OnPageReset(string page)
         PuppeteerPage()
     elseif(page == "Keywords")
         KeywordPage()
-    elseif(page == "Debug")
-        DebugPage()
+    elseif(page == "System")
+        SystemPage()
     endif
 EndEvent
 
@@ -153,15 +177,42 @@ function KeywordPage()
     SetCursorPosition(1)
     EroticArmorOid = AddToggleOption("EroticArmor", false, OPTION_FLAG_DISABLED)
     BikiniArmorOid = AddToggleOption("SLS Bikini Armor", false, OPTION_FLAG_DISABLED)
+    SLAArmorPrettyOid = AddToggleOption("SLA_ArmorPretty", false, OPTION_FLAG_DISABLED)
+    SLAArmorHalfNakedOid = AddToggleOption("SLA_ArmorHalfNaked", false, OPTION_FLAG_DISABLED)
+    SLAArmorSpendexOid = AddToggleOption("SLA_ArmorSpendex", false, OPTION_FLAG_DISABLED)
+    SLAHasStockingsOid = AddToggleOption("SLA_HasStockings", false, OPTION_FLAG_DISABLED)
 endfunction
 
-function DebugPage()
+function SystemPage()
     AddHeaderOption("Native Data")
     DumpArousalData = AddTextOption("Dump Arousal Data", "RUN")
     ;ClearSecondaryArousalData = AddTextOption("Clear Secondary Arousal Data", "RUN")
     ClearAllArousalData = AddTextOption("Clear All Arousal Data", "RUN")
-
     EnableDebugModeOid = AddToggleOption("Enable Debug Logging", Main.EnableDebugMode)
+
+    SetCursorPosition(1)
+    AddHeaderOption("Framework Adapters")
+    If (Main.SexLabAdapterLoaded)
+        AddTextOption("SexLab", "Enabled")
+    Else
+        AddTextOption("SexLab", "Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    If (Main.OStimAdapterLoaded)
+        AddTextOption("OStim", "Enabled")
+    Else
+        AddTextOption("OStim", "Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    AddHeaderOption("Arousal Compatability")
+    If (Main.SlaStubLoaded)
+        AddTextOption("SexLab Aroused", "Enabled")
+    Else
+        AddTextOption("SexLab Aroused", "Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    If (Main.OArousedStubLoaded)
+        AddTextOption("OAroused", "Enabled")
+    Else
+        AddTextOption("OAroused", "Disabled", OPTION_FLAG_DISABLED)
+    EndIf
 endfunction
 
 event OnOptionSelect(int optionId)
@@ -202,8 +253,44 @@ event OnOptionSelect(int optionId)
                 BikiniArmorState = updateSuccess
             endif
             SetToggleOptionValue(BikiniArmorOid, BikiniArmorState)
+        elseif(optionId == SLAArmorPrettyOid)
+            if(SLAArmorPrettyState)
+                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAArmorPrettyKeyword)
+                SLAArmorPrettyState = !removeSuccess ;if remove success fails, indicate keyword still on
+            else
+                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAArmorPrettyKeyword)
+                SLAArmorPrettyState = updateSuccess
+            endif
+            SetToggleOptionValue(SLAArmorPrettyOid, SLAArmorPrettyState)
+        elseif(optionId == SLAArmorHalfNakedOid)
+            if(SLAArmorHalfNakedState)
+                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAArmorHalfNakedKeyword)
+                SLAArmorHalfNakedState = !removeSuccess ;if remove success fails, indicate keyword still on
+            else
+                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAArmorHalfNakedKeyword)
+                SLAArmorHalfNakedState = updateSuccess
+            endif
+            SetToggleOptionValue(SLAArmorHalfNakedOid, SLAArmorHalfNakedState)
+        elseif(optionId == SLAArmorSpendexOid)
+            if(SLAArmorSpendexState)
+                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAArmorSpendexKeyword)
+                SLAArmorSpendexState = !removeSuccess ;if remove success fails, indicate keyword still on
+            else
+                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAArmorSpendexKeyword)
+                SLAArmorSpendexState = updateSuccess
+            endif
+            SetToggleOptionValue(SLAArmorSpendexOid, SLAArmorSpendexState)
+        elseif(optionId == SLAHasStockingsOid)
+            if(SLAHasStockingsState)
+                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAHasStockingsKeyword)
+                SLAHasStockingsState = !removeSuccess ;if remove success fails, indicate keyword still on
+            else
+                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAHasStockingsKeyword)
+                SLAHasStockingsState = updateSuccess
+            endif
+            SetToggleOptionValue(SLAHasStockingsOid, SLAHasStockingsState)
         endif
-    ElseIf(CurrentPage == "Debug")
+    ElseIf(CurrentPage == "System")
         if(optionId == DumpArousalData)
             OSLArousedNative.DumpArousalData()
         elseif(optionId == ClearSecondaryArousalData)
@@ -251,7 +338,7 @@ event OnOptionHighlight(int optionId)
         elseif(optionId == VictimGainsArousalOid)
             SetInfoText("Victim gains arousal in scenes")
         EndIf
-    elseif(CurrentPage == "Debug")
+    elseif(CurrentPage == "System")
         if(optionId == DumpArousalData)
             SetInfoText("Dump all stored arousal data to SKSE log file")
         elseif(optionId == ClearSecondaryArousalData)
@@ -410,7 +497,6 @@ function LoadArmorList()
     while(index < numItems && foundItemIndex < 128)
         Armor armorItem = player.GetNthForm(index) as Armor
         if(armorItem)
-            Debug.Trace("Found: " + armorItem.GetName())
             FoundArmorNames[foundItemIndex] = armorItem.GetName()
             FoundArmorIds[foundItemIndex] = index
             foundItemIndex += 1
@@ -427,24 +513,27 @@ function ArmorSelected()
     if(!SelectedArmor)
         return
     endif
-    
-    if(EroticArmorKeyword)
-        SetOptionFlags(EroticArmorOid, OPTION_FLAG_NONE)
-        EroticArmorState = SelectedArmor.HasKeyword(EroticArmorKeyword)
-        SetToggleOptionValue(EroticArmorOid, EroticArmorState)
-    else
-        SetToggleOptionValue(EroticArmorOid, false)
-    endif
 
-    if(BikiniArmorKeyword)
-        SetOptionFlags(BikiniArmorOid, OPTION_FLAG_NONE)
-        BikiniArmorState = SelectedArmor.HasKeyword(BikiniArmorKeyword)
-        SetToggleOptionValue(BikiniArmorOid, BikiniArmorState)
-    else
-        SetToggleOptionValue(BikiniArmorOid, false)
-    endif
+    EroticArmorState = CheckKeyword(EroticArmorKeyword, EroticArmorOid)
+    BikiniArmorState = CheckKeyword(BikiniArmorKeyword, BikiniArmorOid)
+    SLAArmorPrettyState = CheckKeyword(SLAArmorPrettyKeyword, SLAArmorPrettyOid)
+    SLAArmorHalfNakedState = CheckKeyword(SLAArmorHalfNakedKeyword, SLAArmorHalfNakedOid)
+    SLAArmorSpendexState = CheckKeyword(SLAArmorSpendexKeyword, SLAArmorSpendexOid)
+    SLAHasStockingsState = CheckKeyword(SLAHasStockingsKeyword, SLAHasStockingsOid)
 endfunction
 
+bool function CheckKeyword(Keyword armorKeyword, int oid)
+    bool keywordEnabled
+    if(armorKeyword)
+        SetOptionFlags(oid, OPTION_FLAG_NONE)
+        keywordEnabled = SelectedArmor.HasKeyword(armorKeyword)
+        SetToggleOptionValue(oid, keywordEnabled)
+    else
+        SetToggleOptionValue(oid, false)
+    endif
+
+    return keywordEnabled
+endfunction
 
 function Log(string msg) global
     Debug.Trace("---OSLAroused--- [MCM] " + msg)
