@@ -10,14 +10,19 @@ int CheckArousalKeyOid
 int EnableStatBuffsOid
 int EnableNudityCheckOid
 int HourlyNudityArousalModOid
+int HourlySceneParticipantArousalModOid
+int HourlySceneViewerArousalModOid
 
 int EnableDebugModeOid
 
-int StageChangeIncreasesArousalOid
 int VictimGainsArousalOid
 
 ; OStim Specific Settings
 int Property RequireLowArousalToEndSceneOid Auto
+
+; Sexlab Specfic Settings
+int StageChangeIncreasesArousalOid
+int SexlabStageChangeArousalGainOid
 
 ;---- Puppet Properties ----
 Actor Property PuppetActor Auto
@@ -88,7 +93,8 @@ function MainLeftColumn()
     EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
 
     AddHeaderOption("Scene Settings")
-    StageChangeIncreasesArousalOid = AddToggleOption("Stage change Increases Arousal", Main.StageChangeIncreasesArousal)
+    HourlySceneParticipantArousalModOid = AddSliderOption("Hourly Arousal From Participating", Main.GetHourlySceneParticipantArousalModifier(), "{1}")
+    HourlySceneViewerArousalModOid = AddSliderOption("Hourly Arousal From Spectating", Main.GetHourlySceneViewerArousalModifier(), "{1}")
     VictimGainsArousalOid = AddToggleOption("Victim Gains Arousal", Main.VictimGainsArousal)
 
 endfunction
@@ -100,6 +106,10 @@ function MainRightColumn()
 
     AddHeaderOption("OStim Settings")
     RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", Main.RequireLowArousalToEndScene)
+
+    AddHeaderOption("Sexlab Settings")
+    StageChangeIncreasesArousalOid = AddToggleOption("Stage change Increases Arousal", Main.SexlabStageChangeIncreasesArousal)
+    SexlabStageChangeArousalGainOid = AddSliderOption("Stage Change Arousal Gain", Main.SexlabStageChangeArousalGain, "{1}")
 endfunction
 
 function StatusPage()
@@ -125,8 +135,6 @@ function PuppeteerPage()
         AddHeaderOption("No Target Selected")
         return
     endif
-
-    AddEmptyOption()
     AddHeaderOption(PuppetActor.GetLeveledActorBase().GetName())
 
     float exposure = OSLArousedNative.GetExposure(PuppetActor)
@@ -169,8 +177,8 @@ event OnOptionSelect(int optionId)
             Main.RequireLowArousalToEndScene = !Main.RequireLowArousalToEndScene 
             SetToggleOptionValue(RequireLowArousalToEndSceneOid, Main.RequireLowArousalToEndScene)
         elseif (optionId == StageChangeIncreasesArousalOid)
-            Main.StageChangeIncreasesArousal = !Main.StageChangeIncreasesArousal
-            SetToggleOptionValue(StageChangeIncreasesArousalOid, Main.StageChangeIncreasesArousal)
+            Main.SexlabStageChangeIncreasesArousal = !Main.SexlabStageChangeIncreasesArousal
+            SetToggleOptionValue(StageChangeIncreasesArousalOid, Main.SexlabStageChangeIncreasesArousal)
         elseif (optionId == VictimGainsArousalOid)
             Main.VictimGainsArousal = !Main.VictimGainsArousal
             SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
@@ -228,12 +236,18 @@ event OnOptionHighlight(int optionId)
             SetInfoText("If Enabled, Player Nudity will increase nearby NPC arrousal")
         elseif(optionId == HourlyNudityArousalModOid)
             SetInfoText("Arousal Gained per hour when observing a nude character.")
+        elseif(optionId == HourlySceneParticipantArousalModOid)
+            SetInfoText("Arousal Gained per hour when participating in a sex scene.")
+        elseif(optionId == HourlySceneViewerArousalModOid)
+            SetInfoText("Arousal Gained per hour for spectators of a sex scene.")
         elseif(optionId == EnableStatBuffsOid)
             SetInfoText("Will Enable Arousal based Stat Buffs")
         elseif(optionId == RequireLowArousalToEndSceneOid)
             SetInfoText("OStim Scene will not end until Participant arousal is low")
         elseif(optionId == StageChangeIncreasesArousalOid)
             SetInfoText("Changing Scene stage increases participant arousal")
+        elseif(optionId == SexlabStageChangeArousalGainOid)
+            SetInfoText("Arousal gained when sexlab stage changes")
         elseif(optionId == VictimGainsArousalOid)
             SetInfoText("Victim gains arousal in scenes")
         EndIf
@@ -273,7 +287,22 @@ event OnOptionSliderOpen(int option)
         if(option == HourlyNudityArousalModOid)
             SetSliderDialogStartValue(Main.GetHourlyNudityArousalModifier())
             SetSliderDialogDefaultValue(20.0)
-            SetSliderDialogRange(0, 50)
+            SetSliderDialogRange(0, 100)
+            SetSliderDialogInterval(0.1)
+        elseif(option == HourlySceneParticipantArousalModOid)
+            SetSliderDialogStartValue(Main.GetHourlySceneParticipantArousalModifier())
+            SetSliderDialogDefaultValue(20.0)
+            SetSliderDialogRange(0, 100)
+            SetSliderDialogInterval(0.1)
+        elseif(option == HourlySceneViewerArousalModOid)
+            SetSliderDialogStartValue(Main.GetHourlySceneViewerArousalModifier())
+            SetSliderDialogDefaultValue(20.0)
+            SetSliderDialogRange(0, 100)
+            SetSliderDialogInterval(0.1)
+        elseif(option == SexlabStageChangeArousalGainOid)
+            SetSliderDialogStartValue(Main.SexlabStageChangeArousalGain)
+            SetSliderDialogDefaultValue(3.0)
+            SetSliderDialogRange(0, 10)
             SetSliderDialogInterval(0.1)
         endif
     elseif(CurrentPage == "Puppeteer")
@@ -305,6 +334,15 @@ event OnOptionSliderAccept(int option, float value)
         if(option == HourlyNudityArousalModOid)
             Main.SetHourlyNudityArousalModifier(value)
             SetSliderOptionValue(HourlyNudityArousalModOid, value, "{1}")
+        elseif(option == HourlySceneParticipantArousalModOid)
+            Main.SetHourlySceneParticipantArousalModifier(value)
+            SetSliderOptionValue(HourlySceneParticipantArousalModOid, value, "{1}")
+        elseif(option == HourlySceneViewerArousalModOid)
+            Main.SetHourlySceneViewerArousalModifier(value)
+            SetSliderOptionValue(HourlySceneViewerArousalModOid, value, "{1}")
+        elseif(option == SexlabStageChangeArousalGainOid)
+            Main.SexlabStageChangeArousalGain = value
+            SetSliderOptionValue(SexlabStageChangeArousalGainOid, value, "{1}")
         endif
     elseif(currentPage == "Puppeteer")
         if(option == SetArousalOid)
@@ -325,6 +363,15 @@ event OnOptionDefault(int option)
         if(option == HourlyNudityArousalModOid)
             Main.SetHourlyNudityArousalModifier(20.0)
             SetSliderOptionValue(HourlyNudityArousalModOid, 20.0, "{1}")
+        elseif(option == HourlySceneParticipantArousalModOid)
+            Main.SetHourlySceneParticipantArousalModifier(20.0)
+            SetSliderOptionValue(HourlySceneParticipantArousalModOid, 20.0, "{1}")
+        elseif(option == HourlySceneViewerArousalModOid)
+            Main.SetHourlySceneViewerArousalModifier(20.0)
+            SetSliderOptionValue(HourlySceneViewerArousalModOid, 20.0, "{1}")
+        elseif(option == SexlabStageChangeArousalGainOid)
+            Main.SexlabStageChangeArousalGain = 3.0
+            SetSliderOptionValue(SexlabStageChangeArousalGainOid, 3.0, "{1}")
         endif
     elseif(currentPage == "Puppeteer")
         if(option == SetArousalOid)

@@ -60,7 +60,7 @@ event OnAnimationEnd(int tid, bool hasPlayer)
 endevent
 
 Event OnStageStart(int tid, bool HasPlayer)
-    If (!Main.StageChangeIncreasesArousal)
+    If (!Main.SexlabStageChangeIncreasesArousal)
         return
     EndIf
 
@@ -82,13 +82,13 @@ Event OnStageStart(int tid, bool HasPlayer)
     endif
 
     if(Main.VictimGainsArousal || controller.Victims.Length == 0)
-        OSLAroused_ModInterface.ModifyArousalMultiple(actors, 1, "sexlab scene change")
+        OSLAroused_ModInterface.ModifyArousalMultiple(actors, Main.SexlabStageChangeArousalGain, "sexlab scene change")
     else
         int i = actors.Length
         while(i > 0)
             i -= 1
             If (!controller.IsVictim(actors[i]))
-                OSLAroused_ModInterface.ModifyArousal(actors[i], 1, "sexlab scene change")
+                OSLAroused_ModInterface.ModifyArousal(actors[i], Main.SexlabStageChangeArousalGain, "sexlab scene change")
             EndIf
         endwhile
     endif

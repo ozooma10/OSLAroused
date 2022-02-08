@@ -26,15 +26,21 @@ int CheckArousalKey = 157
 bool EnableNudityIncreasesArousal = true
 float HourlyNudityArousalModifier = 20.0
 bool Property EnableArousalStatBuffs = true Auto
-float DefaultArousalMultiplier = 1.0
+float DefaultArousalMultiplier = 2.0
 
-bool Property StageChangeIncreasesArousal = true Auto
+float HourlySceneParticipantArousalModifier = 20.0
+float HourlySceneViewerArousalModifier = 20.0
+
 bool Property VictimGainsArousal = false Auto
 
 bool Property EnableDebugMode = true Auto
 
 ; OStim Specific
 bool Property RequireLowArousalToEndScene Auto
+
+; Sexlab Specific
+bool Property SexlabStageChangeIncreasesArousal = true Auto
+float Property SexlabStageChangeArousalGain = 3.0 Auto
 
 ; ============ SPELLS =============
 ;OAroused Spells
@@ -78,7 +84,9 @@ Function OnGameLoaded()
 	; Need to notify skse dll whether to check for player nudity
 	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
-	
+	OSLArousedNative.UpdateHourlySceneParticipantArousalModifier(HourlySceneParticipantArousalModifier)
+	OSLArousedNative.UpdateHourlySceneViewerArousalModifier(HourlySceneViewerArousalModifier)
+
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
 		ApplyArousedEffects()
@@ -104,7 +112,7 @@ event OnActorArousalUpdated(string eventName, string strArg, float newExposure, 
 	float lastOrgasmArousal = OSLArousedNative.GetLastOrgasmFrustrationArousal(act)
 	float newArousal = newExposure + lastOrgasmArousal
 
-	Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
+	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
@@ -192,7 +200,16 @@ Event OnKeyDown(int keyCode)
 		return 
 	endif
 	if keyCode == CheckArousalKey
+		
+		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
 		ArousalBar.DisplayBarWithAutohide(10.0)
+		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+		If (crosshairTarget != none)
+			Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
+			OSLAroused_MCM.Get().PuppetActor = crosshairTarget
+		Else
+			OSLAroused_MCM.Get().PuppetActor = PlayerRef
+		EndIf
 	endif 	
 EndEvent
 
@@ -214,6 +231,14 @@ float function GetHourlyNudityArousalModifier()
 	return HourlyNudityArousalModifier
 endfunction
 
+float function GetHourlySceneParticipantArousalModifier()
+	return HourlySceneParticipantArousalModifier
+endfunction
+
+float function GetHourlySceneViewerArousalModifier()
+	return HourlySceneViewerArousalModifier
+endfunction
+
 function SetDefaultArousalMultiplier(float newVal)
 	if(newVal < 0 || newVal > 10)
 		return
@@ -229,8 +254,17 @@ endfunction
 
 function SetHourlyNudityArousalModifier(float newVal)
 	HourlyNudityArousalModifier = newVal
-	log("Update Hourly: " + newVal)
 	OSLArousedNative.UpdateHourlyNudityArousalModifier(newVal)
+endfunction
+
+function SetHourlySceneParticipantArousalModifier(float newVal)
+	HourlySceneParticipantArousalModifier = newVal
+	OSLArousedNative.UpdateHourlySceneParticipantArousalModifier(newVal)
+endfunction
+
+function SetHourlySceneViewerArousalModifier(float newVal)
+	HourlySceneViewerArousalModifier = newVal
+	OSLArousedNative.UpdateHourlySceneViewerArousalModifier(newVal)
 endfunction
 
 function SetShowArousalKeybind(int newKey)

@@ -72,6 +72,11 @@ function UpdateHourlyNudityArousalModifier(float arousalMod) global native
 ;Sets Which arousal mode to use
 function UpdateDefaultArousalMultiplier(float newMultiplier) global native
 
+;Sets Amount to increase arousal per game hour for players in scene
+function UpdateHourlySceneParticipantArousalModifier(float arousalMod) global native
+
+;Sets Amount to increase arousal per game hour for spectators of a scene
+function UpdateHourlySceneViewerArousalModifier(float arousalMod) global native
 
 ; ==================== KEYWORDS =========================
 
