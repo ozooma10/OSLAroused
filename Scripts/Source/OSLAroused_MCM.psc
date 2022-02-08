@@ -32,10 +32,12 @@ int Property SetTimeRateOid Auto
 
 float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
-;------ Debug Properties -------
+;------ System Properties -------
 int DumpArousalData
 int ClearSecondaryArousalData
 int ClearAllArousalData
+
+int SLAStubLoadedOid
 
 ;------ Keywords -------
 int ArmorListMenuOid
@@ -198,10 +200,12 @@ function SystemPage()
         AddTextOption("OStim", "Disabled", OPTION_FLAG_DISABLED)
     EndIf
     AddHeaderOption("Arousal Compatability")
-    If (Main.SlaStubLoaded)
+    If (Main.InvalidSlaFound)
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Invalid Install")
+    ElseIf (Main.SlaStubLoaded)
         AddTextOption("SexLab Aroused", "Enabled")
     Else
-        AddTextOption("SexLab Aroused", "Disabled", OPTION_FLAG_DISABLED)
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Disabled", OPTION_FLAG_DISABLED)
     EndIf
     If (Main.OArousedStubLoaded)
         AddTextOption("OAroused", "Enabled")
@@ -340,6 +344,12 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Clear NPC Arousal data from Save (This Maintains Player/Unique Data)")
         elseif(optionId == ClearAllArousalData)
             SetInfoText("Clear All Arousal data from Save")
+        elseif(optionId == SLAStubLoadedOid)
+            If (Main.InvalidSlaFound)
+                SetInfoText("Incorrect SexlabAroused.esm or slaFrameworkScr.pex detected. Ensure SLA is not installed and OSL Aroused overwrites all conflicts.")
+            elseif(!Main.SlaStubLoaded)
+                SetInfoText("SexlabAroused.esm is disabled or missing. SLA backwards compatibility is disabled.")
+            EndIf
         endif
     EndIf
 endevent

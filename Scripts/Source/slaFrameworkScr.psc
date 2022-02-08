@@ -8,6 +8,8 @@ Faction slaArousalFaction
 Faction slaExposureFaction
 Faction slaNakedFaction
 
+bool Property IsOSLArousedStub = true Auto
+
 function OnGameLoaded()
     slaArousalFaction = Game.GetFormFromFile(0x3FC36, "SexLabAroused.esm") as Faction
     slaArousal = slaArousalFaction
