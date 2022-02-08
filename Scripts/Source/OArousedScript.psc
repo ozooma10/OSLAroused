@@ -3,6 +3,8 @@ ScriptName OArousedScript Extends Quest
 
 float Property ScanDistance = 5120.0 AutoReadOnly
 
+bool Property IsOSLArousedStub = true Auto
+
 oarousedscript Function GetOAroused() Global
 	return game.GetFormFromFile(0x806, "OSLAroused.esp") as OArousedScript
 EndFunction

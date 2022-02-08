@@ -38,6 +38,7 @@ int ClearSecondaryArousalData
 int ClearAllArousalData
 
 int SLAStubLoadedOid
+int OArousedStubLoadedOid
 
 ;------ Keywords -------
 int ArmorListMenuOid
@@ -205,12 +206,14 @@ function SystemPage()
     ElseIf (Main.SlaStubLoaded)
         AddTextOption("SexLab Aroused", "Enabled")
     Else
-        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Disabled", OPTION_FLAG_DISABLED)
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Disabled")
     EndIf
-    If (Main.OArousedStubLoaded)
+    If (Main.InvalidOArousedFound)
+        OArousedStubLoadedOid = AddTextOption("OAroused", "Invalid Install")
+    elseIf (Main.OArousedStubLoaded)
         AddTextOption("OAroused", "Enabled")
     Else
-        AddTextOption("OAroused", "Disabled", OPTION_FLAG_DISABLED)
+        OArousedStubLoadedOid = AddTextOption("OAroused", "Disabled")
     EndIf
 endfunction
 
@@ -349,6 +352,12 @@ event OnOptionHighlight(int optionId)
                 SetInfoText("Incorrect SexlabAroused.esm or slaFrameworkScr.pex detected. Ensure SLA is not installed and OSL Aroused overwrites all conflicts.")
             elseif(!Main.SlaStubLoaded)
                 SetInfoText("SexlabAroused.esm is disabled or missing. SLA backwards compatibility is disabled.")
+            EndIf
+        elseif(optionId == OArousedStubLoadedOid)
+            If (Main.InvalidOArousedFound)
+                SetInfoText("Incorrect OAroused.esp or OArousedScript.pex detected. Ensure OAroused is not installed and OSL Aroused overwrites all conflicts.")
+            elseif(!Main.OArousedStubLoaded)
+                SetInfoText("OAroused.esp is disabled or missing. OAroused backwards compatibility is disabled.")
             EndIf
         endif
     EndIf

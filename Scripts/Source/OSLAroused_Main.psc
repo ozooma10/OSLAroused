@@ -23,6 +23,7 @@ OSLAroused_AdapterSexLab Property SexLabAdapter Auto
 
 bool property InvalidSlaFound = false Auto Hidden
 bool property SlaStubLoaded = false Auto Hidden
+bool property InvalidOArousedFound = false Auto Hidden
 bool property OArousedStubLoaded = false Auto Hidden
 
 ; ============ SETTINGS ============
@@ -73,6 +74,9 @@ Function OnGameLoaded()
 
 	SlaStubLoaded = false
 	OArousedStubLoaded = false
+	InvalidSlaFound = false
+	InvalidOArousedFound = false
+	SlaFrameworkStub = none
     if (Game.GetModByName("SexLabAroused.esm") != 255)
 		SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
 		if(SlaFrameworkStub && SlaFrameworkStub.IsOSLArousedStub)
@@ -81,11 +85,16 @@ Function OnGameLoaded()
 		else
 			SlaFrameworkStub = none
 			InvalidSlaFound = true
-			Debug.MessageBox("[OSL Aroused]: Non-OSLAroused Provided SexLabAroused.esm Detected. Do not Install any version of SexLab Aroused, And ensure OSLAroused overwrites esm and slaFrameworkScr.psc")
+			Debug.MessageBox("[OSL Aroused]: Non-OSLAroused SexLabAroused.esm Detected. Do not Install any version of SexLab Aroused, And ensure OSLAroused overwrites esm and slaFrameworkScr.psc")
 		endif
 	endif
 	if (Game.GetModByName("OAroused.esp") != 255)
-		OArousedStubLoaded = true
+		If (OArousedScript.GetOAroused().IsOSLArousedStub)
+			OArousedStubLoaded = true
+		else
+			InvalidOArousedFound = true
+			Debug.MessageBox("[OSL Aroused]: Non-OSLAroused OAroused.esp Detected. Do not Install any version of OAroused, And ensure OAroused overwrites esp and OArousedScript.psc")
+		EndIf
 	endif
 
 	OStimAdapterLoaded = OStimAdapter.LoadAdapter()
