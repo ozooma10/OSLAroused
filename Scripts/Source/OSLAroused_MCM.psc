@@ -68,11 +68,11 @@ Keyword SLAHasStockingsKeyword
 bool SLAHasStockingsState
 
 int function GetVersion()
-    return 2
+    return 2 ; 0.1.1
 endfunction
 
-Event OnConfigInit()
-    ModName = "OSLAroused"
+Event OnGameLoaded()
+    ModName = "OSL Aroused"
     Pages = new String[5]
     Pages[0] = "General Settings"
     Pages[1] = "Status"
@@ -80,11 +80,6 @@ Event OnConfigInit()
     Pages[3] = "Keywords"
     Pages[4] = "System"
 
-    Debug.Trace("OSLAroused: Config Init")
-EndEvent
-
-Event OnGameLoaded()
-    Debug.Trace("OSLAroused: OnGameLoaded")
     PuppetActor = Game.GetPlayer()
     
 	EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")

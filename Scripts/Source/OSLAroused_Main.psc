@@ -69,7 +69,6 @@ EndEvent
 Function OnGameLoaded()
 	RegisterForModEvent("OSLA_ActorArousalUpdated", "OnActorArousalUpdated")
 	RegisterForModEvent("OSLA_ActorNakedUpdated", "OnActorNakedUpdated")
-	
 
     if (Game.GetModByName("SexLabAroused.esm") != 255)
 		SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
@@ -88,6 +87,8 @@ Function OnGameLoaded()
 
 	SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
 	Log("SexLab IntegrationStatus: " + SexLabAdapterLoaded)
+
+	OSLAroused_MCM.Get().OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 
