@@ -4,6 +4,7 @@ Scriptname slaFrameworkScr extends Quest
 Faction Property slaArousal Auto
 Faction Property slaExposure Auto
 
+slaMainScr Property slaMain Auto
 slaConfigScr Property slaConfig Auto
 
 Faction slaArousalFaction
@@ -12,7 +13,10 @@ Faction slaNakedFaction
 
 bool Property IsOSLArousedStub = true Auto
 
+Int Property slaArousalCap = 100 AutoReadOnly
+
 function OnGameLoaded()
+    slaMain = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaMainScr
     slaConfig = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaConfigScr
 
     slaArousalFaction = Game.GetFormFromFile(0x3FC36, "SexLabAroused.esm") as Faction
@@ -58,6 +62,14 @@ Float Function GetActorTimeRate(Actor akRef)
         return -2.0
     endif
     return OSLAroused_ModInterface.GetActorTimeRate(akRef)
+EndFunction
+
+Float Function SetActorTimeRate(Actor akRef, Float val)
+    if(akRef == none)
+        return -2.0
+    endif
+
+    return OSLAroused_ModInterface.SetActorTimeRate(akRef, val)
 EndFunction
 
 Float Function UpdateActorTimeRate(Actor akRef, Float val)
@@ -135,6 +147,15 @@ Float Function GetActorDaysSinceLastOrgasm(Actor akRef)
     return OSLAroused_ModInterface.GetActorDaysSinceLastOrgasm(akRef)
 EndFunction
 
+;@TODO: Dont use Orgasm :(
+Int Function GetActorHoursSinceLastSex(Actor akRef)
+	If (akRef == None)
+		return -2
+	EndIf
+	
+    return (OSLAroused_ModInterface.GetActorDaysSinceLastOrgasm(akRef) * 24) as Int
+EndFunction
+
 ;Send an updatecomplete event every 120 seconds
 ;Since OSLAroused update cycle occurs outside of Papyrus and not "Heartbeat" based like in sla, nothing really to bind to
 Event OnUpdate()
@@ -159,6 +180,10 @@ endfunction
 bool Function IsActorExhibitionist(Actor akRef)
     return false
 endfunction
+
+Function SetGenderPreference(Actor akRef, Int gender)
+    return
+endfunction 
 
 function Log(string msg) global
     Debug.Trace("----OSLAroused---- [slaFrameworkScr] - " + msg)

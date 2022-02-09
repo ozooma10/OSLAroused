@@ -4,3 +4,5 @@ skyrimse.ppj
 .vscode/tasks.json
 meta.ini
 *.pex
+SKSE/Plugins/OSLAroused_SKSE.dll
+SKSE/Plugins/OSLAroused_SKSE.pdb

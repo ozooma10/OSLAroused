@@ -53,6 +53,10 @@ float function GetActorTimeRate(Actor target) global
     return OSLArousedNative.GetTimeRate(target)
 endfunction
 
+float function SetActorTimeRate(Actor target, float value) global
+    return OSLArousedNative.SetTimeRate(target, value)
+endfunction
+
 float function ModifyActorTimeRate(Actor target, float value) global
     return OSLArousedNative.ModifyTimeRate(target, value)
 endfunction

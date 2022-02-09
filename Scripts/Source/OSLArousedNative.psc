@@ -43,7 +43,7 @@ float function GetDaysSinceLastOrgasm(Actor actor) global native
 float function GetLastOrgasmFrustrationArousal(Actor actor) global native
 
 ;sets to val
-function SetTimeRate(Actor actor, float value) global native
+float function SetTimeRate(Actor actor, float value) global native
 
 ;Modifies by amount
 float function ModifyTimeRate(Actor actor, float value) global native
