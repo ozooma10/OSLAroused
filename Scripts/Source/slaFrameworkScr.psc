@@ -4,6 +4,8 @@ Scriptname slaFrameworkScr extends Quest
 Faction Property slaArousal Auto
 Faction Property slaExposure Auto
 
+slaConfigScr Property slaConfig Auto
+
 Faction slaArousalFaction
 Faction slaExposureFaction
 Faction slaNakedFaction
@@ -11,6 +13,8 @@ Faction slaNakedFaction
 bool Property IsOSLArousedStub = true Auto
 
 function OnGameLoaded()
+    slaConfig = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaConfigScr
+
     slaArousalFaction = Game.GetFormFromFile(0x3FC36, "SexLabAroused.esm") as Faction
     slaArousal = slaArousalFaction
     slaExposureFaction = Game.GetFormFromFile(0x25837, "SexLabAroused.esm") as Faction
@@ -49,6 +53,20 @@ float Function GetActorExposureRate(Actor akRef)
     return OSLAroused_ModInterface.GetArousalMultiplier(akRef)
 EndFunction
 
+Float Function GetActorTimeRate(Actor akRef)
+    if(akRef == none)
+        return -2.0
+    endif
+    return OSLAroused_ModInterface.GetActorTimeRate(akRef)
+EndFunction
+
+Float Function UpdateActorTimeRate(Actor akRef, Float val)
+    if(akRef == none)
+        return -2.0
+    endif
+    return OSLAroused_ModInterface.ModifyActorTimeRate(akRef, val)
+EndFunction
+
 ;Additive exposure
 Int Function UpdateActorExposure(Actor act, Int modVal, String debugMsg = "")
     return OSLAroused_ModInterface.ModifyArousal(act, modVal, "slaframework UpdateActorExposure") as Int
@@ -60,6 +78,14 @@ Int Function SetActorExposure(Actor akRef, Int val)
     endif
     return OSLAroused_ModInterface.SetArousal(akRef, val) as int
 EndFunction
+
+Float Function SetActorExposureRate(Actor akRef, Float val)
+    if(akRef == none)
+        return -2.0
+    endif
+    return OSLAroused_ModInterface.SetArousalMultiplier(akRef, val, "slaframework SetActorExposureRate")
+EndFunction
+
 
 ;Additive exposure rate
 float function UpdateActorExposureRate(Actor akRef, float val)

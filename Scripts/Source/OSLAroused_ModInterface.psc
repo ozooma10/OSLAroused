@@ -30,6 +30,11 @@ function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = 
     OSLArousedNative.ModifyArousalMultiple(actorArray, value)
 endfunction
 
+float function SetArousalMultiplier(Actor target, float value, string reason = "unspecified") global
+    Log("SetArousalMultiplier: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
+    return OSLArousedNative.SetArousalMultiplier(target, value)
+endfunction
+
 float function ModifyArousalMultiplier(Actor target, float value, string reason = "unspecified") global
     Log("ModifyArousalMultiplier: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
     return OSLArousedNative.ModifyArousalMultiplier(target, value)
@@ -42,6 +47,14 @@ endfunction
 
 float function GetActorDaysSinceLastOrgasm(Actor target) global
     return OSLArousedNative.GetDaysSinceLastOrgasm(target)
+endfunction
+
+float function GetActorTimeRate(Actor target) global
+    return OSLArousedNative.GetTimeRate(target)
+endfunction
+
+float function ModifyActorTimeRate(Actor target, float value) global
+    return OSLArousedNative.ModifyTimeRate(target, value)
 endfunction
 
 function Log(string msg) global

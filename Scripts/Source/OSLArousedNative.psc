@@ -27,7 +27,7 @@ function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 float function ModifyArousalMultiplier(Actor actor, float value) global native
 
 ;Sets the arousal multiplier for a given actor
-function SetArousalMultiplier(Actor actor, float value) global native
+float function SetArousalMultiplier(Actor actor, float value) global native
 
 ;Gets the actors current arousal multiplier
 float function GetArousalMultiplier(Actor actor) global native
@@ -42,7 +42,11 @@ float function GetDaysSinceLastOrgasm(Actor actor) global native
 ;Gets the amount of arousal added on top of exposure based off last orgasm date
 float function GetLastOrgasmFrustrationArousal(Actor actor) global native
 
+;sets to val
 function SetTimeRate(Actor actor, float value) global native
+
+;Modifies by amount
+float function ModifyTimeRate(Actor actor, float value) global native
 
 ;Gets the Actors current time rate
 float function GetTimeRate(Actor actor) global native
