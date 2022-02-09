@@ -74,14 +74,25 @@ int function GetVersion()
     return 2 ; 0.1.1
 endfunction
 
-Event OnGameLoaded()
-    ModName = "OSL Aroused"
+Event OnConfigInit()
+    ModName = "OSLAroused"
+
     Pages = new String[5]
     Pages[0] = "General Settings"
     Pages[1] = "Status"
     Pages[2] = "Puppeteer"
     Pages[3] = "Keywords"
     Pages[4] = "System"
+EndEvent
+
+Event OnVersionUpdate(Int NewVersion)
+    If (CurrentVersion != 0)
+        OnConfigInit()
+    EndIf
+EndEvent
+
+Event OnGameLoaded()
+    parent.OnGameReload()
 
     PuppetActor = Game.GetPlayer()
     
