@@ -16,8 +16,8 @@ bool Property IsOSLArousedStub = true Auto
 Int Property slaArousalCap = 100 AutoReadOnly
 
 function OnGameLoaded()
-    slaMain = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaMainScr
-    slaConfig = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaConfigScr
+    slaMain = Game.GetFormFromFile(0x42D62, "SexLabAroused.esm") as slaMainScr
+    slaConfig = Game.GetFormFromFile(0x1C6E0, "SexLabAroused.esm") as slaConfigScr
 
     slaArousalFaction = Game.GetFormFromFile(0x3FC36, "SexLabAroused.esm") as Faction
     slaArousal = slaArousalFaction
