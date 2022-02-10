@@ -8,3 +8,5 @@ SKSE/Plugins/OSLAroused_SKSE.dll
 SKSE/Plugins/OSLAroused_SKSE.pdb
 SKSE/Plugins/OSLAroused_SKSE.pdb
 SKSE/Plugins/OSLAroused_SKSE.dll
+OSLAroused FOMOD/00 Data/*
+OSLAroused FOMOD/DLL/*
