@@ -28,6 +28,7 @@ bool property OArousedStubLoaded = false Auto Hidden
 
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
+int ToggleArousalBarKey = 157
 bool EnableNudityIncreasesArousal = true
 float HourlyNudityArousalModifier = 20.0
 bool Property EnableArousalStatBuffs = true Auto
@@ -106,6 +107,7 @@ Function OnGameLoaded()
 	OSLAroused_MCM.Get().OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
+	RegisterForKey(ToggleArousalBarKey)
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
@@ -229,7 +231,9 @@ Event OnKeyDown(int keyCode)
 	if keyCode == CheckArousalKey
 		
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
-		ArousalBar.DisplayBarWithAutohide(10.0)
+		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
+			ArousalBar.UpdateDisplay()
+		endif
 		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
 		If (crosshairTarget != none)
 			Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
@@ -237,13 +241,20 @@ Event OnKeyDown(int keyCode)
 		Else
 			OSLAroused_MCM.Get().PuppetActor = PlayerRef
 		EndIf
-	endif 	
+	endif
+	If (keyCode == ToggleArousalBarKey && ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Toggle)
+		ArousalBar.UpdateDisplay()
+	EndIf
 EndEvent
 
 
 ; ========= SETTINGS UPDATE =================
 int function GetShowArousalKeybind()
 	return CheckArousalKey
+endfunction
+
+int function GetToggleArousalBarKeybind()
+	return ToggleArousalBarKey
 endfunction
 
 float function GetDefaultArousalMultiplier()
@@ -297,6 +308,12 @@ endfunction
 function SetShowArousalKeybind(int newKey)
 	UnregisterForKey(CheckArousalKey)
 	CheckArousalKey = newKey
+	RegisterForKey(newKey)
+endfunction
+
+function SetToggleArousalBarKeybind(int newKey)
+	UnregisterForKey(ToggleArousalBarKey)
+	ToggleArousalBarKey = newKey
 	RegisterForKey(newKey)
 endfunction
 

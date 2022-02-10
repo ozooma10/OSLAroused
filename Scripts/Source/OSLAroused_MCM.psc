@@ -32,6 +32,13 @@ int Property SetTimeRateOid Auto
 
 float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
+;------- UI Page ---------
+int ArousalBarXOid
+int ArousalBarYOid
+int ArousalBarDisplayModeOid
+string[] ArousalBarDisplayModeNames
+int ArousalBarToggleKeyOid
+
 ;------ System Properties -------
 int DumpArousalData
 int ClearSecondaryArousalData
@@ -71,18 +78,25 @@ Keyword SLAHasStockingsKeyword
 bool SLAHasStockingsState
 
 int function GetVersion()
-    return 2 ; 0.1.1
+    return 3 ; 0.1.4
 endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
 
-    Pages = new String[5]
+    Pages = new String[6]
     Pages[0] = "General Settings"
     Pages[1] = "Status"
     Pages[2] = "Puppeteer"
     Pages[3] = "Keywords"
-    Pages[4] = "System"
+    Pages[4] = "UI"
+    Pages[5] = "System"
+
+    ArousalBarDisplayModeNames = new String[4]
+    ArousalBarDisplayModeNames[0] = "Always Off"
+    ArousalBarDisplayModeNames[1] = "Fade"
+    ArousalBarDisplayModeNames[2] = "Toggle Showing"
+    ArousalBarDisplayModeNames[3] = "Always On"
 EndEvent
 
 Event OnVersionUpdate(Int NewVersion)
@@ -116,6 +130,8 @@ Event OnPageReset(string page)
         PuppeteerPage()
     elseif(page == "Keywords")
         KeywordPage()
+    elseif(page == "UI")
+        UIPage()
     elseif(page == "System")
         SystemPage()
     endif
@@ -190,6 +206,15 @@ function KeywordPage()
     SLAArmorHalfNakedOid = AddToggleOption("SLA_ArmorHalfNaked", false, OPTION_FLAG_DISABLED)
     SLAArmorSpendexOid = AddToggleOption("SLA_ArmorSpendex", false, OPTION_FLAG_DISABLED)
     SLAHasStockingsOid = AddToggleOption("SLA_HasStockings", false, OPTION_FLAG_DISABLED)
+endfunction
+
+function UIPage()
+    AddHeaderOption("Arousal Bar")
+    ArousalBarXOid = AddSliderOption("X Pos", Main.ArousalBar.X)
+    ArousalBarYOid = AddSliderOption("Y Pos", Main.ArousalBar.Y)
+    ArousalBarDisplayModeOid = AddMenuOption("Display Mode", ArousalBarDisplayModeNames[Main.ArousalBar.DisplayMode])
+
+    ArousalBarToggleKeyOid = AddKeyMapOption("Toggle Key", Main.GetToggleArousalBarKeybind())
 endfunction
 
 function SystemPage()
@@ -325,13 +350,16 @@ Event OnOptionKeyMapChange(int optionId, int keyCode, string conflictControl, st
     if(optionId == CheckArousalKeyOid)
         Main.SetShowArousalKeybind(keyCode)
         SetKeyMapOptionValue(CheckArousalKeyOid, keyCode)
+    elseif(optionId == ArousalBarToggleKeyOid)
+        Main.SetToggleArousalBarKeybind(keyCode)
+        SetKeyMapOptionValue(ArousalBarToggleKeyOid, keyCode)
     endif
 EndEvent
 
 event OnOptionHighlight(int optionId)
     if(CurrentPage == "General Settings" || CurrentPage == "")
         if(optionId == CheckArousalKeyOid)
-            SetInfoText("Key To Show Arousal Bar")
+            SetInfoText("Key To Show Arousal Info")
         elseif(optionId == EnableNudityCheckOid)
             SetInfoText("If Enabled, Player Nudity will increase nearby NPC arrousal")
         elseif(optionId == HourlyNudityArousalModOid)
@@ -351,6 +379,10 @@ event OnOptionHighlight(int optionId)
         elseif(optionId == VictimGainsArousalOid)
             SetInfoText("Victim gains arousal in scenes")
         EndIf
+    elseif(CurrentPage == "UI")
+        if(optionId == ArousalBarToggleKeyOid)
+            SetInfoText("Key To Toggle Arousal Bar Display when in Toggle Mode")
+        endif
     elseif(CurrentPage == "System")
         if(optionId == DumpArousalData)
             SetInfoText("Dump all stored arousal data to SKSE log file")
@@ -380,6 +412,12 @@ event OnOptionMenuOpen(int optionId)
         if(optionId == ArmorListMenuOid)
             LoadArmorList()
         endif
+    elseif (CurrentPage == "UI")
+        if(optionId == ArousalBarDisplayModeOid)
+            SetMenuDialogStartIndex(Main.ArousalBar.DisplayMode)
+            SetMenuDialogDefaultIndex(1)
+            SetMenuDialogOptions(ArousalBarDisplayModeNames)
+        endif
     endif
 endevent
 
@@ -391,6 +429,11 @@ event OnOptionMenuAccept(int optionId, int index)
             SetMenuOptionValue(optionId, FoundArmorNames[index])
             ArmorSelected()
         EndIf
+    elseif (CurrentPage == "UI")
+        if(optionId == ArousalBarDisplayModeOid)
+            Main.ArousalBar.SetDisplayMode(index)
+            SetMenuOptionValue(optionId, ArousalBarDisplayModeNames[index])
+        endif
     endif
 endevent
 
@@ -438,6 +481,16 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogRange(0, 100.0)
             SetSliderDialogInterval(1.0)
         endif
+    ElseIf(CurrentPage == "UI")
+        if(option == ArousalBarXOid)
+            SetSliderDialogStartValue(Main.ArousalBar.X)
+            SetSliderDialogDefaultValue(980)
+            SetSliderDialogRange(0, 1000)
+        elseif(option == ArousalBarYOid)
+            SetSliderDialogStartValue(Main.ArousalBar.Y)
+            SetSliderDialogDefaultValue(160)
+            SetSliderDialogRange(35, 710)
+        endif
     endif
 endevent
 
@@ -467,6 +520,13 @@ event OnOptionSliderAccept(int option, float value)
             OSLArousedNative.SetTimeRate(PuppetActor, value)
             SetSliderOptionValue(SetTimeRateOid, value, "{0}")
         endif
+    elseif(currentPage == "UI")
+        if(option == ArousalBarXOid)
+            Main.ArousalBar.SetPosX(value)
+        elseif(option == ArousalBarYOid)
+            Main.ArousalBar.SetPosY(value)
+        endif
+        SetSliderOptionValue(option, value)
     endif
 endevent
 
@@ -495,6 +555,14 @@ event OnOptionDefault(int option)
         elseif(option == SetTimeRateOid)
             OSLArousedNative.SetTimeRate(PuppetActor, 10.0)
             SetSliderOptionValue(SetTimeRateOid, 10.0, "{0}")
+        endif
+    elseif(currentPage == "UI")
+        if(option == ArousalBarXOid)
+            Main.ArousalBar.SetPosX(980)
+            SetSliderOptionValue(option, 980)
+        elseif(option == ArousalBarYOid)
+            Main.ArousalBar.SetPosY(160)
+            SetSliderOptionValue(option, 160)
         endif
     endif
 endevent

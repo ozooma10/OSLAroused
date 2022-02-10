@@ -10,6 +10,16 @@ float	_percent		= 0.0
 
 ; PROPERTIES --------------------------------------------------------------------------------------
 
+Float DefaultPosX = 980.0
+Float DefaultPosY = 160.0
+
+Int Property kDisplayMode_Off = 0 autoreadonly 
+Int Property kDisplayMode_Fade = 1 autoreadonly 
+Int Property kDisplayMode_Toggle = 2 autoreadonly 
+Int Property kDisplayMode_On = 3 autoreadonly 
+
+Int Property DisplayMode = 1 Auto
+
 Bool Property BarVisible = true Auto
 Bool Property BarPendingFade = false Auto
 
@@ -211,8 +221,8 @@ Function InitializeBar(float initialPercent)
 	HAnchor = "left"
 	VAnchor = "bottom"
 
-	X = 980.0
-	Y = 160.0
+	X = DefaultPosX
+	Y = DefaultPosY
 
 	Alpha = 0.0
 	SetPercent(initialPercent)
@@ -245,3 +255,32 @@ event OnUpdate()
 		SetBarVisible(false)
 	endif
 endevent
+
+function SetDisplayMode(int NewDisplayMode)
+	DisplayMode = NewDisplayMode
+	UpdateDisplay()
+endfunction
+
+function UpdateDisplay()
+	if (DisplayMode == kDisplayMode_Off)
+		SetBarVisible(false)
+	elseif(DisplayMode == kDisplayMode_Fade)
+		DisplayBarWithAutohide(10)
+	elseif(DisplayMode == kDisplayMode_Toggle)
+		BarPendingFade = false
+		SetBarVisible(!BarVisible)
+	elseif(DisplayMode == kDisplayMode_On)
+		BarPendingFade = false
+		SetBarVisible(true)
+	endif
+endfunction
+
+function SetPosX(float NewPosX)
+	DefaultPosX = NewPosX
+	X = DefaultPosX
+endfunction
+
+function SetPosY(float NewPosY)
+	DefaultPosY = NewPosY
+	Y = DefaultPosY
+endfunction

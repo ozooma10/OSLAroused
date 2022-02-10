@@ -54,7 +54,9 @@ Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 			endif 
 		endif 
 
-		Main.ArousalBar.DisplayBarWithAutohide(10.0)
+		if(Main.ArousalBar.DisplayMode == Main.ArousalBar.kDisplayMode_Fade)
+			Main.ArousalBar.UpdateDisplay()
+		endif
 	endif 
 EndEvent
 
