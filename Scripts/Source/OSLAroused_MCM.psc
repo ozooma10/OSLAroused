@@ -502,11 +502,23 @@ event OnOptionSliderAccept(int option, float value)
         SetSliderOptionValue(option, value)
     elseIf (currentPage == "Settings")
         if(option == SceneParticipantBaselineOid)
+            Main.SetSceneParticipantBaseline(value)
+            SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
         elseif(option == SceneViewerBaselineOid)
+            Main.SetSceneViewingBaseline(value)
+            SetSliderOptionValue(SceneViewerBaselineOid, value, "{1}")
         elseif(option == BeingNudeBaselineOid)
+            Main.SetBeingNudeBaseline(value)
+            SetSliderOptionValue(BeingNudeBaselineOid, value, "{1}")
         elseif(option == ViewingNudeBaselineOid)
+            Main.SetViewingNudeBaseline(value)
+            SetSliderOptionValue(ViewingNudeBaselineOid, value, "{1}")
         elseif(option == SceneBeginArousalOid)
+            Main.SetSceneParticipantBaseline(value)
+            SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
         elseif(option == StageChangeArousalOid)
+            Main.SetSceneParticipantBaseline(value)
+            SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
         endif
     endif
 endevent
@@ -530,11 +542,23 @@ event OnOptionDefault(int option)
         endif
     elseif(CurrentPage == "Settings")
         if(option == SceneParticipantBaselineOid)
+            Main.SetSceneParticipantBaseline(50)
+            SetSliderOptionValue(SceneParticipantBaselineOid, 50, "{1}")
         elseif(option == SceneViewerBaselineOid)
+            Main.SetSceneViewingBaseline(20)
+            SetSliderOptionValue(SceneViewerBaselineOid, 20, "{1}")
         elseif(option == BeingNudeBaselineOid)
+            Main.SetBeingNudeBaseline(30)
+            SetSliderOptionValue(BeingNudeBaselineOid, 30, "{1}")
         elseif(option == ViewingNudeBaselineOid)
+            Main.SetViewingNudeBaseline(20)
+            SetSliderOptionValue(ViewingNudeBaselineOid, 20, "{1}")
         elseif(option == SceneBeginArousalOid)
+            Main.SceneBeginArousalGain = 10
+            SetSliderOptionValue(SceneBeginArousalOid, 10, "{1}")
         elseif(option == StageChangeArousalOid)
+            Main.StageChangeArousalGain = 3
+            SetSliderOptionValue(StageChangeArousalOid, 3, "{1}")
         endif
     endif
 endevent
