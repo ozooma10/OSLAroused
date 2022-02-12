@@ -31,10 +31,10 @@ int CheckArousalKey = 157
 int ToggleArousalBarKey = 157
 
 ;Do not directly set these settings. Use the associated Set function (so that dll is updated)
-float Property SceneParticipationBaselineIncrease = 20.0 Auto
+float Property SceneParticipationBaselineIncrease = 50.0 Auto
 float Property SceneViewingBaselineIncrease = 20.0 Auto
 bool Property VictimGainsArousal = false Auto
-float Property NudityBaselineIncrease = 20.0 Auto
+float Property NudityBaselineIncrease = 30.0 Auto
 float Property ViewingNudityBaselineIncrease = 20.0 Auto
 
 float Property SceneBeginArousalGain = 10.0 Auto
@@ -188,36 +188,6 @@ Function ApplyArousedEffects()
 	PlayerRef.AddSpell(SLADesireSpell, false)
 EndFunction
 
-Function ApplyOArousedEffects(int arousal)
-	if arousal >= 40
-		arousal -= 40
-		float percent = arousal / 60.0
-		ApplyHornySpell((percent * 25) as int)
-	elseif arousal <= 10
-		ApplyReliefSpell(10)
-	else 
-		RemoveAllArousalSpells()
-	endif 
-endfunction
-
-Function ApplyHornySpell(int magnitude)
-	OArousedHornySpell.SetNthEffectMagnitude(0, magnitude)
-	OArousedHornySpell.SetNthEffectMagnitude(1, magnitude)
-
-	playerref.RemoveSpell(OArousedRelievedSpell)
-	playerref.RemoveSpell(OArousedHornySpell)
-	playerref.AddSpell(OArousedHornySpell, false)
-EndFunction
-
-Function ApplyReliefSpell(int magnitude)
-	OArousedRelievedSpell.SetNthEffectMagnitude(0, magnitude)
-	OArousedRelievedSpell.SetNthEffectMagnitude(1, magnitude)
-
-	playerref.RemoveSpell(OArousedHornySpell)
-	playerref.RemoveSpell(OArousedRelievedSpell)
-	playerref.AddSpell(OArousedRelievedSpell, false)
-EndFunction
-
 Function RemoveAllArousalSpells()
 	playerref.RemoveSpell(SLADesireSpell)
 	playerref.RemoveSpell(OArousedHornySpell)
@@ -231,6 +201,7 @@ Event OnKeyDown(int keyCode)
 	if keyCode == CheckArousalKey
 		
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
+		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
 		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
 			ArousalBar.UpdateDisplay()
 		endif
@@ -246,7 +217,6 @@ Event OnKeyDown(int keyCode)
 		ArousalBar.UpdateDisplay()
 	EndIf
 EndEvent
-
 
 ; ========= SETTINGS UPDATE =================
 int function GetShowArousalKeybind()
