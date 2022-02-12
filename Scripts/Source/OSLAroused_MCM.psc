@@ -6,6 +6,13 @@ OSLAroused_MCM Function Get() Global
 	return Game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_MCM
 EndFunction
 
+;---- Overview Properties ----
+int ArousalStatusOid
+int BaselineArousalStatusOid
+int LibidoStatusOid
+
+;---- Puppet Properties ----
+
 int CheckArousalKeyOid
 int EnableStatBuffsOid
 int EnableNudityCheckOid
@@ -27,8 +34,7 @@ int SexlabStageChangeArousalGainOid
 ;---- Puppet Properties ----
 Actor Property PuppetActor Auto
 int Property SetArousalOid Auto
-int Property SetMultiplierOid Auto
-int Property SetTimeRateOid Auto
+int Property SetLibidoOid Auto
 
 float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
@@ -78,19 +84,21 @@ Keyword SLAHasStockingsKeyword
 bool SLAHasStockingsState
 
 int function GetVersion()
-    return 3 ; 0.1.4
+    return 200 ; 0.2.0
 endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
 
-    Pages = new String[6]
-    Pages[0] = "General Settings"
-    Pages[1] = "Status"
-    Pages[2] = "Puppeteer"
-    Pages[3] = "Keywords"
-    Pages[4] = "UI"
-    Pages[5] = "System"
+    Pages = new String[2]
+    Pages[0] = "Overview"
+    Pages[1] = "Puppeteer"
+
+    ; Pages[1] = "Status"
+    ; Pages[2] = "Puppeteer"
+    ; Pages[3] = "Keywords"
+    ; Pages[4] = "UI"
+    ; Pages[5] = "System"
 
     ArousalBarDisplayModeNames = new String[4]
     ArousalBarDisplayModeNames[0] = "Always Off"
@@ -120,14 +128,12 @@ EndEvent
 
 Event OnPageReset(string page)
     SetCursorFillMode(TOP_TO_BOTTOM)
-    if(page == "" || page == "General Settings")
-        MainLeftColumn()
+    if(page == "Overview")
+        OverviewLeftColumn()
         SetCursorPosition(1)
-        MainRightColumn()
-    elseif(page == "Status")
-        StatusPage()
+        RenderActorStatus(PuppetActor)
     elseif(page == "Puppeteer")
-        PuppeteerPage()
+        PuppeteerPage(PuppetActor)
     elseif(page == "Keywords")
         KeywordPage()
     elseif(page == "UI")
@@ -137,63 +143,63 @@ Event OnPageReset(string page)
     endif
 EndEvent
 
-function MainLeftColumn()
-    CheckArousalKeyOid = AddKeyMapOption("Show Arousal Key", Main.GetShowArousalKeybind())
-    EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
-
-    AddHeaderOption("Scene Settings")
-    HourlySceneParticipantArousalModOid = AddSliderOption("Hourly Arousal From Participating", Main.GetHourlySceneParticipantArousalModifier(), "{1}")
-    HourlySceneViewerArousalModOid = AddSliderOption("Hourly Arousal From Spectating", Main.GetHourlySceneViewerArousalModifier(), "{1}")
-    VictimGainsArousalOid = AddToggleOption("Victim Gains Arousal", Main.VictimGainsArousal)
-
+function OverviewLeftColumn()
+    AddHeaderOption("OSL Aroused Status")
+    AddTextOption("OSL Aroused Is:", "Enabled")
+    AddEmptyOption()
+    AddHeaderOption("Framework Adapters")
+    If (Main.SexLabAdapterLoaded)
+        AddTextOption("SexLab", "Enabled")
+    Else
+        AddTextOption("SexLab", "Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    If (Main.OStimAdapterLoaded)
+        AddTextOption("OStim", "Enabled")
+    Else
+        AddTextOption("OStim", "Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    AddEmptyOption()
+    AddHeaderOption("Arousal Compatability")
+    If (Main.InvalidSlaFound)
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Invalid Install")
+    ElseIf (Main.SlaStubLoaded)
+        AddTextOption("SexLab Aroused", "Enabled")
+    Else
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Disabled")
+    EndIf
+    If (Main.InvalidOArousedFound)
+        OArousedStubLoadedOid = AddTextOption("OAroused", "Invalid Install")
+    elseIf (Main.OArousedStubLoaded)
+        AddTextOption("OAroused", "Enabled")
+    Else
+        OArousedStubLoadedOid = AddTextOption("OAroused", "Disabled")
+    EndIf
 endfunction
 
-function MainRightColumn()
-    AddHeaderOption("Nudity Settings")
-    EnableNudityCheckOid = AddToggleOption("Player Nudity Increases Others Arousal", Main.GetEnableNudityIncreasesArousal())
-    HourlyNudityArousalModOid = AddSliderOption("Hourly Arousal From Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
-
-    AddHeaderOption("OStim Settings")
-    RequireLowArousalToEndSceneOid = AddToggleOption("Require Low Arousal To End Scene", Main.RequireLowArousalToEndScene)
-
-    AddHeaderOption("Sexlab Settings")
-    StageChangeIncreasesArousalOid = AddToggleOption("Stage change Increases Arousal", Main.SexlabStageChangeIncreasesArousal)
-    SexlabStageChangeArousalGainOid = AddSliderOption("Stage Change Arousal Gain", Main.SexlabStageChangeArousalGain, "{1}")
-endfunction
-
-function StatusPage()
-    if(PuppetActor == none)
+function RenderActorStatus(Actor target)
+    if(target == none)
         AddHeaderOption("No Target Selected")
         return
     endif
-    AddHeaderOption(PuppetActor.GetLeveledActorBase().GetName())
+    AddHeaderOption(target.GetDisplayName())
 
-    float timeRate = OSLArousedNative.GetTimeRate(PuppetActor)
-    float lastOrgasm = OSLArousedNative.GetDaysSinceLastOrgasm(PuppetActor)
-
-    AddTextOption("Arousal = Exposure + Time Arousal", OSLArousedNative.GetArousal(PuppetActor), OPTION_FLAG_DISABLED)
-    AddTextOption("Current Exposure", OSLArousedNative.GetExposure(PuppetActor), OPTION_FLAG_DISABLED)
-    AddTextOption("Exposure Rate", OSLArousedNative.GetArousalMultiplier(PuppetActor), OPTION_FLAG_DISABLED)
-    AddTextOption("Time Arousal = D x (Time Rate)", lastOrgasm * timeRate, OPTION_FLAG_DISABLED)
-    AddTextOption("D = Days Since Last Orgasm", OSLArousedNative.GetDaysSinceLastOrgasm(PuppetActor), OPTION_FLAG_DISABLED)
-    AddTextOption("Time Rate", timeRate, OPTION_FLAG_DISABLED)
+    ArousalStatusOid = AddTextOption("Arousal", OSLArousedNative.GetArousal(target))
+    BaselineArousalStatusOid = AddTextOption("Baseline Arousal", OSLArousedNative.GetArousalBaseline(target))
+    LibidoStatusOid = AddTextOption("Libido", OSLArousedNative.GetLibido(target))
 endfunction
 
-function PuppeteerPage()
-    if(PuppetActor == none)
+function PuppeteerPage(Actor target)
+    if(target == none)
         AddHeaderOption("No Target Selected")
         return
     endif
-    AddHeaderOption(PuppetActor.GetLeveledActorBase().GetName())
+    AddHeaderOption(target.GetLeveledActorBase().GetName())
 
-    float exposure = OSLArousedNative.GetExposure(PuppetActor)
-    SetArousalOid = AddSliderOption("Exposure", exposure, "{0}")
+    float arousal = OSLArousedNative.GetArousal(PuppetActor)
+    SetArousalOid = AddSliderOption("Arousal", arousal, "{0}")
 
-    float exposureRate = OSLArousedNative.GetArousalMultiplier(PuppetActor)
-    SetMultiplierOid = AddSliderOption("Exposure Rate", exposureRate, "{1}")
-    
-    float timeRate = OSLArousedNative.GetTimeRate(PuppetActor)
-    SetTimeRateOid = AddSliderOption("Time Rate", timeRate, "{0}")
+    float libido = OSLArousedNative.GetLibido(PuppetActor)
+    SetLibidoOid = AddSliderOption("Libido", libido, "{0}")
 endfunction
 
 function KeywordPage()
@@ -223,55 +229,10 @@ function SystemPage()
     ;ClearSecondaryArousalData = AddTextOption("Clear Secondary Arousal Data", "RUN")
     ClearAllArousalData = AddTextOption("Clear All Arousal Data", "RUN")
     EnableDebugModeOid = AddToggleOption("Enable Debug Logging", Main.EnableDebugMode)
-
-    SetCursorPosition(1)
-    AddHeaderOption("Framework Adapters")
-    If (Main.SexLabAdapterLoaded)
-        AddTextOption("SexLab", "Enabled")
-    Else
-        AddTextOption("SexLab", "Disabled", OPTION_FLAG_DISABLED)
-    EndIf
-    If (Main.OStimAdapterLoaded)
-        AddTextOption("OStim", "Enabled")
-    Else
-        AddTextOption("OStim", "Disabled", OPTION_FLAG_DISABLED)
-    EndIf
-    AddHeaderOption("Arousal Compatability")
-    If (Main.InvalidSlaFound)
-        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Invalid Install")
-    ElseIf (Main.SlaStubLoaded)
-        AddTextOption("SexLab Aroused", "Enabled")
-    Else
-        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "Disabled")
-    EndIf
-    If (Main.InvalidOArousedFound)
-        OArousedStubLoadedOid = AddTextOption("OAroused", "Invalid Install")
-    elseIf (Main.OArousedStubLoaded)
-        AddTextOption("OAroused", "Enabled")
-    Else
-        OArousedStubLoadedOid = AddTextOption("OAroused", "Disabled")
-    EndIf
 endfunction
 
 event OnOptionSelect(int optionId)
-    if(CurrentPage == "General Settings" || CurrentPage == "")
-        if (optionId == EnableNudityCheckOid)
-            bool newVal = !Main.GetEnableNudityIncreasesArousal()
-            Main.SetPlayerNudityIncreasesArousal(newVal) 
-            SetToggleOptionValue(EnableNudityCheckOid, newVal)
-        elseif (optionId == EnableStatBuffsOid)
-            Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
-            SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
-        elseif (optionId == RequireLowArousalToEndSceneOid)
-            Main.RequireLowArousalToEndScene = !Main.RequireLowArousalToEndScene 
-            SetToggleOptionValue(RequireLowArousalToEndSceneOid, Main.RequireLowArousalToEndScene)
-        elseif (optionId == StageChangeIncreasesArousalOid)
-            Main.SexlabStageChangeIncreasesArousal = !Main.SexlabStageChangeIncreasesArousal
-            SetToggleOptionValue(StageChangeIncreasesArousalOid, Main.SexlabStageChangeIncreasesArousal)
-        elseif (optionId == VictimGainsArousalOid)
-            Main.VictimGainsArousal = !Main.VictimGainsArousal
-            SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
-        EndIf
+    if(CurrentPage == "Overview")
     ElseIf (CurrentPage == "Keywords")
         if(optionId == EroticArmorOid)
             if(EroticArmorState)
@@ -357,40 +318,16 @@ Event OnOptionKeyMapChange(int optionId, int keyCode, string conflictControl, st
 EndEvent
 
 event OnOptionHighlight(int optionId)
-    if(CurrentPage == "General Settings" || CurrentPage == "")
-        if(optionId == CheckArousalKeyOid)
-            SetInfoText("Key To Show Arousal Info")
-        elseif(optionId == EnableNudityCheckOid)
-            SetInfoText("If Enabled, Player Nudity will increase nearby NPC arrousal")
-        elseif(optionId == HourlyNudityArousalModOid)
-            SetInfoText("Arousal Gained per hour when observing a nude character.")
-        elseif(optionId == HourlySceneParticipantArousalModOid)
-            SetInfoText("Arousal Gained per hour when participating in a sex scene.")
-        elseif(optionId == HourlySceneViewerArousalModOid)
-            SetInfoText("Arousal Gained per hour for spectators of a sex scene.")
-        elseif(optionId == EnableStatBuffsOid)
-            SetInfoText("Will Enable Arousal based Stat Buffs")
-        elseif(optionId == RequireLowArousalToEndSceneOid)
-            SetInfoText("OStim Scene will not end until Participant arousal is low")
-        elseif(optionId == StageChangeIncreasesArousalOid)
-            SetInfoText("Changing Scene stage increases participant arousal")
-        elseif(optionId == SexlabStageChangeArousalGainOid)
-            SetInfoText("Arousal gained when sexlab stage changes")
-        elseif(optionId == VictimGainsArousalOid)
-            SetInfoText("Victim gains arousal in scenes")
-        EndIf
-    elseif(CurrentPage == "UI")
-        if(optionId == ArousalBarToggleKeyOid)
-            SetInfoText("Key To Toggle Arousal Bar Display when in Toggle Mode")
-        endif
-    elseif(CurrentPage == "System")
-        if(optionId == DumpArousalData)
-            SetInfoText("Dump all stored arousal data to SKSE log file")
-        elseif(optionId == ClearSecondaryArousalData)
-            SetInfoText("Clear NPC Arousal data from Save (This Maintains Player/Unique Data)")
-        elseif(optionId == ClearAllArousalData)
-            SetInfoText("Clear All Arousal data from Save")
-        elseif(optionId == SLAStubLoadedOid)
+    if(optionId == ArousalStatusOid)
+        SetInfoText("Actors current Arousal ranging [0-100]. Will gradually move towards your baseline arousal.")
+    elseif(optionId == BaselineArousalStatusOid)
+        SetInfoText("Target value for arousal to move towards. Based off Libido plus any additonal effects (ex. Lewd Clothing, Nudity, Devious Devices, Participating/viewing adult scenes)")
+    elseif(optionId == LibidoStatusOid)
+        SetInfoText("Base arousal before any effects. Will very slowly move towards actor arousal over time. Keep arousal low to reduce.")
+    endif
+    
+    if(CurrentPage == "Overview")
+        if(optionId == SLAStubLoadedOid)
             If (Main.InvalidSlaFound)
                 SetInfoText("Incorrect SexlabAroused.esm or slaFrameworkScr.pex detected. Ensure SLA is not installed and OSL Aroused overwrites all conflicts.")
             elseif(!Main.SlaStubLoaded)
@@ -403,12 +340,23 @@ event OnOptionHighlight(int optionId)
                 SetInfoText("OAroused.esp is disabled or missing. OAroused backwards compatibility is disabled.")
             EndIf
         endif
+    elseif(CurrentPage == "UI")
+        if(optionId == ArousalBarToggleKeyOid)
+            SetInfoText("Key To Toggle Arousal Bar Display when in Toggle Mode")
+        endif
+    elseif(CurrentPage == "System")
+        if(optionId == DumpArousalData)
+            SetInfoText("Dump all stored arousal data to SKSE log file")
+        elseif(optionId == ClearSecondaryArousalData)
+            SetInfoText("Clear NPC Arousal data from Save (This Maintains Player/Unique Data)")
+        elseif(optionId == ClearAllArousalData)
+            SetInfoText("Clear All Arousal data from Save")
+        endif
     EndIf
 endevent
 
 event OnOptionMenuOpen(int optionId)
-    if(CurrentPage == "General Settings" || CurrentPage == "")
-    elseif (CurrentPage == "Keywords")
+    if (CurrentPage == "Keywords")
         if(optionId == ArmorListMenuOid)
             LoadArmorList()
         endif
@@ -422,8 +370,7 @@ event OnOptionMenuOpen(int optionId)
 endevent
 
 event OnOptionMenuAccept(int optionId, int index)
-    if(CurrentPage == "General Settings" || CurrentPage == "")
-    ElseIf (CurrentPage == "Keywords")
+    If (CurrentPage == "Keywords")
         If (optionId == ArmorListMenuOid)
             SelectedArmor = Game.GetPlayer().GetNthForm(FoundArmorIds[index]) as Armor
             SetMenuOptionValue(optionId, FoundArmorNames[index])
@@ -438,48 +385,20 @@ event OnOptionMenuAccept(int optionId, int index)
 endevent
 
 event OnOptionSliderOpen(int option)
-    if(CurrentPage == "" || CurrentPage == "General Settings")
-        if(option == HourlyNudityArousalModOid)
-            SetSliderDialogStartValue(Main.GetHourlyNudityArousalModifier())
-            SetSliderDialogDefaultValue(20.0)
-            SetSliderDialogRange(0, 100)
-            SetSliderDialogInterval(0.1)
-        elseif(option == HourlySceneParticipantArousalModOid)
-            SetSliderDialogStartValue(Main.GetHourlySceneParticipantArousalModifier())
-            SetSliderDialogDefaultValue(20.0)
-            SetSliderDialogRange(0, 100)
-            SetSliderDialogInterval(0.1)
-        elseif(option == HourlySceneViewerArousalModOid)
-            SetSliderDialogStartValue(Main.GetHourlySceneViewerArousalModifier())
-            SetSliderDialogDefaultValue(20.0)
-            SetSliderDialogRange(0, 100)
-            SetSliderDialogInterval(0.1)
-        elseif(option == SexlabStageChangeArousalGainOid)
-            SetSliderDialogStartValue(Main.SexlabStageChangeArousalGain)
-            SetSliderDialogDefaultValue(3.0)
-            SetSliderDialogRange(0, 10)
-            SetSliderDialogInterval(0.1)
-        endif
-    elseif(CurrentPage == "Puppeteer")
+    if(CurrentPage == "Puppeteer")
         if(option == SetArousalOid)
             float arousal = 0
-            arousal = OSLArousedNative.GetExposure(PuppetActor)
+            arousal = OSLArousedNative.GetArousal(PuppetActor)
             SetSliderDialogStartValue(arousal)
             SetSliderDialogDefaultValue(0)
             SetSliderDialogRange(0, 100)
             SetSliderDialogInterval(1)
-        elseif (option == SetMultiplierOid)
-            float mult = OSLArousedNative.GetArousalMultiplier(PuppetActor)
-            SetSliderDialogStartValue(mult)
-            SetSliderDialogDefaultValue(kDefaultArousalMultiplier)
-            SetSliderDialogRange(0, 10.0)
-            SetSliderDialogInterval(0.1)
-        elseif (option == SetTimeRateOid)
-            float timeRate = OSLArousedNative.GetTimeRate(PuppetActor)
-            SetSliderDialogStartValue(timeRate)
-            SetSliderDialogDefaultValue(10.0)
-            SetSliderDialogRange(0, 100.0)
-            SetSliderDialogInterval(1.0)
+        elseif (option == SetLibidoOid)
+            float libido = OSLArousedNative.GetLibido(PuppetActor)
+            SetSliderDialogStartValue(libido)
+            SetSliderDialogDefaultValue(0)
+            SetSliderDialogRange(0, 100)
+            SetSliderDialogInterval(1)
         endif
     ElseIf(CurrentPage == "UI")
         if(option == ArousalBarXOid)
@@ -495,30 +414,13 @@ event OnOptionSliderOpen(int option)
 endevent
 
 event OnOptionSliderAccept(int option, float value)
-    if(CurrentPage == "" || CurrentPage == "General Settings")
-        if(option == HourlyNudityArousalModOid)
-            Main.SetHourlyNudityArousalModifier(value)
-            SetSliderOptionValue(HourlyNudityArousalModOid, value, "{1}")
-        elseif(option == HourlySceneParticipantArousalModOid)
-            Main.SetHourlySceneParticipantArousalModifier(value)
-            SetSliderOptionValue(HourlySceneParticipantArousalModOid, value, "{1}")
-        elseif(option == HourlySceneViewerArousalModOid)
-            Main.SetHourlySceneViewerArousalModifier(value)
-            SetSliderOptionValue(HourlySceneViewerArousalModOid, value, "{1}")
-        elseif(option == SexlabStageChangeArousalGainOid)
-            Main.SexlabStageChangeArousalGain = value
-            SetSliderOptionValue(SexlabStageChangeArousalGainOid, value, "{1}")
-        endif
-    elseif(currentPage == "Puppeteer")
+    if(currentPage == "Puppeteer")
         if(option == SetArousalOid)
             OSLArousedNative.SetArousal(PuppetActor, value)
             SetSliderOptionValue(SetArousalOid, value, "{0}")
-        elseif(option == SetMultiplierOid)
-            OSLArousedNative.SetArousalMultiplier(PuppetActor, value)
-            SetSliderOptionValue(SetMultiplierOid, value, "{1}")
-        elseif(option == SetTimeRateOid)
-            OSLArousedNative.SetTimeRate(PuppetActor, value)
-            SetSliderOptionValue(SetTimeRateOid, value, "{0}")
+        elseif(option == SetLibidoOid)
+            OSLArousedNative.SetLibido(PuppetActor, value)
+            SetSliderOptionValue(SetLibidoOid, value, "{1}")
         endif
     elseif(currentPage == "UI")
         if(option == ArousalBarXOid)
@@ -531,30 +433,13 @@ event OnOptionSliderAccept(int option, float value)
 endevent
 
 event OnOptionDefault(int option)
-    if(CurrentPage == "" || CurrentPage == "General Settings")
-        if(option == HourlyNudityArousalModOid)
-            Main.SetHourlyNudityArousalModifier(20.0)
-            SetSliderOptionValue(HourlyNudityArousalModOid, 20.0, "{1}")
-        elseif(option == HourlySceneParticipantArousalModOid)
-            Main.SetHourlySceneParticipantArousalModifier(20.0)
-            SetSliderOptionValue(HourlySceneParticipantArousalModOid, 20.0, "{1}")
-        elseif(option == HourlySceneViewerArousalModOid)
-            Main.SetHourlySceneViewerArousalModifier(20.0)
-            SetSliderOptionValue(HourlySceneViewerArousalModOid, 20.0, "{1}")
-        elseif(option == SexlabStageChangeArousalGainOid)
-            Main.SexlabStageChangeArousalGain = 3.0
-            SetSliderOptionValue(SexlabStageChangeArousalGainOid, 3.0, "{1}")
-        endif
-    elseif(currentPage == "Puppeteer")
+    if(currentPage == "Puppeteer")
         if(option == SetArousalOid)
             OSLArousedNative.SetArousal(PuppetActor, 0)
             SetSliderOptionValue(SetArousalOid, 0, "{0}")
-        elseif(option == SetMultiplierOid)
-            OSLArousedNative.SetArousalMultiplier(PuppetActor, kDefaultArousalMultiplier)
-            SetSliderOptionValue(SetMultiplierOid, kDefaultArousalMultiplier, "{1}")
-        elseif(option == SetTimeRateOid)
-            OSLArousedNative.SetTimeRate(PuppetActor, 10.0)
-            SetSliderOptionValue(SetTimeRateOid, 10.0, "{0}")
+        elseif(option == SetLibidoOid)
+            OSLArousedNative.SetLibido(PuppetActor, 0)
+            SetSliderOptionValue(SetLibidoOid, 0, "{0}")
         endif
     elseif(currentPage == "UI")
         if(option == ArousalBarXOid)
