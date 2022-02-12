@@ -29,24 +29,23 @@ bool property OArousedStubLoaded = false Auto Hidden
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 int ToggleArousalBarKey = 157
-bool EnableNudityIncreasesArousal = true
-float HourlyNudityArousalModifier = 20.0
-bool Property EnableArousalStatBuffs = true Auto
-float DefaultArousalMultiplier = 2.0
 
-float HourlySceneParticipantArousalModifier = 20.0
-float HourlySceneViewerArousalModifier = 20.0
-
+;Do not directly set these settings. Use the associated Set function (so that dll is updated)
+float Property SceneParticipationBaselineIncrease = 20.0 Auto
+float Property SceneViewingBaselineIncrease = 20.0 Auto
 bool Property VictimGainsArousal = false Auto
+float Property NudityBaselineIncrease = 20.0 Auto
+float Property ViewingNudityBaselineIncrease = 20.0 Auto
+
+float Property SceneBeginArousalGain = 10.0 Auto
+float Property StageChangeArousalGain = 3.0 Auto
+
+bool Property EnableArousalStatBuffs = true Auto
 
 bool Property EnableDebugMode = true Auto
 
 ; OStim Specific
 bool Property RequireLowArousalToEndScene Auto
-
-; Sexlab Specific
-bool Property SexlabStageChangeIncreasesArousal = true Auto
-float Property SexlabStageChangeArousalGain = 3.0 Auto
 
 ; ============ SPELLS =============
 ;OAroused Spells
@@ -60,8 +59,8 @@ Spell Property OArousedRelievedSpell Auto
 
 Event OnInit()
 	;Initialize multiplier to 2 for player
-	OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
-	OSLArousedNative.SetArousal(PlayerRef, 5)
+	;OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
+	;OSLArousedNative.SetArousal(PlayerRef, 5)
 
 	OnGameLoaded()
 
@@ -111,10 +110,11 @@ Function OnGameLoaded()
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
-	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
-	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
-	OSLArousedNative.UpdateHourlySceneParticipantArousalModifier(HourlySceneParticipantArousalModifier)
-	OSLArousedNative.UpdateHourlySceneViewerArousalModifier(HourlySceneViewerArousalModifier)
+	OSLArousedNativeConfig.SetSceneParticipantBaseline(SceneParticipationBaselineIncrease)
+	OSLArousedNativeConfig.SetSceneViewingBaseline(SceneViewingBaselineIncrease)
+	OSLArousedNativeConfig.SetSceneVictimGainsArousal(VictimGainsArousal)
+	OSLArousedNativeConfig.SetBeingNudeBaseline(NudityBaselineIncrease)
+	OSLArousedNativeConfig.SetViewingNudeBaseline(ViewingNudityBaselineIncrease)
 
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
@@ -257,52 +257,29 @@ int function GetToggleArousalBarKeybind()
 	return ToggleArousalBarKey
 endfunction
 
-float function GetDefaultArousalMultiplier()
-	return DefaultArousalMultiplier
+function SetSceneParticipantBaseline(float newVal)
+	SceneParticipationBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetSceneParticipantBaseline(newVal)
 endfunction
 
-bool function GetEnableNudityIncreasesArousal()
-	return EnableNudityIncreasesArousal
+function SetSceneViewingBaseline(float newVal)
+	SceneViewingBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetSceneViewingBaseline(newVal)
 endfunction
 
-float function GetHourlyNudityArousalModifier()
-	return HourlyNudityArousalModifier
+function SetSceneVictimGainsArousal(bool newVal)
+	VictimGainsArousal = newVal
+	OSLArousedNativeConfig.SetSceneVictimGainsArousal(newVal)
 endfunction
 
-float function GetHourlySceneParticipantArousalModifier()
-	return HourlySceneParticipantArousalModifier
+function SetBeingNudeBaseline(float newVal)
+	NudityBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetBeingNudeBaseline(newVal)
 endfunction
 
-float function GetHourlySceneViewerArousalModifier()
-	return HourlySceneViewerArousalModifier
-endfunction
-
-function SetDefaultArousalMultiplier(float newVal)
-	if(newVal < 0 || newVal > 10)
-		return
-	endif
-	DefaultArousalMultiplier = newVal
-	OSLArousedNative.UpdateDefaultArousalMultiplier(newVal)
-endfunction
-
-function SetPlayerNudityIncreasesArousal(bool newVal)
-	EnableNudityIncreasesArousal = newVal
-	OSLArousedNative.UpdatePlayerNudityCheck(newVal)
-endfunction
-
-function SetHourlyNudityArousalModifier(float newVal)
-	HourlyNudityArousalModifier = newVal
-	OSLArousedNative.UpdateHourlyNudityArousalModifier(newVal)
-endfunction
-
-function SetHourlySceneParticipantArousalModifier(float newVal)
-	HourlySceneParticipantArousalModifier = newVal
-	OSLArousedNative.UpdateHourlySceneParticipantArousalModifier(newVal)
-endfunction
-
-function SetHourlySceneViewerArousalModifier(float newVal)
-	HourlySceneViewerArousalModifier = newVal
-	OSLArousedNative.UpdateHourlySceneViewerArousalModifier(newVal)
+function SetViewingNudeBaseline(float newVal)
+	ViewingNudityBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetViewingNudeBaseline(newVal)
 endfunction
 
 function SetShowArousalKeybind(int newKey)

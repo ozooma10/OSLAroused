@@ -31,13 +31,6 @@ float function GetLibido(Actor actor) global native
 float function SetLibido(Actor actor, float newVal) global native
 
 
-
-
-
-
-
-
-
 ; ======================= REVALUATE BELOW =================================================
 
 ;Modifies the arousal multiplier by the specified amount

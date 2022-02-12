@@ -195,10 +195,10 @@ function PuppeteerPage(Actor target)
     AddHeaderOption(target.GetLeveledActorBase().GetName())
 
     float arousal = OSLArousedNative.GetArousal(PuppetActor)
-    SetArousalOid = AddSliderOption("Arousal", arousal, "{0}")
+    SetArousalOid = AddSliderOption("Arousal", ((arousal * 100) / 100) as int, "{0}")
 
     float libido = OSLArousedNative.GetLibido(PuppetActor)
-    SetLibidoOid = AddSliderOption("Libido", libido, "{0}")
+    SetLibidoOid = AddSliderOption("Libido", ((libido * 100) / 100) as int, "{0}")
 endfunction
 
 function KeywordPage()
@@ -228,18 +228,18 @@ function SettingsLeftColumn()
     EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
 
     AddHeaderOption("Baseline Arousal Gains")
-    SceneParticipantBaselineOid = AddSliderOption("Participating In Sex", Main.GetHourlySceneParticipantArousalModifier(), "{1}")
+    SceneParticipantBaselineOid = AddSliderOption("Participating In Sex", Main.SceneParticipationBaselineIncrease, "{1}")
     VictimGainsArousalOid = AddToggleOption("Victim Gains Arousal", Main.VictimGainsArousal)
-    SceneViewerBaselineOid = AddSliderOption("Spectating Sex", Main.GetHourlySceneViewerArousalModifier(), "{1}")
-    BeingNudeBaselineOid = AddSliderOption("Being Nude", Main.GetEnableNudityIncreasesArousal(), "{1}")
-    ViewingNudeBaselineOid = AddSliderOption("Viewing Nude", Main.GetHourlyNudityArousalModifier(), "{1}")
+    SceneViewerBaselineOid = AddSliderOption("Spectating Sex", Main.SceneViewingBaselineIncrease, "{1}")
+    BeingNudeBaselineOid = AddSliderOption("Being Nude", Main.NudityBaselineIncrease, "{1}")
+    ViewingNudeBaselineOid = AddSliderOption("Viewing Nude", Main.ViewingNudityBaselineIncrease, "{1}")
 
 endfunction
 
 function SettingsRightColumn()
     AddHeaderOption("Event-Based Arousal Gains")
-    SceneBeginArousalOid = AddSliderOption("Sex Scene Begin", Main.SexlabStageChangeIncreasesArousal, "{1}")
-    StageChangeArousalOid = AddSliderOption("Sex Stage Change", Main.SexlabStageChangeIncreasesArousal, "{1}")
+    SceneBeginArousalOid = AddSliderOption("Sex Scene Begin", Main.SceneBeginArousalGain, "{1}")
+    StageChangeArousalOid = AddSliderOption("Sex Stage Change", Main.StageChangeArousalGain, "{1}")
 endfunction
 
 function SystemPage()
@@ -467,10 +467,19 @@ event OnOptionSliderOpen(int option)
         elseif(option == BeingNudeBaselineOid)
             SetSliderDialogStartValue(30)
             SetSliderDialogDefaultValue(30)
-            SetSliderDialogRange(0, 100)
+            SetSliderDialogRange(0, 50)
         elseif(option == ViewingNudeBaselineOid)
+            SetSliderDialogStartValue(20)
+            SetSliderDialogDefaultValue(20)
+            SetSliderDialogRange(0, 50)
         elseif(option == SceneBeginArousalOid)
+            SetSliderDialogStartValue(10)
+            SetSliderDialogDefaultValue(10)
+            SetSliderDialogRange(0, 50)
         elseif(option == StageChangeArousalOid)
+            SetSliderDialogStartValue(3)
+            SetSliderDialogDefaultValue(3)
+            SetSliderDialogRange(0, 20)
         endif
     endif
 endevent
@@ -491,6 +500,14 @@ event OnOptionSliderAccept(int option, float value)
             Main.ArousalBar.SetPosY(value)
         endif
         SetSliderOptionValue(option, value)
+    elseIf (currentPage == "Settings")
+        if(option == SceneParticipantBaselineOid)
+        elseif(option == SceneViewerBaselineOid)
+        elseif(option == BeingNudeBaselineOid)
+        elseif(option == ViewingNudeBaselineOid)
+        elseif(option == SceneBeginArousalOid)
+        elseif(option == StageChangeArousalOid)
+        endif
     endif
 endevent
 
@@ -510,6 +527,14 @@ event OnOptionDefault(int option)
         elseif(option == ArousalBarYOid)
             Main.ArousalBar.SetPosY(160)
             SetSliderOptionValue(option, 160)
+        endif
+    elseif(CurrentPage == "Settings")
+        if(option == SceneParticipantBaselineOid)
+        elseif(option == SceneViewerBaselineOid)
+        elseif(option == BeingNudeBaselineOid)
+        elseif(option == ViewingNudeBaselineOid)
+        elseif(option == SceneBeginArousalOid)
+        elseif(option == StageChangeArousalOid)
         endif
     endif
 endevent
