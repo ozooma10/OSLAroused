@@ -132,21 +132,16 @@ Function OnGameLoaded()
 	endif
 EndFunction
 
-;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
 ;Works as expected need to debug through papyrus
-event OnActorArousalUpdated(string eventName, string strArg, float newExposure, Form sender)
+event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
-
-	;Need to get amount of arousal to add on top of exposure 
-	float lastOrgasmArousal = OSLArousedNative.GetLastOrgasmFrustrationArousal(act)
-	float newArousal = newExposure + lastOrgasmArousal
 
 	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
 		ConditionVars.OSLAroused_PlayerArousal = newArousal
-		ConditionVars.OSLAroused_PlayerTimeRate = OSLArousedNative.GetTimeRate(PlayerRef)
+		ConditionVars.OSLAroused_PlayerTimeRate = 10.0 ;Not used in new system
 
 		if EnableArousalStatBuffs
 			; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
@@ -158,7 +153,7 @@ event OnActorArousalUpdated(string eventName, string strArg, float newExposure, 
 	endif
 
 	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newExposure)
+		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newArousal)
 	endif
 endevent
 
