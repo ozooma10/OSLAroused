@@ -31,7 +31,7 @@ event OnAnimationStart(int tid, bool hasPlayer)
     OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
     ;OArousal mode sends a blast on scene start
-    OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, 5.0, "Sexlab Animation Start")
+    OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, Main.SceneBeginArousalGain, "Sexlab Animation Start")
 endevent
 
 event OnAnimationEnd(int tid, bool hasPlayer)
@@ -82,13 +82,13 @@ Event OnStageStart(int tid, bool HasPlayer)
     endif
 
     if(Main.VictimGainsArousal || controller.Victims.Length == 0)
-        ;OSLAroused_ModInterface.ModifyArousalMultiple(actors, Main.SexlabStageChangeArousalGain, "sexlab scene change")
+        OSLAroused_ModInterface.ModifyArousalMultiple(actors, Main.StageChangeArousalGain, "sexlab scene change")
     else
         int i = actors.Length
         while(i > 0)
             i -= 1
             If (!controller.IsVictim(actors[i]))
-                ;OSLAroused_ModInterface.ModifyArousal(actors[i], Main.SexlabStageChangeArousalGain, "sexlab scene change")
+                OSLAroused_ModInterface.ModifyArousal(actors[i], Main.StageChangeArousalGain, "sexlab scene change")
             EndIf
         endwhile
     endif
@@ -116,12 +116,12 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     ;Update arousal for any victims
     ;@TODO: Tie this into a lewdness system
     if(controller.Victims.Length > 0)
-        OSLAroused_ModInterface.ModifyArousalMultiple(controller.Victims, -10, "being sexlab victim")
+        OSLAroused_ModInterface.ModifyArousalMultiple(controller.Victims, -20, "being sexlab victim")
     endif
 
     ;Lower arousal on orgasm
     ;@TODO: Improve this function
-    int exposureMod = ((controller.TotalTime / controller.GetAnimationRunTime()) * -20.0) as int
+    int exposureMod = ((controller.TotalTime / controller.GetAnimationRunTime()) * -40.0) as int
     ;@TODO: Check for belt
     OSLAroused_ModInterface.ModifyArousal(act, exposureMod, "sexlab orgasm")
 EndEvent
