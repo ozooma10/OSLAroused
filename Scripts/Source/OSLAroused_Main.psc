@@ -29,6 +29,7 @@ bool property OArousedStubLoaded = false Auto Hidden
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 int ToggleArousalBarKey = 157
+int ShowDebugKey = 34
 
 ;Do not directly set these settings. Use the associated Set function (so that dll is updated)
 float Property SceneParticipationBaselineIncrease = 50.0 Auto
@@ -107,6 +108,7 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 	RegisterForKey(ToggleArousalBarKey)
+	RegisterForKey(ShowDebugKey)
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
@@ -135,7 +137,7 @@ EndFunction
 ;Works as expected need to debug through papyrus
 event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
-
+	
 	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
@@ -211,6 +213,15 @@ Event OnKeyDown(int keyCode)
 	If (keyCode == ToggleArousalBarKey && ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Toggle)
 		ArousalBar.UpdateDisplay()
 	EndIf
+
+	if(keyCode == ShowDebugKey)
+		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+		if(crosshairTarget != none)
+			OSLAroused_Debug.ShowDebugStatusMenu(crosshairTarget)
+		else
+			OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
+		endif
+	endif
 EndEvent
 
 ; ========= SETTINGS UPDATE =================
