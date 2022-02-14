@@ -27,6 +27,11 @@ int VictimGainsArousalOid
 int SceneBeginArousalOid
 int StageChangeArousalOid
 
+;Rate of Change
+int ArousalRateOfChangeOid
+int LibidoRateOfChangeOid
+
+
 ;---- Puppet Properties ----
 Actor Property PuppetActor Auto
 int Property SetArousalOid Auto
@@ -240,6 +245,10 @@ function SettingsRightColumn()
     AddHeaderOption("Event-Based Arousal Gains")
     SceneBeginArousalOid = AddSliderOption("Sex Scene Begin", Main.SceneBeginArousalGain, "{1}")
     StageChangeArousalOid = AddSliderOption("Sex Stage Change", Main.StageChangeArousalGain, "{1}")
+    AddHeaderOption("Attribute Change Rates")
+    ArousalRateOfChangeOid = AddSliderOption("Arousal Rate of Change", Main.ArousalChangeRate, "{1}")
+    LibidoRateOfChangeOid = AddSliderOption("Libido Rate of Change", Main.LibidoChangeRate, "{1}")
+
 endfunction
 
 function SystemPage()
@@ -388,6 +397,10 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Amount of Arousal gained when scene starts")
         elseif(optionId == StageChangeArousalOid)
             SetInfoText("Amount of Arousal gained when scene stage changes")
+        elseif(optionId == ArousalRateOfChangeOid)
+            SetInfoText("Percentage of Difference Arousal moves towards Baseline after 1 ingame hour. Ex. Rate 50, Arousal 100, Baseline 50, Arousal is 75 after 1 hour, 62.5 after 2, 56.25 after 3, etc...")
+        elseif(optionId == LibidoRateOfChangeOid)
+            SetInfoText("Percentage of Difference Libido moves towards Arousal after 1 ingame hour. Ex. Rate 10, Arousal 100, Libido 0, Libido is 10 after 1 hour, 19 after 2, 27.1 after 3, etc...")
         endif
     elseif(CurrentPage == "System")
         if(optionId == DumpArousalData)
@@ -480,6 +493,15 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogStartValue(Main.StageChangeArousalGain)
             SetSliderDialogDefaultValue(3)
             SetSliderDialogRange(0, 20)
+        elseif(option == ArousalRateOfChangeOid)
+            SetSliderDialogStartValue(Main.ArousalChangeRate)
+            SetSliderDialogDefaultValue(50)
+            SetSliderDialogRange(0, 100)
+        elseif(option == LibidoRateOfChangeOid)
+            SetSliderDialogStartValue(Main.LibidoChangeRate)
+            SetSliderDialogDefaultValue(10)
+            SetSliderDialogInterval(0.5)
+            SetSliderDialogRange(0, 50)
         endif
     endif
 endevent
@@ -514,11 +536,17 @@ event OnOptionSliderAccept(int option, float value)
             Main.SetViewingNudeBaseline(value)
             SetSliderOptionValue(ViewingNudeBaselineOid, value, "{1}")
         elseif(option == SceneBeginArousalOid)
-            Main.SetSceneParticipantBaseline(value)
+            Main.SceneBeginArousalGain = value
             SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
         elseif(option == StageChangeArousalOid)
-            Main.SetSceneParticipantBaseline(value)
+            Main.StageChangeArousalGain = value
             SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
+        elseif(option == ArousalRateOfChangeOid)
+            Main.SetArousalChangeRate(value)
+            SetSliderOptionValue(ArousalRateOfChangeOid, value, "{1}")
+        elseif(option == LibidoRateOfChangeOid)
+            Main.SetLibidoChangeRate(value)
+            SetSliderOptionValue(LibidoRateOfChangeOid, value, "{1}")
         endif
     endif
 endevent
@@ -559,6 +587,12 @@ event OnOptionDefault(int option)
         elseif(option == StageChangeArousalOid)
             Main.StageChangeArousalGain = 3
             SetSliderOptionValue(StageChangeArousalOid, 3, "{1}")
+        elseif(option == ArousalRateOfChangeOid)
+            Main.SetArousalChangeRate(50)
+            SetSliderOptionValue(ArousalRateOfChangeOid, 50, "{1}")
+        elseif(option == LibidoRateOfChangeOid)
+            Main.SetLibidoChangeRate(10)
+            SetSliderOptionValue(LibidoRateOfChangeOid, 10, "{1}")
         endif
     endif
 endevent

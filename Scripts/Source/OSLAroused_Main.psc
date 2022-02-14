@@ -32,6 +32,11 @@ int ToggleArousalBarKey = 157
 int ShowDebugKey = 34
 
 ;Do not directly set these settings. Use the associated Set function (so that dll is updated)
+;Percentage of Difference from Arousal to Baseline closed after 1 in game hour. (ex. 50 = Arousal 0, Baseline 50, Arousal is 25 after 1 hour, 37.5 after 2 hours, etc...)
+float Property ArousalChangeRate = 50.0 Auto
+;Percentage of Difference from Libido to Arousal closed after 1 in game hour. (ex. 10 = Libido 0, Arousal 50, Libido is 5 after 1 hour, 9.5 after 2 hours, etc...)
+float Property LibidoChangeRate = 10.0 Auto
+
 float Property SceneParticipationBaselineIncrease = 50.0 Auto
 float Property SceneViewingBaselineIncrease = 20.0 Auto
 bool Property VictimGainsArousal = false Auto
@@ -112,6 +117,8 @@ Function OnGameLoaded()
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
+	OSLArousedNativeConfig.SetArousalChangeRate(ArousalChangeRate)
+	OSLArousedNativeConfig.SetLibidoChangeRate(LibidoChangeRate)
 	OSLArousedNativeConfig.SetSceneParticipantBaseline(SceneParticipationBaselineIncrease)
 	OSLArousedNativeConfig.SetSceneViewingBaseline(SceneViewingBaselineIncrease)
 	OSLArousedNativeConfig.SetSceneVictimGainsArousal(VictimGainsArousal)
@@ -231,6 +238,16 @@ endfunction
 
 int function GetToggleArousalBarKeybind()
 	return ToggleArousalBarKey
+endfunction
+
+function SetArousalChangeRate(float newVal)
+	ArousalChangeRate = newVal
+	OSLArousedNativeConfig.SetArousalChangeRate(newVal)
+endfunction
+
+function SetLibidoChangeRate(float newVal)
+	LibidoChangeRate = newVal
+	OSLArousedNativeConfig.SetLibidoChangeRate(newVal)
 endfunction
 
 function SetSceneParticipantBaseline(float newVal)

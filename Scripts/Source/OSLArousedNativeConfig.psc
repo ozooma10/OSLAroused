@@ -1,5 +1,11 @@
 scriptname OSLArousedNativeConfig hidden
 
+;Sets percentage change of arousal over time
+function SetArousalChangeRate(float newVal) global native
+
+;Sets percentage change of libido over time
+function SetLibidoChangeRate(float newVal) global native
+
 ;Sets Amount of Arousal Baseline to gain when partcipating in scene
 function SetSceneParticipantBaseline(float newVal) global native
 
