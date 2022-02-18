@@ -3,8 +3,6 @@ scriptname OSLAroused_ModInterface hidden
 
 float function GetArousal(Actor target) global
     return OSLArousedNative.GetArousal(target)
-    ;Log("GetArousal: " + target.GetDisplayName() + " val: " + arousal)
-    ;return arousal
 endfunction
 
 float function GetArousalMultiplier(Actor target) global

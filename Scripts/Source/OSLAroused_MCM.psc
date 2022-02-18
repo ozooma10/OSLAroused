@@ -84,6 +84,17 @@ int SLAHasStockingsOid
 Keyword SLAHasStockingsKeyword
 bool SLAHasStockingsState
 
+;------- Help ---------
+int HelpOverviewOid
+int HelpCurrentArousalOid
+int HelpBaselineArousalOid
+int HelpLibidoOid
+
+int HelpGainArousalOid
+int HelpLowerArousalOid
+int HelpGainBaselineOid
+int HelpLowerBaselineOid
+
 int function GetVersion()
     return 200 ; 0.2.0
 endfunction
@@ -91,13 +102,14 @@ endfunction
 Event OnConfigInit()
     ModName = "OSLAroused"
 
-    Pages = new String[6]
+    Pages = new String[7]
     Pages[0] = "Overview"
     Pages[1] = "Puppeteer"
     Pages[2] = "Keywords"
     Pages[3] = "UI/Notifications"
     Pages[4] = "Settings"
     Pages[5] = "System"
+    Pages[6] = "Help"
 
 
     ArousalBarDisplayModeNames = new String[4]
@@ -144,6 +156,8 @@ Event OnPageReset(string page)
         SettingsRightColumn()
     elseif(page == "System")
         SystemPage()
+    elseif(page == "Help")
+        HelpPage()
     endif
 EndEvent
 
@@ -187,7 +201,7 @@ function RenderActorStatus(Actor target)
     endif
     AddHeaderOption(target.GetDisplayName())
 
-    ArousalStatusOid = AddTextOption("Arousal", OSLArousedNative.GetArousal(target))
+    ArousalStatusOid = AddTextOption("Current Arousal", OSLArousedNative.GetArousal(target))
     BaselineArousalStatusOid = AddTextOption("Baseline Arousal", OSLArousedNative.GetArousalBaseline(target))
     LibidoStatusOid = AddTextOption("Libido", OSLArousedNative.GetLibido(target))
 endfunction
@@ -256,6 +270,22 @@ function SystemPage()
     DumpArousalData = AddTextOption("Dump Arousal Data", "RUN")
     ClearAllArousalData = AddTextOption("Clear All Arousal Data", "RUN")
     EnableDebugModeOid = AddToggleOption("Enable Debug Logging", Main.EnableDebugMode)
+endfunction
+
+function HelpPage()
+    AddHeaderOption("OSL Aroused Help Topics")
+
+    HelpOverviewOid = AddTextOption("Overview", "Click To Read")
+    HelpCurrentArousalOid = AddTextOption("Current Arousal", "Click To Read")
+    HelpBaselineArousalOid = AddTextOption("Baseline Arousal", "Click To Read")
+    HelpLibidoOid = AddTextOption("Libido", "Click To Read")
+
+    SetCursorPosition(1)
+
+    HelpGainArousalOid = AddTextOption("Gain Arousal", "Click To Read")
+    HelpLowerArousalOid = AddTextOption("Lower Arousal", "Click To Read")
+    HelpGainBaselineOid = AddTextOption("Raise Baseline", "Click To Read")
+    HelpLowerBaselineOid = AddTextOption("Lower Arousal", "Click To Read")
 endfunction
 
 event OnOptionSelect(int optionId)
@@ -337,6 +367,24 @@ event OnOptionSelect(int optionId)
         ElseIf (optionId == EnableDebugModeOid)
             Main.EnableDebugMode = !Main.EnableDebugMode
             SetToggleOptionValue(EnableDebugModeOid, Main.EnableDebugMode)
+        endif
+    ElseIf(CurrentPage == "Help")
+        if(optionId == HelpOverviewOid)
+            Debug.MessageBox("OSL Aroused uses a robust Arousal Management system, where both \"state\" and \"event\" based arousal modification is supported, Baseline Arousal represents the state of arousal the player \"wants\" to be in. And their Current Arousal will gradually move towards that value. Certain events can directly manipulate your arousal, which will gradually \"normalize\" back to baseline")
+        elseif(optionId == HelpCurrentArousalOid)
+            Debug.MessageBox("Current Arousal represents your overall arousal level in range (0-100). It will Gradually move towards your Baseline Arousal over time. Certain Events/Other Mods can increase/decrease your current arousal, and it will gradually normalize back towards your Baseline Arousal.")
+        elseif(optionId == HelpBaselineArousalOid)
+            Debug.MessageBox("Baseline Arousal represents a baseline arousal level that your current arousal wants to move towards. It is Modified by certain states (such as erotic clothing, worn devices, nudity/having sex, Libido etc..)")
+        elseif(optionId == HelpLibidoOid)
+            Debug.MessageBox("Libido represets the minimum value your BaselineArousal can drop to (excluding arousal supression states). It will very slowly move towards your Current Arousal value. Remaining at high arousal will increase your libido towards that arousal value, and to lower libido you need to keep your arousal below your current libido value")
+        elseif(optionId == HelpGainArousalOid)
+            Debug.MessageBox("Arousal Gains can be triggered from other Mods. Additionally, OSLAroused will cause direct arousal gains when a sex scene begins, and whenever the stage is changed.")
+        elseif(optionId == HelpLowerArousalOid)
+            Debug.MessageBox("Arousal Reduction can be triggered from other Mods. Additionally, OSLAroused will cause direct arousal Reduction when an actor orgasms.")
+        elseif(optionId == HelpGainBaselineOid)
+            Debug.MessageBox("Baseline Is Raised.")
+        elseif(optionId == HelpLowerBaselineOid)
+            Debug.MessageBox("Baseline Reduction can be triggered from other Mods. Additionally, OSLAroused will cause direct arousal Reduction when an actor orgasms.")
         endif
     EndIf
 endevent
