@@ -115,13 +115,13 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
 
     ;Update arousal for any victims
     ;@TODO: Tie this into a lewdness system
-    if(controller.Victims.Length > 0)
-        OSLAroused_ModInterface.ModifyArousalMultiple(controller.Victims, -20, "being sexlab victim")
-    endif
+    ; if(controller.Victims.Length > 0)
+    ;     OSLAroused_ModInterface.ModifyArousalMultiple(controller.Victims, -20, "being sexlab victim")
+    ; endif
 
     ;Lower arousal on orgasm
     ;@TODO: Improve this function
-    int exposureMod = ((controller.TotalTime / controller.GetAnimationRunTime()) * -40.0) as int
+    int exposureMod = Main.OrgasmArousalChange as int
     ;@TODO: Check for belt
     OSLAroused_ModInterface.ModifyArousal(act, exposureMod, "sexlab orgasm")
 EndEvent

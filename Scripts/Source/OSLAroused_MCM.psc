@@ -27,6 +27,8 @@ int VictimGainsArousalOid
 int SceneBeginArousalOid
 int StageChangeArousalOid
 
+int OrgasmArousalLossOid
+
 ;Rate of Change
 int ArousalRateOfChangeOid
 int LibidoRateOfChangeOid
@@ -259,6 +261,7 @@ function SettingsRightColumn()
     AddHeaderOption("Event-Based Arousal Gains")
     SceneBeginArousalOid = AddSliderOption("Sex Scene Begin", Main.SceneBeginArousalGain, "{1}")
     StageChangeArousalOid = AddSliderOption("Sex Stage Change", Main.StageChangeArousalGain, "{1}")
+    OrgasmArousalLossOid = AddSliderOption("Orgasm Arousal Loss", -Main.OrgasmArousalChange, "{1}")
     AddHeaderOption("Attribute Change Rates")
     ArousalRateOfChangeOid = AddSliderOption("Arousal Rate of Change", Main.ArousalChangeRate, "{1}")
     LibidoRateOfChangeOid = AddSliderOption("Libido Rate of Change", Main.LibidoChangeRate, "{1}")
@@ -382,9 +385,9 @@ event OnOptionSelect(int optionId)
         elseif(optionId == HelpLowerArousalOid)
             Debug.MessageBox("Arousal Reduction can be triggered from other Mods. Additionally, OSLAroused will cause direct arousal Reduction when an actor orgasms.")
         elseif(optionId == HelpGainBaselineOid)
-            Debug.MessageBox("Baseline Is Raised.")
+            Debug.MessageBox("Baseline Is Raised From Being Nude, Being Near Nude Actors, Partcipating in Sex, Spectating Sex and Wearing EroticArmor.")
         elseif(optionId == HelpLowerBaselineOid)
-            Debug.MessageBox("Baseline Reduction can be triggered from other Mods. Additionally, OSLAroused will cause direct arousal Reduction when an actor orgasms.")
+            Debug.MessageBox("Baseline can be reduced by removing any equipment/states that raise baseline (ex. Clothes, Devices etc). Baseline is actively supressed when the player is outside in the rain.")
         endif
     EndIf
 endevent
@@ -445,6 +448,8 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Amount of Arousal gained when scene starts")
         elseif(optionId == StageChangeArousalOid)
             SetInfoText("Amount of Arousal gained when scene stage changes")
+        elseif(optionId == OrgasmArousalLossOid)
+            SetInfoText("Amount of Arousal lost when Actor Orgasms")
         elseif(optionId == ArousalRateOfChangeOid)
             SetInfoText("Percentage of Difference Arousal moves towards Baseline after 1 ingame hour. Ex. Rate 50, Arousal 100, Baseline 50, Arousal is 75 after 1 hour, 62.5 after 2, 56.25 after 3, etc...")
         elseif(optionId == LibidoRateOfChangeOid)
@@ -541,6 +546,10 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogStartValue(Main.StageChangeArousalGain)
             SetSliderDialogDefaultValue(3)
             SetSliderDialogRange(0, 20)
+        elseif(Option == OrgasmArousalLossOid)
+            SetSliderDialogStartValue(-Main.OrgasmArousalChange)
+            SetSliderDialogDefaultValue(50)
+            SetSliderDialogRange(0, 100)
         elseif(option == ArousalRateOfChangeOid)
             SetSliderDialogStartValue(Main.ArousalChangeRate)
             SetSliderDialogDefaultValue(50)
@@ -589,6 +598,9 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == StageChangeArousalOid)
             Main.StageChangeArousalGain = value
             SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
+        elseif(option == OrgasmArousalLossOid)
+            Main.OrgasmArousalChange = -value
+            SetSliderOptionValue(OrgasmArousalLossOid, value, "{1}")
         elseif(option == ArousalRateOfChangeOid)
             Main.SetArousalChangeRate(value)
             SetSliderOptionValue(ArousalRateOfChangeOid, value, "{1}")
@@ -635,6 +647,9 @@ event OnOptionDefault(int option)
         elseif(option == StageChangeArousalOid)
             Main.StageChangeArousalGain = 3
             SetSliderOptionValue(StageChangeArousalOid, 3, "{1}")
+        elseif(option == OrgasmArousalLossOid)
+            Main.OrgasmArousalChange = -50
+            SetSliderOptionValue(OrgasmArousalLossOid, 50, "{1}")
         elseif(option == ArousalRateOfChangeOid)
             Main.SetArousalChangeRate(50)
             SetSliderOptionValue(ArousalRateOfChangeOid, 50, "{1}")
