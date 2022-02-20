@@ -19,6 +19,7 @@ int OArousedStubLoadedOid
 int EnableStatBuffsOid
 int BeingNudeBaselineOid
 int ViewingNudeBaselineOid
+int EroticArmorBaselineOid
 int SceneParticipantBaselineOid
 int SceneViewerBaselineOid
 int VictimGainsArousalOid
@@ -254,6 +255,7 @@ function SettingsLeftColumn()
     SceneViewerBaselineOid = AddSliderOption("Spectating Sex", Main.SceneViewingBaselineIncrease, "{1}")
     BeingNudeBaselineOid = AddSliderOption("Being Nude", Main.NudityBaselineIncrease, "{1}")
     ViewingNudeBaselineOid = AddSliderOption("Viewing Nude", Main.ViewingNudityBaselineIncrease, "{1}")
+    EroticArmorBaselineOid = AddSliderOption("Wearing Erotic Armor", Main.EroticArmorBaselineIncrease, "{1}")
 
 endfunction
 
@@ -438,6 +440,8 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Amount Baseline Arousal is increased by when nude")
         elseif(optionId == ViewingNudeBaselineOid)
             SetInfoText("Amount Baseline Arousal is increased by when near naked NPCs")
+        elseif(optionId == EroticArmorBaselineOid)
+            SetInfoText("Amount Baseline Arousal is increased by when nearing Armor with EroticArmor keyword")
         elseif(optionId == SceneParticipantBaselineOid)
             SetInfoText("Amount Baseline Arousal is increased by when participating in scene")
         elseif(optionId == SceneViewerBaselineOid)
@@ -538,6 +542,10 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogStartValue(Main.ViewingNudityBaselineIncrease)
             SetSliderDialogDefaultValue(20)
             SetSliderDialogRange(0, 50)
+        elseif(option == EroticArmorBaselineOid)
+            SetSliderDialogStartValue(Main.EroticArmorBaselineIncrease)
+            SetSliderDialogDefaultValue(20)
+            SetSliderDialogRange(0, 50)
         elseif(option == SceneBeginArousalOid)
             SetSliderDialogStartValue(Main.SceneBeginArousalGain)
             SetSliderDialogDefaultValue(10)
@@ -592,6 +600,9 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == ViewingNudeBaselineOid)
             Main.SetViewingNudeBaseline(value)
             SetSliderOptionValue(ViewingNudeBaselineOid, value, "{1}")
+        elseif(option == EroticArmorBaselineOid)
+            Main.SetEroticArmorBaseline(value)
+            SetSliderOptionValue(EroticArmorBaselineOid, value, "{1}")
         elseif(option == SceneBeginArousalOid)
             Main.SceneBeginArousalGain = value
             SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
@@ -641,6 +652,9 @@ event OnOptionDefault(int option)
         elseif(option == ViewingNudeBaselineOid)
             Main.SetViewingNudeBaseline(20)
             SetSliderOptionValue(ViewingNudeBaselineOid, 20, "{1}")
+        elseif(option == EroticArmorBaselineOid)
+            Main.SetEroticArmorBaseline(20)
+            SetSliderOptionValue(EroticArmorBaselineOid, 20, "{1}")
         elseif(option == SceneBeginArousalOid)
             Main.SceneBeginArousalGain = 10
             SetSliderOptionValue(SceneBeginArousalOid, 10, "{1}")

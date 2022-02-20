@@ -42,6 +42,7 @@ float Property SceneViewingBaselineIncrease = 20.0 Auto
 bool Property VictimGainsArousal = false Auto
 float Property NudityBaselineIncrease = 30.0 Auto
 float Property ViewingNudityBaselineIncrease = 20.0 Auto
+float Property EroticArmorBaselineIncrease = 20.0 Auto
 
 float Property SceneBeginArousalGain = 10.0 Auto
 float Property StageChangeArousalGain = 3.0 Auto
@@ -125,6 +126,7 @@ Function OnGameLoaded()
 	OSLArousedNativeConfig.SetSceneVictimGainsArousal(VictimGainsArousal)
 	OSLArousedNativeConfig.SetBeingNudeBaseline(NudityBaselineIncrease)
 	OSLArousedNativeConfig.SetViewingNudeBaseline(ViewingNudityBaselineIncrease)
+	OSLArousedNativeConfig.SetEroticArmorBaseline(EroticArmorBaselineIncrease, OSLAroused_MCM.Get().EroticArmorKeyword)
 
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
@@ -274,6 +276,11 @@ endfunction
 function SetViewingNudeBaseline(float newVal)
 	ViewingNudityBaselineIncrease = newVal
 	OSLArousedNativeConfig.SetViewingNudeBaseline(newVal)
+endfunction
+
+function SetEroticArmorBaseline(float newVal)
+	EroticArmorBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetEroticArmorBaseline(newVal, OSLAroused_MCM.Get().EroticArmorKeyword)
 endfunction
 
 function SetShowArousalKeybind(int newKey)
