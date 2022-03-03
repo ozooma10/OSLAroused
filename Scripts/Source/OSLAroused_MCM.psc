@@ -471,6 +471,7 @@ event OnOptionHighlight(int optionId)
 endevent
 
 event OnOptionMenuOpen(int optionId)
+    Debug.Notification("OnOptionMenuOptn: " + optionId + " Page: " + CurrentPage + " alm " + ArmorListMenuOid)
     if (CurrentPage == "Keywords")
         if(optionId == ArmorListMenuOid)
             LoadArmorList()
@@ -687,9 +688,11 @@ endevent
 
 ;Based off code from MrowrPurr :)
 function LoadArmorList()
+    Log("Loading Armor List")
     SelectedArmor = none
     Actor player = Game.GetPlayer()
     int numItems = player.GetNumItems()
+    Log("Loading Armor List, Playter has: " + numItems)
     int index = 0
     FoundArmorNames = new string[128]
     FoundArmorIds = new int[128]
@@ -706,6 +709,7 @@ function LoadArmorList()
 
     FoundArmorNames = Utility.ResizeStringArray(FoundArmorNames, foundItemIndex)
     FoundArmorIds = Utility.ResizeIntArray(FoundArmorIds, foundItemIndex)
+    Log("Loading Armor List, ArmorIds : " + FoundArmorIds.Length + " index: " + foundItemIndex)
     SetMenuDialogOptions(FoundArmorNames)
 endfunction
 
