@@ -55,6 +55,9 @@ bool Property EnableDebugMode = true Auto
 ; OStim Specific
 bool Property RequireLowArousalToEndScene Auto
 
+; Device Related
+float[] Property DeviceBaselineModifications Auto
+
 ; ============ SPELLS =============
 ;OAroused Spells
 Spell Property SLADesireSpell Auto
@@ -69,7 +72,6 @@ Event OnInit()
 	;Initialize multiplier to 2 for player
 	;OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
 	;OSLArousedNative.SetArousal(PlayerRef, 5)
-
 	OnGameLoaded()
 
 	Log("OSLAroused installed")
@@ -79,6 +81,7 @@ EndEvent
 Function OnGameLoaded()
 	RegisterForModEvent("OSLA_ActorArousalUpdated", "OnActorArousalUpdated")
 	RegisterForModEvent("OSLA_ActorNakedUpdated", "OnActorNakedUpdated")
+	InitializeDeviceSettings()
 
 	SlaStubLoaded = false
 	OArousedStubLoaded = false
@@ -127,6 +130,9 @@ Function OnGameLoaded()
 	OSLArousedNativeConfig.SetBeingNudeBaseline(NudityBaselineIncrease)
 	OSLArousedNativeConfig.SetViewingNudeBaseline(ViewingNudityBaselineIncrease)
 	OSLArousedNativeConfig.SetEroticArmorBaseline(EroticArmorBaselineIncrease, OSLAroused_MCM.Get().EroticArmorKeyword)
+
+	OSLArousedNativeConfig.SetDeviceTypesBaseline1(DeviceBaselineModifications[0], DeviceBaselineModifications[1], DeviceBaselineModifications[2], DeviceBaselineModifications[3], DeviceBaselineModifications[4], DeviceBaselineModifications[5], DeviceBaselineModifications[6], DeviceBaselineModifications[7], DeviceBaselineModifications[8], DeviceBaselineModifications[9])
+	OSLArousedNativeConfig.SetDeviceTypesBaseline2(DeviceBaselineModifications[10], DeviceBaselineModifications[11], DeviceBaselineModifications[12], DeviceBaselineModifications[13], DeviceBaselineModifications[14], DeviceBaselineModifications[15], DeviceBaselineModifications[16], DeviceBaselineModifications[17], DeviceBaselineModifications[18])
 
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
@@ -283,6 +289,11 @@ function SetEroticArmorBaseline(float newVal)
 	OSLArousedNativeConfig.SetEroticArmorBaseline(newVal, OSLAroused_MCM.Get().EroticArmorKeyword)
 endfunction
 
+function SetDeviceTypeBaselineChange(int deviceTypeId, float newVal)
+	DeviceBaselineModifications[deviceTypeId] = newVal
+	OSLArousedNativeConfig.SetDeviceTypeBaseline(deviceTypeId, newVal)
+endfunction
+
 function SetShowArousalKeybind(int newKey)
 	UnregisterForKey(CheckArousalKey)
 	CheckArousalKey = newKey
@@ -293,6 +304,31 @@ function SetToggleArousalBarKeybind(int newKey)
 	UnregisterForKey(ToggleArousalBarKey)
 	ToggleArousalBarKey = newKey
 	RegisterForKey(newKey)
+endfunction
+
+function InitializeDeviceSettings()
+	if(DeviceBaselineModifications.Length < 19)
+		DeviceBaselineModifications = new float[19]
+		DeviceBaselineModifications[0] = 20
+		DeviceBaselineModifications[1] = 5
+		DeviceBaselineModifications[2] = 5
+		DeviceBaselineModifications[3] = 5
+		DeviceBaselineModifications[4] = 10
+		DeviceBaselineModifications[5] = 10
+		DeviceBaselineModifications[6] = 10
+		DeviceBaselineModifications[7] = 10
+		DeviceBaselineModifications[8] = 5
+		DeviceBaselineModifications[9] = 10
+		DeviceBaselineModifications[10] = 20
+		DeviceBaselineModifications[11] = 20
+		DeviceBaselineModifications[12] = 10
+		DeviceBaselineModifications[13] = 5
+		DeviceBaselineModifications[14] = 5
+		DeviceBaselineModifications[15] = 20
+		DeviceBaselineModifications[16] = 20
+		DeviceBaselineModifications[17] = 10
+		DeviceBaselineModifications[18] = 10
+	endif
 endfunction
 
 ; ========== DEBUG RELATED ==================

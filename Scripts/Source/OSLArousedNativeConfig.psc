@@ -23,3 +23,8 @@ function SetViewingNudeBaseline(float newVal) global native
 
 ;Sets amount of Arousal Baseline to gain when wearing erotic armor (and sends keyword to use)
 function SetEroticArmorBaseline(float newVal, Keyword eroticKeyword) global native
+
+;Sets amount of Arousal Baseline to gain for a given device type
+function SetDeviceTypesBaseline1(float belt, float collar, float legCuffs, float armCuffs, float bra, float gag, float piercingsNipple, float piercingsVaginal, float blindfold, float harness) global native
+function SetDeviceTypesBaseline2(float plugVag, float plugAnal, float corset, float boots, float gloves, float hood, float suit, float heavyBondage, float bondageMittens) global native
+function SetDeviceTypeBaseline(int deviceTypeId, float newVal) global native

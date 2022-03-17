@@ -24,6 +24,11 @@ int SceneParticipantBaselineOid
 int SceneViewerBaselineOid
 int VictimGainsArousalOid
 
+int DeviceBaselineGainTypeOid
+int DeviceBaselineGainValueOid
+int SelectedDeviceTypeId
+string[] DeviceTypeNames
+
 ;Event-Based
 int SceneBeginArousalOid
 int StageChangeArousalOid
@@ -263,6 +268,9 @@ function SettingsLeftColumn()
     BeingNudeBaselineOid = AddSliderOption("Being Nude", Main.NudityBaselineIncrease, "{1}")
     ViewingNudeBaselineOid = AddSliderOption("Viewing Nude", Main.ViewingNudityBaselineIncrease, "{1}")
     EroticArmorBaselineOid = AddSliderOption("Wearing Erotic Armor", Main.EroticArmorBaselineIncrease, "{1}")
+    AddHeaderOption("Device Baseline Gains")
+    DeviceBaselineGainTypeOid = AddMenuOption("Device Type", "")
+    DeviceBaselineGainValueOid = AddSliderOption("Selected Type Gain", 0)
 
 endfunction
 
@@ -521,6 +529,10 @@ event OnOptionMenuOpen(int optionId)
             SetMenuDialogDefaultIndex(1)
             SetMenuDialogOptions(ArousalBarDisplayModeNames)
         endif
+    elseif (CurrentPage == "Settings")
+        if(optionId == DeviceBaselineGainTypeOid)
+            LoadDeviceTypesList();
+        endif
     endif
 endevent
 
@@ -535,6 +547,12 @@ event OnOptionMenuAccept(int optionId, int index)
         if(optionId == ArousalBarDisplayModeOid)
             Main.ArousalBar.SetDisplayMode(index)
             SetMenuOptionValue(optionId, ArousalBarDisplayModeNames[index])
+        endif
+    elseif (CurrentPage == "Settings")
+        if(optionId == DeviceBaselineGainTypeOid)
+            SelectedDeviceTypeId = index
+            SetMenuOptionValue(optionId, DeviceTypeNames[index])
+            SetSliderOptionValue(DeviceBaselineGainValueOid, Main.DeviceBaselineModifications[index])
         endif
     endif
 endevent
@@ -585,6 +603,10 @@ event OnOptionSliderOpen(int option)
         elseif(option == EroticArmorBaselineOid)
             SetSliderDialogStartValue(Main.EroticArmorBaselineIncrease)
             SetSliderDialogDefaultValue(20)
+            SetSliderDialogRange(0, 50)
+        elseif(option == DeviceBaselineGainValueOid)
+            SetSliderDialogStartValue(Main.DeviceBaselineModifications[SelectedDeviceTypeId])
+            SetSliderDialogDefaultValue(Main.DeviceBaselineModifications[SelectedDeviceTypeId])
             SetSliderDialogRange(0, 50)
         elseif(option == SceneBeginArousalOid)
             SetSliderDialogStartValue(Main.SceneBeginArousalGain)
@@ -643,6 +665,9 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == EroticArmorBaselineOid)
             Main.SetEroticArmorBaseline(value)
             SetSliderOptionValue(EroticArmorBaselineOid, value, "{1}")
+        elseif(option == DeviceBaselineGainValueOid)
+            Main.SetDeviceTypeBaselineChange(SelectedDeviceTypeId, value)
+            SetSliderOptionValue(DeviceBaselineGainValueOid, value)
         elseif(option == SceneBeginArousalOid)
             Main.SceneBeginArousalGain = value
             SetSliderOptionValue(SceneParticipantBaselineOid, value, "{1}")
@@ -776,6 +801,30 @@ bool function CheckKeyword(Keyword armorKeyword, int oid)
     endif
 
     return keywordEnabled
+endfunction
+
+function LoadDeviceTypesList()
+    DeviceTypeNames = new string[19]
+    DeviceTypeNames[0] = "Belt"
+    DeviceTypeNames[1] = "Collar"
+    DeviceTypeNames[2] = "LegCuffs"
+    DeviceTypeNames[3] = "ArmCuffs"
+    DeviceTypeNames[4] = "Bra"
+    DeviceTypeNames[5] = "Gag"
+    DeviceTypeNames[6] = "PiercingsNipple"
+    DeviceTypeNames[7] = "PiercingsVaginal"
+    DeviceTypeNames[8] = "Blindfold"
+    DeviceTypeNames[9] = "Harness"
+    DeviceTypeNames[10] = "PlugVaginal"
+    DeviceTypeNames[11] = "PlugAnal"
+    DeviceTypeNames[12] = "Corset"
+    DeviceTypeNames[13] = "Boots"
+    DeviceTypeNames[14] = "Gloves"
+    DeviceTypeNames[15] = "Hood"
+    DeviceTypeNames[16] = "Suit"
+    DeviceTypeNames[17] = "HeavyBondage"
+    DeviceTypeNames[18] = "BondageMittens"
+    SetMenuDialogOptions(DeviceTypeNames)
 endfunction
 
 function Log(string msg) global
