@@ -113,3 +113,7 @@ function ClearAllArousalData() global native
 ;======= Explainer =========
 bool function IsNaked(Actor actor) global native
 bool function IsViewingNaked(Actor actor) global native
+bool function IsInScene(Actor actor) global native
+bool function IsViewingScene(Actor actor) global native
+bool function IsWearingEroticArmor(Actor actor) global native
+float function WornDeviceBaselineGain(Actor actor) global native

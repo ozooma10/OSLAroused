@@ -295,6 +295,25 @@ function ExplainPage()
         AddTextOption("Actor Naked", "0")
         AddTextOption("Viewing Nude Actor", "0")
     endif
+
+    if(OSLArousedNative.IsInScene(PuppetActor))
+        AddTextOption("In Scene", Main.SceneParticipationBaselineIncrease)
+        AddTextOption("Viewing Sex Scene", "0")
+    elseif (OSLArousedNative.IsViewingScene(PuppetActor))
+        AddTextOption("In Scene", "0")
+        AddTextOption("Viewing Sex Scene", Main.SceneViewingBaselineIncrease)
+    else
+        AddTextOption("In Scene", "0")
+        AddTextOption("Viewing Sex Scene", "0")
+    endif
+
+    if(OSLArousedNative.IsWearingEroticArmor(PuppetActor))
+        AddTextOption("Worn Erotic Armor", Main.EroticArmorBaselineIncrease)
+    else
+        AddTextOption("Worn Erotic Armor", "0")
+    endif
+
+    AddTextOption("Worn Devices Gain", OSLArousedNative.WornDeviceBaselineGain(PuppetActor))
 endfunction
 
 function HelpPage()
