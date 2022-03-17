@@ -109,3 +109,7 @@ float function ClampFloat(float val, float min, float max) global native
 function DumpArousalData() global native
 function ClearSecondaryArousalData() global native
 function ClearAllArousalData() global native
+
+;======= Explainer =========
+bool function IsNaked(Actor actor) global native
+bool function IsViewingNaked(Actor actor) global native

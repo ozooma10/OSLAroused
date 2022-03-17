@@ -87,6 +87,10 @@ int SLAHasStockingsOid
 Keyword SLAHasStockingsKeyword
 bool SLAHasStockingsState
 
+;------ Baseline Explain -------
+int ExplainNakedOid
+int ExplainSpectatingNakedOid
+
 ;------- Help ---------
 int HelpOverviewOid
 int HelpCurrentArousalOid
@@ -99,20 +103,21 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 200 ; 0.2.0
+    return 201 ; 0.2.0
 endfunction
 
 Event OnConfigInit()
     ModName = "OSLAroused"
 
-    Pages = new String[7]
+    Pages = new String[8]
     Pages[0] = "Overview"
     Pages[1] = "Puppeteer"
     Pages[2] = "Keywords"
     Pages[3] = "UI/Notifications"
     Pages[4] = "Settings"
     Pages[5] = "System"
-    Pages[6] = "Help"
+    Pages[6] = "Explain"
+    Pages[7] = "Help"
 
 
     ArousalBarDisplayModeNames = new String[4]
@@ -159,6 +164,8 @@ Event OnPageReset(string page)
         SettingsRightColumn()
     elseif(page == "System")
         SystemPage()
+    elseif(page == "Explain")
+        ExplainPage()
     elseif(page == "Help")
         HelpPage()
     endif
@@ -275,6 +282,19 @@ function SystemPage()
     DumpArousalData = AddTextOption("Dump Arousal Data", "RUN")
     ClearAllArousalData = AddTextOption("Clear All Arousal Data", "RUN")
     EnableDebugModeOid = AddToggleOption("Enable Debug Logging", Main.EnableDebugMode)
+endfunction
+
+function ExplainPage()
+    if(OSLArousedNative.IsNaked(PuppetActor))
+        AddTextOption("Actor Naked", Main.NudityBaselineIncrease)
+        AddTextOption("Viewing Nude Actor", "0")
+    elseif (OSLArousedNative.IsViewingNaked(PuppetActor))
+        AddTextOption("Actor Naked", "0")
+        AddTextOption("Viewing Nude Actor", Main.ViewingNudityBaselineIncrease)
+    else
+        AddTextOption("Actor Naked", "0")
+        AddTextOption("Viewing Nude Actor", "0")
+    endif
 endfunction
 
 function HelpPage()
