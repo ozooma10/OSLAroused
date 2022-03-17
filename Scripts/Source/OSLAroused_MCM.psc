@@ -121,7 +121,7 @@ Event OnConfigInit()
     Pages[3] = "UI/Notifications"
     Pages[4] = "Settings"
     Pages[5] = "System"
-    Pages[6] = "Explain"
+    Pages[6] = "Baseline Status"
     Pages[7] = "Help"
 
 
@@ -169,8 +169,8 @@ Event OnPageReset(string page)
         SettingsRightColumn()
     elseif(page == "System")
         SystemPage()
-    elseif(page == "Explain")
-        ExplainPage()
+    elseif(page == "Baseline Status")
+        BaselineStatusPage()
     elseif(page == "Help")
         HelpPage()
     endif
@@ -292,7 +292,8 @@ function SystemPage()
     EnableDebugModeOid = AddToggleOption("Enable Debug Logging", Main.EnableDebugMode)
 endfunction
 
-function ExplainPage()
+function BaselineStatusPage()
+    AddHeaderOption("Baseline Arousal Contributions")
     if(OSLArousedNative.IsNaked(PuppetActor))
         AddTextOption("Actor Naked", Main.NudityBaselineIncrease)
         AddTextOption("Viewing Nude Actor", "0")
