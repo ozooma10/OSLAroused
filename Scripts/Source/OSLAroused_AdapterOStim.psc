@@ -34,13 +34,8 @@ Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 	OSLAroused_Main main = OSLAroused_Main.Get()
 	actor player = main.PlayerRef
 
-	float reduceBy = (OStim.GetTimeSinceStart() / 120) * OStim.SexExcitementMult
-    reduceBy = OSLArousedNative.ClampFloat(reduceBy, 0.75, 1.5)
-    reduceBy = reduceBy * 55.0
-    reduceBy = reduceBy + OSLArousedNative.GenerateRandomFloat(-5.0, 5.0)
-    reduceBy = -reduceBy 
-
-	OSLAroused_ModInterface.ModifyArousal(orgasmer, reduceBy, "ostim orgasm")
+    Log("OStimOrgasm: " + orgasmer)
+	OSLAroused_ModInterface.ModifyArousal(orgasmer, Main.OrgasmArousalChange, "ostim orgasm")
 
 	CalculateStimMultipliers(OStim)
 
@@ -69,7 +64,7 @@ Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 
 	CalculateStimMultipliers(OStim)
 
-	OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, 5.0 * OStim.SexExcitementMult, "OStim Scene Start")
+	OSLAroused_ModInterface.ModifyArousalMultiple(ActiveSceneActors, Main.SceneBeginArousalGain, "OStim Scene Start")
 
 	Actor player = main.PlayerRef
 	if (main.RequireLowArousalToEndScene && OStim.IsPlayerInvolved() && !OStim.HasSceneMetadata("SpecialEndConditions") && !(OStim.isvictim(player)))
