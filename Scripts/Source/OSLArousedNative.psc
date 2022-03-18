@@ -22,6 +22,16 @@ float function ModifyArousal(Actor actor, float value) global native
 ;Modifies all actors in array by sepcified amount (relative to current arousal)
 function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 
+;Retrieves Arousal Baseline
+float function GetArousalBaseline(Actor actor) global native
+
+;Retrieves Actor Base Libido
+float function GetLibido(Actor actor) global native
+;Sets Actor Base Libido
+float function SetLibido(Actor actor, float newVal) global native
+
+
+; ======================= REVALUATE BELOW =================================================
 
 ;Modifies the arousal multiplier by the specified amount
 float function ModifyArousalMultiplier(Actor actor, float value) global native
@@ -87,6 +97,8 @@ function UpdateHourlySceneViewerArousalModifier(float arousalMod) global native
 bool function AddKeywordToForm(Form form, Keyword keyword) global native
 bool function RemoveKeywordFromForm(Form form, Keyword keyword) global native
 
+bool function FormHasKeywordString(form form, string kwd) global native
+
 ; ==================== UTILITIES =========================
 
 float function GenerateRandomFloat(float min, float max) global native
@@ -97,3 +109,11 @@ float function ClampFloat(float val, float min, float max) global native
 function DumpArousalData() global native
 function ClearSecondaryArousalData() global native
 function ClearAllArousalData() global native
+
+;======= Explainer =========
+bool function IsNaked(Actor actor) global native
+bool function IsViewingNaked(Actor actor) global native
+bool function IsInScene(Actor actor) global native
+bool function IsViewingScene(Actor actor) global native
+bool function IsWearingEroticArmor(Actor actor) global native
+float function WornDeviceBaselineGain(Actor actor) global native

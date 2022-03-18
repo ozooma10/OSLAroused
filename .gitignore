@@ -3,10 +3,12 @@ skyrimse.ppj
 .vscode/launch.json
 .vscode/tasks.json
 meta.ini
-*.pex
+Scripts/*.pex
 SKSE/Plugins/OSLAroused_SKSE.dll
 SKSE/Plugins/OSLAroused_SKSE.pdb
 SKSE/Plugins/OSLAroused_SKSE.pdb
 SKSE/Plugins/OSLAroused_SKSE.dll
 OSLAroused FOMOD/00 Data/*
 OSLAroused FOMOD/DLL/*
+SKSE/Plugins/OSLAroused_SKSE.dll
+SKSE/Plugins/OSLAroused_SKSE.pdb

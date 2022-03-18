@@ -29,24 +29,34 @@ bool property OArousedStubLoaded = false Auto Hidden
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 int ToggleArousalBarKey = 157
-bool EnableNudityIncreasesArousal = true
-float HourlyNudityArousalModifier = 20.0
-bool Property EnableArousalStatBuffs = true Auto
-float DefaultArousalMultiplier = 2.0
+int ShowDebugKey = 34
 
-float HourlySceneParticipantArousalModifier = 20.0
-float HourlySceneViewerArousalModifier = 20.0
+;Do not directly set these settings. Use the associated Set function (so that dll is updated)
+;Percentage of Difference from Arousal to Baseline closed after 1 in game hour. (ex. 50 = Arousal 0, Baseline 50, Arousal is 25 after 1 hour, 37.5 after 2 hours, etc...)
+float Property ArousalChangeRate = 50.0 Auto
+;Percentage of Difference from Libido to Arousal closed after 1 in game hour. (ex. 10 = Libido 0, Arousal 50, Libido is 5 after 1 hour, 9.5 after 2 hours, etc...)
+float Property LibidoChangeRate = 10.0 Auto
 
+float Property SceneParticipationBaselineIncrease = 50.0 Auto
+float Property SceneViewingBaselineIncrease = 20.0 Auto
 bool Property VictimGainsArousal = false Auto
+float Property NudityBaselineIncrease = 30.0 Auto
+float Property ViewingNudityBaselineIncrease = 20.0 Auto
+float Property EroticArmorBaselineIncrease = 20.0 Auto
+
+float Property SceneBeginArousalGain = 10.0 Auto
+float Property StageChangeArousalGain = 3.0 Auto
+float Property OrgasmArousalChange = -50.0 Auto
+
+bool Property EnableArousalStatBuffs = true Auto
 
 bool Property EnableDebugMode = true Auto
 
 ; OStim Specific
 bool Property RequireLowArousalToEndScene Auto
 
-; Sexlab Specific
-bool Property SexlabStageChangeIncreasesArousal = true Auto
-float Property SexlabStageChangeArousalGain = 3.0 Auto
+; Device Related
+float[] Property DeviceBaselineModifications Auto
 
 ; ============ SPELLS =============
 ;OAroused Spells
@@ -60,9 +70,8 @@ Spell Property OArousedRelievedSpell Auto
 
 Event OnInit()
 	;Initialize multiplier to 2 for player
-	OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
-	OSLArousedNative.SetArousal(PlayerRef, 5)
-
+	;OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
+	;OSLArousedNative.SetArousal(PlayerRef, 5)
 	OnGameLoaded()
 
 	Log("OSLAroused installed")
@@ -72,6 +81,7 @@ EndEvent
 Function OnGameLoaded()
 	RegisterForModEvent("OSLA_ActorArousalUpdated", "OnActorArousalUpdated")
 	RegisterForModEvent("OSLA_ActorNakedUpdated", "OnActorNakedUpdated")
+	InitializeDeviceSettings()
 
 	SlaStubLoaded = false
 	OArousedStubLoaded = false
@@ -108,13 +118,21 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 	RegisterForKey(ToggleArousalBarKey)
+	RegisterForKey(ShowDebugKey)
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
-	OSLArousedNative.UpdatePlayerNudityCheck(EnableNudityIncreasesArousal)
-	OSLArousedNative.UpdateHourlyNudityArousalModifier(HourlyNudityArousalModifier)
-	OSLArousedNative.UpdateHourlySceneParticipantArousalModifier(HourlySceneParticipantArousalModifier)
-	OSLArousedNative.UpdateHourlySceneViewerArousalModifier(HourlySceneViewerArousalModifier)
+	OSLArousedNativeConfig.SetArousalChangeRate(ArousalChangeRate)
+	OSLArousedNativeConfig.SetLibidoChangeRate(LibidoChangeRate)
+	OSLArousedNativeConfig.SetSceneParticipantBaseline(SceneParticipationBaselineIncrease)
+	OSLArousedNativeConfig.SetSceneViewingBaseline(SceneViewingBaselineIncrease)
+	OSLArousedNativeConfig.SetSceneVictimGainsArousal(VictimGainsArousal)
+	OSLArousedNativeConfig.SetBeingNudeBaseline(NudityBaselineIncrease)
+	OSLArousedNativeConfig.SetViewingNudeBaseline(ViewingNudityBaselineIncrease)
+	OSLArousedNativeConfig.SetEroticArmorBaseline(EroticArmorBaselineIncrease, OSLAroused_MCM.Get().EroticArmorKeyword)
+
+	OSLArousedNativeConfig.SetDeviceTypesBaseline1(DeviceBaselineModifications[0], DeviceBaselineModifications[1], DeviceBaselineModifications[2], DeviceBaselineModifications[3], DeviceBaselineModifications[4], DeviceBaselineModifications[5], DeviceBaselineModifications[6], DeviceBaselineModifications[7], DeviceBaselineModifications[8], DeviceBaselineModifications[9])
+	OSLArousedNativeConfig.SetDeviceTypesBaseline2(DeviceBaselineModifications[10], DeviceBaselineModifications[11], DeviceBaselineModifications[12], DeviceBaselineModifications[13], DeviceBaselineModifications[14], DeviceBaselineModifications[15], DeviceBaselineModifications[16], DeviceBaselineModifications[17], DeviceBaselineModifications[18])
 
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
@@ -132,21 +150,16 @@ Function OnGameLoaded()
 	endif
 EndFunction
 
-;@TODO: This causes Error: Incorrect number of arguments passed. Expected 1, got 4. to throw in papyrus log.
 ;Works as expected need to debug through papyrus
-event OnActorArousalUpdated(string eventName, string strArg, float newExposure, Form sender)
+event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
-
-	;Need to get amount of arousal to add on top of exposure 
-	float lastOrgasmArousal = OSLArousedNative.GetLastOrgasmFrustrationArousal(act)
-	float newArousal = newExposure + lastOrgasmArousal
-
+	
 	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
 		ConditionVars.OSLAroused_PlayerArousal = newArousal
-		ConditionVars.OSLAroused_PlayerTimeRate = OSLArousedNative.GetTimeRate(PlayerRef)
+		ConditionVars.OSLAroused_PlayerTimeRate = 10.0 ;Not used in new system
 
 		if EnableArousalStatBuffs
 			; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
@@ -158,14 +171,14 @@ event OnActorArousalUpdated(string eventName, string strArg, float newExposure, 
 	endif
 
 	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newExposure)
+		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newArousal)
 	endif
 endevent
 
 event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat, Form sender)
 	bool isActorNaked = actorNakedFloat > 0
 	Actor act = sender as Actor
-	Log("OnActorNakedUpdated for: " + act.GetDisplayName() + " - newNaked: " + isActorNaked)
+	;Log("OnActorNakedUpdated for: " + act.GetDisplayName() + " - newNaked: " + isActorNaked)
 	
 	if(SlaFrameworkStub && act)
 		SlaFrameworkStub.OnActorNakedUpdated(act, isActorNaked)
@@ -188,36 +201,6 @@ Function ApplyArousedEffects()
 	PlayerRef.AddSpell(SLADesireSpell, false)
 EndFunction
 
-Function ApplyOArousedEffects(int arousal)
-	if arousal >= 40
-		arousal -= 40
-		float percent = arousal / 60.0
-		ApplyHornySpell((percent * 25) as int)
-	elseif arousal <= 10
-		ApplyReliefSpell(10)
-	else 
-		RemoveAllArousalSpells()
-	endif 
-endfunction
-
-Function ApplyHornySpell(int magnitude)
-	OArousedHornySpell.SetNthEffectMagnitude(0, magnitude)
-	OArousedHornySpell.SetNthEffectMagnitude(1, magnitude)
-
-	playerref.RemoveSpell(OArousedRelievedSpell)
-	playerref.RemoveSpell(OArousedHornySpell)
-	playerref.AddSpell(OArousedHornySpell, false)
-EndFunction
-
-Function ApplyReliefSpell(int magnitude)
-	OArousedRelievedSpell.SetNthEffectMagnitude(0, magnitude)
-	OArousedRelievedSpell.SetNthEffectMagnitude(1, magnitude)
-
-	playerref.RemoveSpell(OArousedHornySpell)
-	playerref.RemoveSpell(OArousedRelievedSpell)
-	playerref.AddSpell(OArousedRelievedSpell, false)
-EndFunction
-
 Function RemoveAllArousalSpells()
 	playerref.RemoveSpell(SLADesireSpell)
 	playerref.RemoveSpell(OArousedHornySpell)
@@ -231,6 +214,7 @@ Event OnKeyDown(int keyCode)
 	if keyCode == CheckArousalKey
 		
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
+		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
 		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
 			ArousalBar.UpdateDisplay()
 		endif
@@ -245,8 +229,16 @@ Event OnKeyDown(int keyCode)
 	If (keyCode == ToggleArousalBarKey && ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Toggle)
 		ArousalBar.UpdateDisplay()
 	EndIf
-EndEvent
 
+	if(keyCode == ShowDebugKey)
+		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+		if(crosshairTarget != none)
+			OSLAroused_Debug.ShowDebugStatusMenu(crosshairTarget)
+		else
+			OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
+		endif
+	endif
+EndEvent
 
 ; ========= SETTINGS UPDATE =================
 int function GetShowArousalKeybind()
@@ -257,52 +249,49 @@ int function GetToggleArousalBarKeybind()
 	return ToggleArousalBarKey
 endfunction
 
-float function GetDefaultArousalMultiplier()
-	return DefaultArousalMultiplier
+function SetArousalChangeRate(float newVal)
+	ArousalChangeRate = newVal
+	OSLArousedNativeConfig.SetArousalChangeRate(newVal)
 endfunction
 
-bool function GetEnableNudityIncreasesArousal()
-	return EnableNudityIncreasesArousal
+function SetLibidoChangeRate(float newVal)
+	LibidoChangeRate = newVal
+	OSLArousedNativeConfig.SetLibidoChangeRate(newVal)
 endfunction
 
-float function GetHourlyNudityArousalModifier()
-	return HourlyNudityArousalModifier
+function SetSceneParticipantBaseline(float newVal)
+	SceneParticipationBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetSceneParticipantBaseline(newVal)
 endfunction
 
-float function GetHourlySceneParticipantArousalModifier()
-	return HourlySceneParticipantArousalModifier
+function SetSceneViewingBaseline(float newVal)
+	SceneViewingBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetSceneViewingBaseline(newVal)
 endfunction
 
-float function GetHourlySceneViewerArousalModifier()
-	return HourlySceneViewerArousalModifier
+function SetSceneVictimGainsArousal(bool newVal)
+	VictimGainsArousal = newVal
+	OSLArousedNativeConfig.SetSceneVictimGainsArousal(newVal)
 endfunction
 
-function SetDefaultArousalMultiplier(float newVal)
-	if(newVal < 0 || newVal > 10)
-		return
-	endif
-	DefaultArousalMultiplier = newVal
-	OSLArousedNative.UpdateDefaultArousalMultiplier(newVal)
+function SetBeingNudeBaseline(float newVal)
+	NudityBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetBeingNudeBaseline(newVal)
 endfunction
 
-function SetPlayerNudityIncreasesArousal(bool newVal)
-	EnableNudityIncreasesArousal = newVal
-	OSLArousedNative.UpdatePlayerNudityCheck(newVal)
+function SetViewingNudeBaseline(float newVal)
+	ViewingNudityBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetViewingNudeBaseline(newVal)
 endfunction
 
-function SetHourlyNudityArousalModifier(float newVal)
-	HourlyNudityArousalModifier = newVal
-	OSLArousedNative.UpdateHourlyNudityArousalModifier(newVal)
+function SetEroticArmorBaseline(float newVal)
+	EroticArmorBaselineIncrease = newVal
+	OSLArousedNativeConfig.SetEroticArmorBaseline(newVal, OSLAroused_MCM.Get().EroticArmorKeyword)
 endfunction
 
-function SetHourlySceneParticipantArousalModifier(float newVal)
-	HourlySceneParticipantArousalModifier = newVal
-	OSLArousedNative.UpdateHourlySceneParticipantArousalModifier(newVal)
-endfunction
-
-function SetHourlySceneViewerArousalModifier(float newVal)
-	HourlySceneViewerArousalModifier = newVal
-	OSLArousedNative.UpdateHourlySceneViewerArousalModifier(newVal)
+function SetDeviceTypeBaselineChange(int deviceTypeId, float newVal)
+	DeviceBaselineModifications[deviceTypeId] = newVal
+	OSLArousedNativeConfig.SetDeviceTypeBaseline(deviceTypeId, newVal)
 endfunction
 
 function SetShowArousalKeybind(int newKey)
@@ -315,6 +304,31 @@ function SetToggleArousalBarKeybind(int newKey)
 	UnregisterForKey(ToggleArousalBarKey)
 	ToggleArousalBarKey = newKey
 	RegisterForKey(newKey)
+endfunction
+
+function InitializeDeviceSettings()
+	if(DeviceBaselineModifications.Length < 19)
+		DeviceBaselineModifications = new float[19]
+		DeviceBaselineModifications[0] = 20
+		DeviceBaselineModifications[1] = 5
+		DeviceBaselineModifications[2] = 5
+		DeviceBaselineModifications[3] = 5
+		DeviceBaselineModifications[4] = 10
+		DeviceBaselineModifications[5] = 10
+		DeviceBaselineModifications[6] = 10
+		DeviceBaselineModifications[7] = 10
+		DeviceBaselineModifications[8] = 5
+		DeviceBaselineModifications[9] = 10
+		DeviceBaselineModifications[10] = 20
+		DeviceBaselineModifications[11] = 20
+		DeviceBaselineModifications[12] = 10
+		DeviceBaselineModifications[13] = 5
+		DeviceBaselineModifications[14] = 5
+		DeviceBaselineModifications[15] = 20
+		DeviceBaselineModifications[16] = 20
+		DeviceBaselineModifications[17] = 10
+		DeviceBaselineModifications[18] = 10
+	endif
 endfunction
 
 ; ========== DEBUG RELATED ==================
