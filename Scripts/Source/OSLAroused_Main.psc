@@ -49,6 +49,7 @@ float Property StageChangeArousalGain = 3.0 Auto
 float Property OrgasmArousalChange = -50.0 Auto
 
 bool Property EnableArousalStatBuffs = true Auto
+bool Property EnableSOSIntegration = true Auto 
 
 bool Property EnableDebugMode = true Auto
 
@@ -167,8 +168,9 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 		else  
 			RemoveAllArousalSpells()
 		endif
-
 	endif
+
+	UpdateSOSPosition(act, newArousal)
 
 	if(SlaFrameworkStub)
 		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newArousal)
@@ -212,7 +214,6 @@ Event OnKeyDown(int keyCode)
 		return 
 	endif
 	if keyCode == CheckArousalKey
-		
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
 		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
 		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
@@ -239,6 +240,23 @@ Event OnKeyDown(int keyCode)
 	; 	endif
 	; endif
 EndEvent
+
+function UpdateSOSPosition(Actor act, float arousal)
+	if(act == none || !EnableSOSIntegration)
+		return
+	elseif(OSLArousedNative.IsInScene(act))
+		return
+	endif
+	int pos = ((arousal as int) / 4) - 14;
+	if(pos < -9)
+		Debug.SendAnimationEvent(act, "SOSFlaccid")
+	elseif(pos > 9)
+		Debug.SendAnimationEvent(act, "SOSBend9")
+	else
+		Debug.SendAnimationEvent(act, "SOSBend" + pos)
+	endif
+endfunction
+
 
 ; ========= SETTINGS UPDATE =================
 int function GetShowArousalKeybind()

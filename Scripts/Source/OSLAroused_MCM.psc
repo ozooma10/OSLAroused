@@ -16,7 +16,6 @@ int OArousedStubLoadedOid
 
 ;---- Settings ----
 ;Baseline
-int EnableStatBuffsOid
 int BeingNudeBaselineOid
 int ViewingNudeBaselineOid
 int EroticArmorBaselineOid
@@ -39,6 +38,9 @@ int OrgasmArousalLossOid
 int ArousalRateOfChangeOid
 int LibidoRateOfChangeOid
 
+;Settings
+int EnableStatBuffsOid
+int EnableSOSIntegrationOid
 
 ;---- Puppet Properties ----
 Actor Property PuppetActor Auto
@@ -108,7 +110,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 200 ; 0.2.0
+    return 201 ; 2.0.1
 endfunction
 
 Event OnConfigInit()
@@ -260,6 +262,7 @@ endfunction
 
 function SettingsLeftColumn()
     EnableStatBuffsOid = AddToggleOption("Enable Arousal Stat (De)Buffs", Main.EnableArousalStatBuffs)
+    EnableSOSIntegrationOid = AddToggleOption("Enable SOS Integration", Main.EnableSOSIntegration)
 
     AddHeaderOption("Baseline Arousal Gains")
     SceneParticipantBaselineOid = AddSliderOption("Participating In Sex", Main.SceneParticipationBaselineIncrease, "{1}")
@@ -349,6 +352,9 @@ event OnOptionSelect(int optionId)
         elseif(optionId == EnableStatBuffsOid)
             Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
             SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
+        elseif(optionId == EnableSOSIntegrationOid)
+            Main.EnableSOSIntegration = !Main.EnableSOSIntegration
+            SetToggleOptionValue(EnableSOSIntegrationOid, Main.EnableSOSIntegration)
         endif
     ElseIf (CurrentPage == "Keywords")
         if(optionId == EroticArmorOid)
@@ -484,6 +490,8 @@ event OnOptionHighlight(int optionId)
     elseif(CurrentPage == "Settings")
         if(optionId == EnableStatBuffsOid)
             SetInfoText("Will Enable Arousal based Stat Buffs")
+        elseif(optionId == EnableSOSIntegrationOid)
+            SetInfoText("Will Enable Arousal effecting shrong state. Requires SOS to be installed")
         elseif(optionId == BeingNudeBaselineOid)
             SetInfoText("Amount Baseline Arousal is increased by when nude")
         elseif(optionId == ViewingNudeBaselineOid)
