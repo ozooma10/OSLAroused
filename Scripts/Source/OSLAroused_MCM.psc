@@ -519,7 +519,6 @@ event OnOptionHighlight(int optionId)
 endevent
 
 event OnOptionMenuOpen(int optionId)
-    Debug.Notification("OnOptionMenuOptn: " + optionId + " Page: " + CurrentPage + " alm " + ArmorListMenuOid)
     if (CurrentPage == "Keywords")
         if(optionId == ArmorListMenuOid)
             LoadArmorList()

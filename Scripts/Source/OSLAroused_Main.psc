@@ -230,14 +230,14 @@ Event OnKeyDown(int keyCode)
 		ArousalBar.UpdateDisplay()
 	EndIf
 
-	if(keyCode == ShowDebugKey)
-		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
-		if(crosshairTarget != none)
-			OSLAroused_Debug.ShowDebugStatusMenu(crosshairTarget)
-		else
-			OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
-		endif
-	endif
+	; if(keyCode == ShowDebugKey)
+	; 	Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+	; 	if(crosshairTarget != none)
+	; 		OSLAroused_Debug.ShowDebugStatusMenu(crosshairTarget)
+	; 	else
+	; 		OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
+	; 	endif
+	; endif
 EndEvent
 
 ; ========= SETTINGS UPDATE =================

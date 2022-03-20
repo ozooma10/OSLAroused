@@ -15,13 +15,11 @@ endfunction
 
 float function ModifyArousal(Actor target, float value, string reason = "unspecified") global
     Log("ModifyArousal: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
-    Debug.Notification(target.GetDisplayName() + " Arousal Modified By: " + value + " for: " + reason)
     return OSLArousedNative.ModifyArousal(target, value)
 endfunction
 
 float function SetArousal(Actor target, float value, string reason = "unspecified") global
     Log("ModifyASetArousalrousal: " + target.GetDisplayName() + " set to val: " + value + " Reason: " + reason)
-    Debug.Notification(target.GetDisplayName() + " Arousal Set to: " + value + " for: " + reason)
     return OSLArousedNative.SetArousal(target, value)
 endfunction
 
