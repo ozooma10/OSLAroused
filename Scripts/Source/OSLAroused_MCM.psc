@@ -10,6 +10,7 @@ EndFunction
 int ArousalStatusOid
 int BaselineArousalStatusOid
 int LibidoStatusOid
+int ArousalMultiplierStatusOid
 
 int SLAStubLoadedOid
 int OArousedStubLoadedOid
@@ -46,6 +47,7 @@ int EnableSOSIntegrationOid
 Actor Property PuppetActor Auto
 int Property SetArousalOid Auto
 int Property SetLibidoOid Auto
+int Property SetArousalMultiplierOid Auto
 
 float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
@@ -110,7 +112,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 201 ; 2.0.1
+    return 202 ; 2.0.2
 endfunction
 
 Event OnConfigInit()
@@ -221,6 +223,7 @@ function RenderActorStatus(Actor target)
     ArousalStatusOid = AddTextOption("Current Arousal", OSLArousedNative.GetArousal(target))
     BaselineArousalStatusOid = AddTextOption("Baseline Arousal", OSLArousedNative.GetArousalBaseline(target))
     LibidoStatusOid = AddTextOption("Libido", OSLArousedNative.GetLibido(target))
+    ArousalMultiplierStatusOid = AddTextOption("Arousal Multiplier", OSLArousedNative.GetArousalMultiplier(target))
 endfunction
 
 function PuppeteerPage(Actor target)
@@ -235,6 +238,9 @@ function PuppeteerPage(Actor target)
 
     float libido = OSLArousedNative.GetLibido(PuppetActor)
     SetLibidoOid = AddSliderOption("Libido", ((libido * 100) / 100) as int, "{1}")
+    
+    float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
+    SetArousalMultiplierOid = AddSliderOption("Arousal Multiplier", arousalMultiplier, "{1}")
 endfunction
 
 function KeywordPage()
@@ -465,6 +471,8 @@ event OnOptionHighlight(int optionId)
         SetInfoText("Target value for arousal to move towards. Based off Libido plus any additonal effects (ex. Lewd Clothing, Nudity, Devious Devices, Participating/viewing adult scenes)")
     elseif(optionId == LibidoStatusOid)
         SetInfoText("Base arousal before any effects. Will very slowly move towards actor arousal over time. Keep arousal low to reduce.")
+    elseif(optionId == ArousalMultiplierStatusOid)
+        SetInfoText("Multiplier applied to any Arousal Gains")
     endif
     
     if(CurrentPage == "Overview")
@@ -580,6 +588,12 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogDefaultValue(0)
             SetSliderDialogRange(0, 100)
             SetSliderDialogInterval(1)
+        ElseIf (option == SetArousalMultiplierOid)
+            float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
+            SetSliderDialogStartValue(arousalMultiplier)
+            SetSliderDialogDefaultValue(kDefaultArousalMultiplier)
+            SetSliderDialogRange(0, 10)
+            SetSliderDialogInterval(0.2)
         endif
     ElseIf(CurrentPage == "UI/Notifications")
         if(option == ArousalBarXOid)
@@ -649,6 +663,9 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == SetLibidoOid)
             OSLArousedNative.SetLibido(PuppetActor, value)
             SetSliderOptionValue(SetLibidoOid, value, "{1}")
+        elseif(option == SetArousalMultiplierOid)
+            OSLArousedNative.SetArousalMultiplier(PuppetActor, value)
+            SetSliderOptionValue(SetArousalMultiplierOid, value, "{1}")
         endif
     elseif(currentPage == "UI/Notifications")
         if(option == ArousalBarXOid)
@@ -703,6 +720,9 @@ event OnOptionDefault(int option)
         elseif(option == SetLibidoOid)
             OSLArousedNative.SetLibido(PuppetActor, 0)
             SetSliderOptionValue(SetLibidoOid, 0, "{1}")
+        elseif(option == SetArousalMultiplierOid)
+            OSLArousedNative.SetArousalMultiplier(PuppetActor, kDefaultArousalMultiplier)
+            SetSliderOptionValue(SetArousalMultiplierOid, kDefaultArousalMultiplier, "{1}")
         endif
     elseif(currentPage == "UI")
         if(option == ArousalBarXOid)

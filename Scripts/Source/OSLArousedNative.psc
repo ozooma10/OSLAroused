@@ -30,9 +30,6 @@ float function GetLibido(Actor actor) global native
 ;Sets Actor Base Libido
 float function SetLibido(Actor actor, float newVal) global native
 
-
-; ======================= REVALUATE BELOW =================================================
-
 ;Modifies the arousal multiplier by the specified amount
 float function ModifyArousalMultiplier(Actor actor, float value) global native
 
@@ -42,24 +39,9 @@ float function SetArousalMultiplier(Actor actor, float value) global native
 ;Gets the actors current arousal multiplier
 float function GetArousalMultiplier(Actor actor) global native
 
-;Gets the "Raw" Exposure value 
-;In OAroused mode this is equavalent to GetArousal
-float function GetExposure(Actor actor) global native
 
 ;Gets the number of days since this actor last orgasmed
 float function GetDaysSinceLastOrgasm(Actor actor) global native
-
-;Gets the amount of arousal added on top of exposure based off last orgasm date
-float function GetLastOrgasmFrustrationArousal(Actor actor) global native
-
-;sets to val
-float function SetTimeRate(Actor actor, float value) global native
-
-;Modifies by amount
-float function ModifyTimeRate(Actor actor, float value) global native
-
-;Gets the Actors current time rate
-float function GetTimeRate(Actor actor) global native
 
 ; =================== ACTOR STATE =======================
 

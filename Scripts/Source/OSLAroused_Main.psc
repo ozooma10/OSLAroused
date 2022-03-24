@@ -119,7 +119,7 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 	RegisterForKey(ToggleArousalBarKey)
-	RegisterForKey(ShowDebugKey)
+	; RegisterForKey(ShowDebugKey)
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
@@ -234,7 +234,7 @@ Event OnKeyDown(int keyCode)
 	; if(keyCode == ShowDebugKey)
 	; 	Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
 	; 	if(crosshairTarget != none)
-	; 		OSLAroused_Debug.ShowDebugStatusMenu(crosshairTarget)
+	; 		OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
 	; 	else
 	; 		OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
 	; 	endif
