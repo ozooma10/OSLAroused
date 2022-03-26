@@ -91,7 +91,9 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	while i > 0
 		i -= 1
 		if OStim.GetTimesOrgasm(ActiveSceneActors[i]) < 1
-			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], 20.0, "OStim end - no orgasm")
+			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], main.SceneEndArousalNoOrgasmChange, "OStim end - no orgasm")
+		else
+			OSLAroused_ModInterface.ModifyArousal(ActiveSceneActors[i], main.SceneEndArousalOrgasmChange, "OStim end - orgasm")
 		endif 
 	endwhile
 	

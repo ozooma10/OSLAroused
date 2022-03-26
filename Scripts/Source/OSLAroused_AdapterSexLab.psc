@@ -2,6 +2,8 @@ ScriptName OSLAroused_AdapterSexLab Extends Quest Hidden
 
 OSLAroused_Main Main
 
+bool SLSODetected = false
+
 bool function LoadAdapter()
 	;Looks like Sexlab not Installed
     if (Game.GetModByName("SexLab.esm") == 255)
@@ -14,6 +16,8 @@ bool function LoadAdapter()
 	RegisterForModEvent("HookAnimationEnd", "OnAnimationEnd")
 	RegisterForModEvent("HookStageStart", "OnStageStart")
 	RegisterForModEvent("SexLabOrgasm", "OnSexLabOrgasm")
+
+    SLSODetected = Game.GetModByName("SLSO.esp") != 255
     return true
 endfunction
 
@@ -53,9 +57,17 @@ event OnAnimationEnd(int tid, bool hasPlayer)
     while(i > 0)
         i -= 1
         actor act = controller.Positions[i]
-        If ((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() < 1 && (!controller.IsVictim(act) || Main.VictimGainsArousal))
-            OSLAroused_ModInterface.ModifyArousal(act, 20.0, "sexlab end - no orgasm")
-        EndIf
+
+
+        if(SLSODetected)
+            if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - SLSO orgasm")
+            elseif(Main.VictimGainsArousal || !controller.IsVictim(act))
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
+            endif
+        else
+            OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - no orgasm (no SLSO)")
+        endif
     endwhile
 endevent
 

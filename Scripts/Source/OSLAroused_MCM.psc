@@ -35,6 +35,9 @@ int StageChangeArousalOid
 
 int OrgasmArousalLossOid
 
+int SceneEndArousalNoOrgasmOid
+int SceneEndArousalOrgasmOid
+
 ;Rate of Change
 int ArousalRateOfChangeOid
 int LibidoRateOfChangeOid
@@ -112,7 +115,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 202 ; 2.0.2
+    return 203 ; 2.0.3
 endfunction
 
 Event OnConfigInit()
@@ -288,6 +291,8 @@ function SettingsRightColumn()
     SceneBeginArousalOid = AddSliderOption("Sex Scene Begin", Main.SceneBeginArousalGain, "{1}")
     StageChangeArousalOid = AddSliderOption("Sex Stage Change", Main.StageChangeArousalGain, "{1}")
     OrgasmArousalLossOid = AddSliderOption("Orgasm Arousal Loss", -Main.OrgasmArousalChange, "{1}")
+    SceneEndArousalNoOrgasmOid = AddSliderOption("Sex Scene End (No Orgasm)", Main.SceneEndArousalNoOrgasmChange, "{1}")
+    SceneEndArousalOrgasmOid = AddSliderOption("Sex Scene End (SLSO Orgasm)", Main.SceneEndArousalOrgasmChange, "{1}")
     AddHeaderOption("Attribute Change Rates")
     ArousalRateOfChangeOid = AddSliderOption("Arousal Rate of Change", Main.ArousalChangeRate, "{1}")
     LibidoRateOfChangeOid = AddSliderOption("Libido Rate of Change", Main.LibidoChangeRate, "{1}")
@@ -518,6 +523,10 @@ event OnOptionHighlight(int optionId)
             SetInfoText("Amount of Arousal gained when scene stage changes")
         elseif(optionId == OrgasmArousalLossOid)
             SetInfoText("Amount of Arousal lost when Actor Orgasms")
+        elseif(optionId == SceneEndArousalNoOrgasmOid)
+            SetInfoText("Amount of Arousal Changed when Actor scene ends and actor did not orgasm (or SLSO not installed). [And not victim when VictimGainsArousal is false]")
+        elseif(optionId == SceneEndArousalOrgasmOid)
+            SetInfoText("Amount of Arousal Changed when Actor scene ends and actor did orgasm (and SLSO installed)")
         elseif(optionId == ArousalRateOfChangeOid)
             SetInfoText("Percentage of Difference Arousal moves towards Baseline after 1 ingame hour. Ex. Rate 50, Arousal 100, Baseline 50, Arousal is 75 after 1 hour, 62.5 after 2, 56.25 after 3, etc...")
         elseif(optionId == LibidoRateOfChangeOid)
@@ -642,6 +651,14 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogStartValue(-Main.OrgasmArousalChange)
             SetSliderDialogDefaultValue(50)
             SetSliderDialogRange(0, 100)
+        elseif(Option == SceneEndArousalNoOrgasmOid)
+            SetSliderDialogStartValue(Main.SceneEndArousalNoOrgasmChange)
+            SetSliderDialogDefaultValue(-40)
+            SetSliderDialogRange(-100, 50)
+        elseif(Option == SceneEndArousalOrgasmOid)
+            SetSliderDialogStartValue(Main.SceneEndArousalOrgasmChange)
+            SetSliderDialogDefaultValue(0)
+            SetSliderDialogRange(-100, 50)
         elseif(option == ArousalRateOfChangeOid)
             SetSliderDialogStartValue(Main.ArousalChangeRate)
             SetSliderDialogDefaultValue(50)
@@ -702,6 +719,12 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == OrgasmArousalLossOid)
             Main.OrgasmArousalChange = -value
             SetSliderOptionValue(OrgasmArousalLossOid, value, "{1}")
+        elseif(option == SceneEndArousalNoOrgasmOid)
+            Main.SceneEndArousalNoOrgasmChange = value
+            SetSliderOptionValue(SceneEndArousalNoOrgasmOid, value, "{1}")
+        elseif(option == SceneEndArousalOrgasmOid)
+            Main.SceneEndArousalOrgasmChange = value
+            SetSliderOptionValue(SceneEndArousalOrgasmOid, value, "{1}")
         elseif(option == ArousalRateOfChangeOid)
             Main.SetArousalChangeRate(value)
             SetSliderOptionValue(ArousalRateOfChangeOid, value, "{1}")
@@ -757,6 +780,12 @@ event OnOptionDefault(int option)
         elseif(option == OrgasmArousalLossOid)
             Main.OrgasmArousalChange = -50
             SetSliderOptionValue(OrgasmArousalLossOid, 50, "{1}")
+        elseif(option == SceneEndArousalNoOrgasmOid)
+            Main.SceneEndArousalNoOrgasmChange = -40
+            SetSliderOptionValue(SceneEndArousalNoOrgasmOid, -40, "{1}")
+        elseif(option == SceneEndArousalOrgasmOid)
+            Main.SceneEndArousalOrgasmChange = 0
+            SetSliderOptionValue(SceneEndArousalOrgasmOid, 0, "{1}")
         elseif(option == ArousalRateOfChangeOid)
             Main.SetArousalChangeRate(50)
             SetSliderOptionValue(ArousalRateOfChangeOid, 50, "{1}")

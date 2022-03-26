@@ -47,6 +47,8 @@ float Property EroticArmorBaselineIncrease = 20.0 Auto
 float Property SceneBeginArousalGain = 10.0 Auto
 float Property StageChangeArousalGain = 3.0 Auto
 float Property OrgasmArousalChange = -50.0 Auto
+float Property SceneEndArousalNoOrgasmChange = -40.0 Auto
+float Property SceneEndArousalOrgasmChange = 0.0 Auto
 
 bool Property EnableArousalStatBuffs = true Auto
 bool Property EnableSOSIntegration = true Auto 
