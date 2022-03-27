@@ -114,8 +114,12 @@ int HelpLowerArousalOid
 int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
+int function GetVersionNum() global
+    return 205 ; 2.1.0
+endfunction
+
 int function GetVersion()
-    return 203 ; 2.0.3
+    return GetVersionNum()
 endfunction
 
 Event OnConfigInit()

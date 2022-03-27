@@ -21,6 +21,9 @@ OSLAroused_AdapterOStim Property OStimAdapter Auto
 bool property SexLabAdapterLoaded = false Auto Hidden
 OSLAroused_AdapterSexLab Property SexLabAdapter Auto
 
+bool property ToysAdapterLoaded = false Auto Hidden
+OSLAroused_AdapterToys Property ToysAdapter Auto
+
 bool property InvalidSlaFound = false Auto Hidden
 bool property SlaStubLoaded = false Auto Hidden
 bool property InvalidOArousedFound = false Auto Hidden
@@ -71,6 +74,10 @@ Spell Property OArousedRelievedSpell Auto
 
 ; ============== CORE LIFECYCLE ===================
 
+int function GetVersionNum()
+    return OSLAroused_MCM.GetVersionNum()
+endfunction
+
 Event OnInit()
 	;Initialize multiplier to 2 for player
 	;OSLArousedNative.SetArousalMultiplier(PlayerRef, DefaultArousalMultiplier)
@@ -115,7 +122,10 @@ Function OnGameLoaded()
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
 
 	SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
-	Log("SexLab IntegrationStatus: " + SexLabAdapterLoaded)
+	Log("SexLab Integration Status: " + SexLabAdapterLoaded)
+	
+	ToysAdapterLoaded = ToysAdapter.LoadAdapter()
+	Log("Toys Integration Status: " + ToysAdapterLoaded)
 
 	OSLAroused_MCM.Get().OnGameLoaded()
 
