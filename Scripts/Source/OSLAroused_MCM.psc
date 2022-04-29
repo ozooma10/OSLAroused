@@ -118,7 +118,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 205 ; 2.0.5
+    return 210 ; 2.1.0
 endfunction
 
 Event OnConfigInit()
@@ -146,7 +146,8 @@ Event OnVersionUpdate(Int NewVersion)
     If (CurrentVersion != 0)
         OnConfigInit()
 
-        if (CurrentVersion < 205)
+        if (CurrentVersion < 210)
+            Log("Regenerated")
             Main.SetDeviceTypeBaselineChange(15, 0)
             Main.SetDeviceTypeBaselineChange(16, 5)
             Main.SetArousalChangeRate(20)
