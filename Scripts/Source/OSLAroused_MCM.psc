@@ -115,7 +115,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 203 ; 2.0.3
+    return 204 ; 2.0.5
 endfunction
 
 Event OnConfigInit()
@@ -811,19 +811,23 @@ endevent
 function LoadArmorList()
     Log("Loading Armor List")
     SelectedArmor = none
+
     Actor player = Game.GetPlayer()
-    int numItems = player.GetNumItems()
-    Log("Loading Armor List, Playter has: " + numItems)
+    Form[] equippedArmor = OSLArousedNativeActor.GetAllEquippedArmor(player)
+    Log("Loaded Armor List, Playter has: " + equippedArmor.Length + " Equipped Armor")
     int index = 0
-    FoundArmorNames = new string[128]
-    FoundArmorIds = new int[128]
+    FoundArmorNames = new string[64]
+    FoundArmorIds = new int[64]
     int foundItemIndex = 0
-    while(index < numItems && foundItemIndex < 128)
-        Armor armorItem = player.GetNthForm(index) as Armor
+    while(index < equippedArmor.Length && foundItemIndex < 64)
+        Armor armorItem = equippedArmor[index] as Armor
         if(armorItem)
-            FoundArmorNames[foundItemIndex] = armorItem.GetName()
-            FoundArmorIds[foundItemIndex] = index
-            foundItemIndex += 1
+            string armorName = armorItem.GetName()
+            if(armorName)
+                FoundArmorNames[foundItemIndex] = armorItem.GetName()
+                FoundArmorIds[foundItemIndex] = index
+                foundItemIndex += 1
+            endif
         endif
         index += 1
     endwhile
