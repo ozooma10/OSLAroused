@@ -164,7 +164,6 @@ Event OnGameLoaded()
 EndEvent
 
 Event OnPageReset(string page)
-    PrintActiveDevices()
     SetCursorFillMode(TOP_TO_BOTTOM)
     if(page == "Overview")
         OverviewLeftColumn()
@@ -343,6 +342,19 @@ function BaselineStatusPage()
     endif
 
     AddTextOption("Worn Devices Gain", OSLArousedNative.WornDeviceBaselineGain(PuppetActor))
+
+    SetCursorPosition(1)
+    int[] activeDeviceTypeIds = OSLArousedNativeActor.GetActiveDeviceTypeIds(Game.GetPlayer())
+    if(activeDeviceTypeIds.Length > 0)
+        AddHeaderOption("Detected Devious Devices")
+        string[] deviceTypeNamesList = GetDeviceTypeNames()
+        int index = 0
+        while(index < activeDeviceTypeIds.Length)
+            AddTextOption(deviceTypeNamesList[activeDeviceTypeIds[index]], Main.DeviceBaselineModifications[activeDeviceTypeIds[index]])
+            index += 1
+        endwhile
+    endif
+
 endfunction
 
 function HelpPage()
@@ -871,9 +883,7 @@ bool function CheckKeyword(Keyword armorKeyword, int oid)
     return keywordEnabled
 endfunction
 
-function PrintActiveDevices()
-    int[] activeDeviceTypeIds = OSLArousedNativeActor.GetActiveDeviceTypeIds(Game.GetPlayer())
-
+string[] function GetDeviceTypeNames()
     DeviceTypeNames = new string[19]
     DeviceTypeNames[0] = "Belt"
     DeviceTypeNames[1] = "Collar"
@@ -894,37 +904,11 @@ function PrintActiveDevices()
     DeviceTypeNames[16] = "Suit"
     DeviceTypeNames[17] = "HeavyBondage"
     DeviceTypeNames[18] = "BondageMittens"
-
-    Log("Printing Active Devices:")
-    int index = 0
-    while(index < activeDeviceTypeIds.Length)
-        Log(DeviceTypeNames[activeDeviceTypeIds[index]])
-        index += 1
-    endwhile
+    return DeviceTypeNames
 endfunction
 
 function LoadDeviceTypesList()
-    DeviceTypeNames = new string[19]
-    DeviceTypeNames[0] = "Belt"
-    DeviceTypeNames[1] = "Collar"
-    DeviceTypeNames[2] = "LegCuffs"
-    DeviceTypeNames[3] = "ArmCuffs"
-    DeviceTypeNames[4] = "Bra"
-    DeviceTypeNames[5] = "Gag"
-    DeviceTypeNames[6] = "PiercingsNipple"
-    DeviceTypeNames[7] = "PiercingsVaginal"
-    DeviceTypeNames[8] = "Blindfold"
-    DeviceTypeNames[9] = "Harness"
-    DeviceTypeNames[10] = "PlugVaginal"
-    DeviceTypeNames[11] = "PlugAnal"
-    DeviceTypeNames[12] = "Corset"
-    DeviceTypeNames[13] = "Boots"
-    DeviceTypeNames[14] = "Gloves"
-    DeviceTypeNames[15] = "Hood"
-    DeviceTypeNames[16] = "Suit"
-    DeviceTypeNames[17] = "HeavyBondage"
-    DeviceTypeNames[18] = "BondageMittens"
-    SetMenuDialogOptions(DeviceTypeNames)
+    SetMenuDialogOptions(GetDeviceTypeNames())
 endfunction
 
 function Log(string msg) global
