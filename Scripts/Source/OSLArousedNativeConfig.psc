@@ -1,7 +1,7 @@
 scriptname OSLArousedNativeConfig hidden
 
 ;Sets the minimum value libido can fall to
-function SetMinLibidoValue(float newVal) global native
+function SetMinLibidoValue(bool bPlayerVal, float newVal) global native
 
 ;Sets percentage change of arousal over time
 function SetArousalChangeRate(float newVal) global native

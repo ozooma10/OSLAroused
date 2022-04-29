@@ -37,8 +37,9 @@ float Property ArousalChangeRate = 20.0 Auto
 ;Percentage of Difference from Libido to Arousal closed after 1 in game hour. (ex. 10 = Libido 0, Arousal 50, Libido is 5 after 1 hour, 9.5 after 2 hours, etc...)
 float Property LibidoChangeRate = 10.0 Auto
 
-;Minimum Value of Libido. This can be used to have an actors 
-float Property MinLibidoValue = 50.0 Auto
+;Minimum Value of Libido. This can be used to have an actors arousal rise to this value over time
+float Property MinLibidoValuePlayer = 30.0 Auto
+float Property MinLibidoValueNPC = 80.0 Auto
 
 float Property SceneParticipationBaselineIncrease = 50.0 Auto
 float Property SceneViewingBaselineIncrease = 20.0 Auto
@@ -128,7 +129,8 @@ Function OnGameLoaded()
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
-	OSLArousedNativeConfig.SetMinLibidoValue(MinLibidoValue)
+	OSLArousedNativeConfig.SetMinLibidoValue(true, MinLibidoValuePlayer)
+	OSLArousedNativeConfig.SetMinLibidoValue(false, MinLibidoValueNPC)
 	OSLArousedNativeConfig.SetArousalChangeRate(ArousalChangeRate)
 	OSLArousedNativeConfig.SetLibidoChangeRate(LibidoChangeRate)
 	OSLArousedNativeConfig.SetSceneParticipantBaseline(SceneParticipationBaselineIncrease)
@@ -228,6 +230,7 @@ Event OnKeyDown(int keyCode)
 		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
 		If (crosshairTarget != none)
 			Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
+			; Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(crosshairTarget) + "    Libido: " + OSLArousedNative.GetLibido(crosshairTarget))
 			OSLAroused_MCM.Get().PuppetActor = crosshairTarget
 		Else
 			OSLAroused_MCM.Get().PuppetActor = PlayerRef
@@ -283,9 +286,13 @@ function SetLibidoChangeRate(float newVal)
 	OSLArousedNativeConfig.SetLibidoChangeRate(newVal)
 endfunction
 
-function SetMinLibidoValue(float newVal)
-	MinLibidoValue = newVal
-	OSLArousedNativeConfig.SetMinLibidoValue(newVal)
+function SetMinLibidoValue(bool bPlayerVal, float newVal)
+	if(bPlayerVal)
+		MinLibidoValuePlayer = newVal
+	else
+		MinLibidoValueNPC = newVal
+	endif
+	OSLArousedNativeConfig.SetMinLibidoValue(bPlayerVal, newVal)
 endfunction
 
 function SetSceneParticipantBaseline(float newVal)
