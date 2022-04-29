@@ -115,7 +115,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 204 ; 2.0.5
+    return 205 ; 2.0.5
 endfunction
 
 Event OnConfigInit()
@@ -142,6 +142,11 @@ EndEvent
 Event OnVersionUpdate(Int NewVersion)
     If (CurrentVersion != 0)
         OnConfigInit()
+
+        if (CurrentVersion < 205)
+            Main.SetDeviceTypeBaselineChange(15, 0)
+            Main.SetDeviceTypeBaselineChange(16, 5)
+        endif
     EndIf
 EndEvent
 
@@ -159,6 +164,7 @@ Event OnGameLoaded()
 EndEvent
 
 Event OnPageReset(string page)
+    PrintActiveDevices()
     SetCursorFillMode(TOP_TO_BOTTOM)
     if(page == "Overview")
         OverviewLeftColumn()
@@ -564,7 +570,8 @@ endevent
 event OnOptionMenuAccept(int optionId, int index)
     If (CurrentPage == "Keywords")
         If (optionId == ArmorListMenuOid)
-            SelectedArmor = Game.GetPlayer().GetNthForm(FoundArmorIds[index]) as Armor
+            Form[] equippedArmor = OSLArousedNativeActor.GetAllEquippedArmor(Game.GetPlayer())
+            SelectedArmor = equippedArmor[FoundArmorIds[index]] as Armor
             SetMenuOptionValue(optionId, FoundArmorNames[index])
             ArmorSelected()
         EndIf
@@ -862,6 +869,38 @@ bool function CheckKeyword(Keyword armorKeyword, int oid)
     endif
 
     return keywordEnabled
+endfunction
+
+function PrintActiveDevices()
+    int[] activeDeviceTypeIds = OSLArousedNativeActor.GetActiveDeviceTypeIds(Game.GetPlayer())
+
+    DeviceTypeNames = new string[19]
+    DeviceTypeNames[0] = "Belt"
+    DeviceTypeNames[1] = "Collar"
+    DeviceTypeNames[2] = "LegCuffs"
+    DeviceTypeNames[3] = "ArmCuffs"
+    DeviceTypeNames[4] = "Bra"
+    DeviceTypeNames[5] = "Gag"
+    DeviceTypeNames[6] = "PiercingsNipple"
+    DeviceTypeNames[7] = "PiercingsVaginal"
+    DeviceTypeNames[8] = "Blindfold"
+    DeviceTypeNames[9] = "Harness"
+    DeviceTypeNames[10] = "PlugVaginal"
+    DeviceTypeNames[11] = "PlugAnal"
+    DeviceTypeNames[12] = "Corset"
+    DeviceTypeNames[13] = "Boots"
+    DeviceTypeNames[14] = "Gloves"
+    DeviceTypeNames[15] = "Hood"
+    DeviceTypeNames[16] = "Suit"
+    DeviceTypeNames[17] = "HeavyBondage"
+    DeviceTypeNames[18] = "BondageMittens"
+
+    Log("Printing Active Devices:")
+    int index = 0
+    while(index < activeDeviceTypeIds.Length)
+        Log(DeviceTypeNames[activeDeviceTypeIds[index]])
+        index += 1
+    endwhile
 endfunction
 
 function LoadDeviceTypesList()

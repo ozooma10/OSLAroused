@@ -314,6 +314,12 @@ function SetDeviceTypeBaselineChange(int deviceTypeId, float newVal)
 	OSLArousedNativeConfig.SetDeviceTypeBaseline(deviceTypeId, newVal)
 endfunction
 
+function ResetDeviceSettings()
+	InitializeDeviceSettings(true)
+	OSLArousedNativeConfig.SetDeviceTypesBaseline1(DeviceBaselineModifications[0], DeviceBaselineModifications[1], DeviceBaselineModifications[2], DeviceBaselineModifications[3], DeviceBaselineModifications[4], DeviceBaselineModifications[5], DeviceBaselineModifications[6], DeviceBaselineModifications[7], DeviceBaselineModifications[8], DeviceBaselineModifications[9])
+	OSLArousedNativeConfig.SetDeviceTypesBaseline2(DeviceBaselineModifications[10], DeviceBaselineModifications[11], DeviceBaselineModifications[12], DeviceBaselineModifications[13], DeviceBaselineModifications[14], DeviceBaselineModifications[15], DeviceBaselineModifications[16], DeviceBaselineModifications[17], DeviceBaselineModifications[18])
+endfunction
+
 function SetShowArousalKeybind(int newKey)
 	UnregisterForKey(CheckArousalKey)
 	CheckArousalKey = newKey
@@ -326,8 +332,8 @@ function SetToggleArousalBarKeybind(int newKey)
 	RegisterForKey(newKey)
 endfunction
 
-function InitializeDeviceSettings()
-	if(DeviceBaselineModifications.Length < 19)
+function InitializeDeviceSettings(bool forceInit = false)
+	if(DeviceBaselineModifications.Length < 19 || forceInit)
 		DeviceBaselineModifications = new float[19]
 		DeviceBaselineModifications[0] = 20
 		DeviceBaselineModifications[1] = 5
@@ -344,8 +350,8 @@ function InitializeDeviceSettings()
 		DeviceBaselineModifications[12] = 10
 		DeviceBaselineModifications[13] = 5
 		DeviceBaselineModifications[14] = 5
-		DeviceBaselineModifications[15] = 20
-		DeviceBaselineModifications[16] = 20
+		DeviceBaselineModifications[15] = 0
+		DeviceBaselineModifications[16] = 5
 		DeviceBaselineModifications[17] = 10
 		DeviceBaselineModifications[18] = 10
 	endif
