@@ -55,6 +55,9 @@ int Property SetArousalOid Auto
 int Property SetLibidoOid Auto
 int Property SetArousalMultiplierOid Auto
 
+int GenderPreferenceOid
+string[] GenderPreferenceList
+
 float Property kDefaultArousalMultiplier = 1.0 AutoReadOnly
 
 ;------- UI Page ---------
@@ -118,7 +121,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 210 ; 2.1.0
+    return 211 ; 2.1.0
 endfunction
 
 Event OnConfigInit()
@@ -140,6 +143,12 @@ Event OnConfigInit()
     ArousalBarDisplayModeNames[1] = "Fade"
     ArousalBarDisplayModeNames[2] = "Toggle Showing"
     ArousalBarDisplayModeNames[3] = "Always On"
+
+    GenderPreferenceList = new string[4]
+    GenderPreferenceList[0] = "Male"
+    GenderPreferenceList[1] = "Female"
+    GenderPreferenceList[2] = "Both"
+    GenderPreferenceList[3] = "Sexlab"
 EndEvent
 
 Event OnVersionUpdate(Int NewVersion)
@@ -237,6 +246,10 @@ function RenderActorStatus(Actor target)
     BaselineArousalStatusOid = AddTextOption("Baseline Arousal", OSLArousedNative.GetArousalBaseline(target))
     LibidoStatusOid = AddTextOption("Libido", OSLArousedNative.GetLibido(target))
     ArousalMultiplierStatusOid = AddTextOption("Arousal Multiplier", OSLArousedNative.GetArousalMultiplier(target))
+
+    if(Main.SlaFrameworkStub)
+        AddTextOption("Gender Preference", GenderPreferenceList[Main.SlaFrameworkStub.GetGenderPreference(target)])
+    endif
 endfunction
 
 function PuppeteerPage(Actor target)
@@ -254,6 +267,10 @@ function PuppeteerPage(Actor target)
     
     float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
     SetArousalMultiplierOid = AddSliderOption("Arousal Multiplier", arousalMultiplier, "{1}")
+
+    if(Main.SlaFrameworkStub)
+        GenderPreferenceOid = AddMenuOption("Gender Preference", GenderPreferenceList[Main.SlaFrameworkStub.GetGenderPreference(target, true)])
+    endif
 endfunction
 
 function KeywordPage()
@@ -519,6 +536,10 @@ event OnOptionHighlight(int optionId)
                 SetInfoText("OAroused.esp is disabled or missing. OAroused backwards compatibility is disabled.")
             EndIf
         endif
+    elseif(CurrentPage == "Puppeteer")
+        if(optionId == GenderPreferenceOid)
+            SetInfoText("PC/NPC gender preference.")
+        endif  
     elseif(CurrentPage == "UI/Notifications")
         if(optionId == ArousalBarToggleKeyOid)
             SetInfoText("Key To Toggle Arousal Bar Display when in Toggle Mode")
@@ -577,6 +598,12 @@ event OnOptionMenuOpen(int optionId)
         if(optionId == ArmorListMenuOid)
             LoadArmorList()
         endif
+    elseif (CurrentPage == "Puppeteer")
+        if(optionId == GenderPreferenceOid)
+            SetMenuDialogStartIndex(Main.SlaFrameworkStub.GetGenderPreference(PuppetActor, true))
+            SetMenuDialogDefaultIndex(3)
+            SetMenuDialogOptions(GenderPreferenceList)
+        endif
     elseif (CurrentPage == "UI/Notifications")
         if(optionId == ArousalBarDisplayModeOid)
             SetMenuDialogStartIndex(Main.ArousalBar.DisplayMode)
@@ -598,6 +625,11 @@ event OnOptionMenuAccept(int optionId, int index)
             SetMenuOptionValue(optionId, FoundArmorNames[index])
             ArmorSelected()
         EndIf
+    elseif (CurrentPage == "Puppeteer")
+        if(optionId == GenderPreferenceOid)
+            Main.SlaFrameworkStub.SetGenderPreference(PuppetActor, index)
+            SetMenuOptionValue(optionId, GenderPreferenceList[index])
+        endif
     elseif (CurrentPage == "UI/Notifications")
         if(optionId == ArousalBarDisplayModeOid)
             Main.ArousalBar.SetDisplayMode(index)
@@ -802,6 +834,9 @@ event OnOptionDefault(int option)
         elseif(option == SetArousalMultiplierOid)
             OSLArousedNative.SetArousalMultiplier(PuppetActor, kDefaultArousalMultiplier)
             SetSliderOptionValue(SetArousalMultiplierOid, kDefaultArousalMultiplier, "{1}")
+        elseif(option == GenderPreferenceOid)
+            Main.SlaFrameworkStub.SetGenderPreference(PuppetActor, 3)
+            SetMenuOptionValue(GenderPreferenceOid, GenderPreferenceList[3])
         endif
     elseif(currentPage == "UI")
         if(option == ArousalBarXOid)

@@ -10,6 +10,7 @@ slaConfigScr Property slaConfig Auto
 Faction slaArousalFaction
 Faction slaExposureFaction
 Faction slaNakedFaction
+Faction slaGenderPreference
 
 bool Property IsOSLArousedStub = true Auto
 
@@ -24,6 +25,8 @@ function OnGameLoaded()
     slaExposureFaction = Game.GetFormFromFile(0x25837, "SexLabAroused.esm") as Faction
     slaExposure = slaExposureFaction
     slaNakedFaction = Game.GetFormFromFile(0x77F87, "SexLabAroused.esm") as Faction
+
+    slaGenderPreference = Game.GetFormFromFile(0x79A72, "SexLabAroused.esm") as Faction
 
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
 	RegisterForSingleUpdate(120)
@@ -183,8 +186,48 @@ bool Function IsActorExhibitionist(Actor akRef)
     return false
 endfunction
 
+; 0 - Male
+; 1 - Female
+; 2 - Both
+; 3 - SexLab
+Int Function GetGenderPreference(Actor akRef, Bool forConfig = False)
+	If (akRef == None)
+		return -2
+	EndIf
+			
+	int res = akRef.GetFactionRank(slaGenderPreference)
+	If (res < 0 || res == 3)
+		If (forConfig == True)
+			Return 3
+		EndIf
+	
+		int resultingPreference = -1
+
+        if (Game.GetModByName("SexLab.esm") == 255)
+            return -1
+        endif
+
+        SexLabFramework sexlab = SexLabUtil.GetAPI() 
+		;;;Credits to Doombell for this piece of code
+		int ratio = sexlab.Stats.GetSexuality(akRef)
+		if ratio > 65
+			resultingPreference =  (-(akRef.GetLeveledActorBase().GetSex() - 1))
+		ElseIf ratio < 35
+			resultingPreference =  akRef.GetLeveledActorBase().GetSex()
+		Else
+			resultingPreference =  2
+		EndIf
+		return resultingPreference
+	EndIf
+	Return res
+EndFunction
+
 Function SetGenderPreference(Actor akRef, Int gender)
-    return
+    If (akRef == None)
+		return
+	EndIf
+	
+	akRef.SetFactionRank(slaGenderPreference, gender)
 endfunction 
 
 function Log(string msg) global

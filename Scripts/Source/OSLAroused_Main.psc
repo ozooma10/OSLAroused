@@ -8,7 +8,7 @@ EndFunction
 
 Actor Property PlayerRef Auto 
 
-slaFrameworkScr SlaFrameworkStub
+slaFrameworkScr Property SlaFrameworkStub Auto 
 
 float Property ScanDistance = 5120.0 AutoReadOnly
 
