@@ -205,6 +205,7 @@ EndEvent
 function OverviewLeftColumn()
     AddHeaderOption("OSL Aroused Status")
     AddTextOption("OSL Aroused Is:", "Enabled")
+    AddTextOption("Version:", GetVersion())
     AddEmptyOption()
     AddHeaderOption("Framework Adapters")
     If (Main.SexLabAdapterLoaded)
@@ -541,7 +542,7 @@ event OnOptionHighlight(int optionId)
         endif
     elseif(CurrentPage == "Puppeteer")
         if(optionId == GenderPreferenceOid)
-            SetInfoText("PC/NPC gender preference. Only used by external mods. requires Sexlab.")
+            SetInfoText("PC/NPC gender preference. Only used by external mods. Requires Sexlab.")
         endif
     elseif(CurrentPage == "UI/Notifications")
         if(optionId == ArousalBarToggleKeyOid)
