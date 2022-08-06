@@ -248,7 +248,10 @@ function RenderActorStatus(Actor target)
     ArousalMultiplierStatusOid = AddTextOption("Arousal Multiplier", OSLArousedNative.GetArousalMultiplier(target))
 
     if(Main.SlaFrameworkStub)
-        AddTextOption("Gender Preference", GenderPreferenceList[Main.SlaFrameworkStub.GetGenderPreference(target)])
+        int genderPrefIndex = Main.SlaFrameworkStub.GetGenderPreference(target)
+        if(genderPrefIndex >= 0)
+            AddTextOption("Gender Preference", GenderPreferenceList[genderPrefIndex])
+        endif
     endif
 endfunction
 
@@ -538,8 +541,8 @@ event OnOptionHighlight(int optionId)
         endif
     elseif(CurrentPage == "Puppeteer")
         if(optionId == GenderPreferenceOid)
-            SetInfoText("PC/NPC gender preference.")
-        endif  
+            SetInfoText("PC/NPC gender preference. Only used by external mods. requires Sexlab.")
+        endif
     elseif(CurrentPage == "UI/Notifications")
         if(optionId == ArousalBarToggleKeyOid)
             SetInfoText("Key To Toggle Arousal Bar Display when in Toggle Mode")

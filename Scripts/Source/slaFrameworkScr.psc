@@ -201,8 +201,6 @@ Int Function GetGenderPreference(Actor akRef, Bool forConfig = False)
 			Return 3
 		EndIf
 	
-		int resultingPreference = -1
-
         if (Game.GetModByName("SexLab.esm") == 255)
             return -1
         endif
@@ -211,13 +209,12 @@ Int Function GetGenderPreference(Actor akRef, Bool forConfig = False)
 		;;;Credits to Doombell for this piece of code
 		int ratio = sexlab.Stats.GetSexuality(akRef)
 		if ratio > 65
-			resultingPreference =  (-(akRef.GetLeveledActorBase().GetSex() - 1))
+			res =  (-(akRef.GetLeveledActorBase().GetSex() - 1))
 		ElseIf ratio < 35
-			resultingPreference =  akRef.GetLeveledActorBase().GetSex()
+			res =  akRef.GetLeveledActorBase().GetSex()
 		Else
-			resultingPreference =  2
+			res =  2
 		EndIf
-		return resultingPreference
 	EndIf
 	Return res
 EndFunction
