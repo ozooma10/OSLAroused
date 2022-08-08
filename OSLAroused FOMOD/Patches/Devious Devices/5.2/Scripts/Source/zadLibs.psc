@@ -20,6 +20,7 @@ SexLabFramework property SexLab auto
 import MfgConsoleFunc
 import StringUtil
 import zadNativeFunctions
+import zadprebuildedexpressions
 
 slaUtilScr Property Aroused Auto
 zadConfig Property Config Auto
@@ -32,6 +33,7 @@ Quest Property zadNPCSlots Auto
 zadBoundCombatScript Property BoundCombat auto
 Int Property TweenMenuKey Auto
 bool Property Terminate Auto
+zadexpressionlibs Property ExpLibs auto ;expression libs
 
 ; Keywords
 Keyword Property zad_DeviousPlug Auto
@@ -405,7 +407,7 @@ Bool Function UnlockDevice(actor akActor, armor deviceInventory, armor deviceRen
 	Endif				
 	if akActor.IsEquipped(deviceInventory) 
 		StorageUtil.SetIntValue(akActor, "zad_RemovalToken" + deviceInventory, 1)		
-		akActor.UnequipItemEx(deviceInventory, 0, false)		
+		akActor.UnequipItemEx(deviceInventory, 0, false)
 	else
 		; NPCs often don't have their worn gear actually marked as equipped, so the above code would fail super-duper hard and do exactly..nothing.
 		; Same when more than one copy of a device worn is in the inventory, even for the player. 
@@ -654,7 +656,7 @@ Int Function GetSlotMaskForDeviceType(Keyword kw)
 		return Armor.GetMaskForSlot(58)
 	elseif kw == zad_DeviousCollar
 		return Armor.GetMaskForSlot(45)
-    elseif kw == zad_DeviousHeavyBondage
+	elseif kw == zad_DeviousHeavyBondage
         If playerRef.wornhaskeyword(zad_DeviousStraitJacket)
             return Armor.GetMaskForSlot(32)
         Else    
@@ -1158,7 +1160,7 @@ EndFunction
 
 Bool Function HasBreastsExposed(Actor a)
 	Form arm = a.GetWornForm(0x00000004)
-	if !arm || arm.HasKeyword(zad_ExposedBreasts)
+	if !arm || a.WornHasKeyword(zad_ExposedBreasts)
 		return true
 	endif
 	return false
@@ -1839,7 +1841,9 @@ function DoApplyExpression(int[] presets, actor ActorRef, bool hasGag = false) g
 	endWhile
 endFunction
 
-
+;====================================================================
+;=====================REWORKED EXPRESSION SYSTEM=====================
+;====================================================================
 ; Vib Expressions
 Function ApplyExpression(Actor akActor, sslBaseExpression expression, int strength, bool openMouth=false)
 	if !IsValidActor(akActor)
@@ -1850,25 +1854,40 @@ Function ApplyExpression(Actor akActor, sslBaseExpression expression, int streng
 		Log("ApplyExpression(): Expression is none.")
 		return
 	EndIf
-	int gender = (akActor.GetBaseObject() as ActorBase).GetSex()
-	bool hasGag = akActor.WornHasKeyword(zad_DeviousGag)
-	DoApplyExpression(expression.GetPhase(expression.PickPhase(strength, gender), gender), akActor, hasGag)
-	if openMouth && !hasGag
-		MfgConsoleFunc.SetPhonemeModifier(akActor, 0, 0, 75)
-	EndIf
-	if hasGag
-		ApplyGagEffect(akActor)
-	EndIf
+	;use priority 0, as its impossible to know what priority should be used
+	ExpLibs.ApplyExpression(akActor, expression, strength, openMouth,aiPriority = 0)
 EndFunction
 
-
+;reset expression with priority 0
 Function ResetExpression(actor akActor, sslBaseExpression expression)
-	ResetPhonemeModifier(akActor)
-	if akActor.WornHasKeyword(zad_DeviousGag)
-		ApplyGagEffect(akActor)
-	EndIf
+	ExpLibs.ResetExpressionRaw(akActor,aiPriority = 0)
 EndFunction
 
+;reworked function ApplyExpression to use expression priority
+Function ApplyExpression_v2(Actor akActor, sslBaseExpression expression,int iPriority, int strength = 100,bool openMouth=false)
+	if !IsValidActor(akActor)
+		Log("ApplyExpression(): Actor is not loaded (Or is otherwise invalid). Aborting.")
+		return
+	EndIf
+	if !expression
+		Log("ApplyExpression(): Expression is none.")
+		return
+	EndIf
+	ExpLibs.ApplyExpression(akActor, expression, strength, openMouth,iPriority)
+EndFunction
+
+;Wrapper for ApplyExpressionRaw function
+Function ApplyExpressionRaw(Actor akActor, float[] expression ,int iPriority, int strength = 100,bool openMouth=false)
+	ExpLibs.ApplyExpressionRaw(akActor, expression, strength, openMouth,iPriority)
+EndFunction
+;reset expression with passed priority
+Function ResetExpressionRaw(actor akActor, int iPriority)
+	ExpLibs.ResetExpressionRaw(akActor,iPriority)
+EndFunction
+
+;====================================================================
+;====================================================================
+;====================================================================
 
 string function GetVibrationStrength(int vibStrength)
 	if vibStrength == 5
@@ -2004,12 +2023,12 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 	Endif
 
 	; Initialize Sounds
-	float vibSoundMult = 1
+	float vibSoundVol = Config.VolumeVibrator
 	if akActor != PlayerRef
-		vibSoundMult=0.5
+		vibSoundVol = Config.VolumeVibratorNPC
 	EndIf
 	int vsID = vibSoundSelect.Play(akActor)
-	Sound.SetInstanceVolume(vsID, Config.VolumeVibrator * vibSoundMult)
+	Sound.SetInstanceVolume(vsID, vibSoundVol)
 	int msID = MoanSound.Play(akActor)
 	Sound.SetInstanceVolume(msID, GetMoanVolume(akActor))
 	int timeVibrated = 0
@@ -2018,11 +2037,9 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 
 	; Start base expression
 	sslBaseExpression expression = SexLab.RandomExpressionByTag("Pleasure")
+	ApplyExpression_v2(akActor, expression, 15, Math.Ceiling(Aroused.GetActorExposure(akActor)*0.6), openMouth=false) ;do not open mouth
 	if Utility.RandomInt() <= (10*vibStrength) 
-		ApplyExpression(akActor, expression, (Aroused.GetActorExposure(akActor) * 0.75) as Int, openMouth=true)
 		PlayThirdPersonAnimation(akActor, AnimSwitchKeyword(akActor, "Horny01"), 3, permitRestrictive=true)
-	Else
-		ApplyExpression(akActor, expression, (Aroused.GetActorExposure(akActor) * 0.75) as Int)
 	EndIf
 	
 	; Actor in combat?
@@ -2056,8 +2073,7 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 				EndIf
 				actorCame += 1
 				if teaseOnly
-					expression = SexLab.RandomExpressionByTag("Pleasure")
-					ApplyExpression(akActor, expression, 100, openMouth=true)
+					ApplyExpressionRaw(akActor, GetPrebuildExpression_Orgasm1(),65, 100, openMouth=false)
 					Sound.StopInstance(vsID)
 					Sound.StopInstance(msID)
 					StopVibrating(akActor)
@@ -2065,16 +2081,17 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 						NotifyPlayer("The vibrations abruptly stop just short of bringing you to orgasm.")
 					Endif
 					EdgeActor(akActor)
-					ResetExpression(akActor, expression)
+					ResetExpressionRaw(akActor, 65)
 					SendModEvent("DeviceVibrateEffectStop", akActor.GetLeveledActorBase().GetName(), vibStrength * numVibratorsMult)
 					return -1
 				EndIf
-				ApplyExpression(akActor, expression, 100, openMouth=true)
+				ApplyExpressionRaw(akActor, GetPrebuildExpression_Orgasm2(),65, 100, openMouth=false)
 				if !silent && akActor == PlayerRef
 					NotifyPlayer("The plugs bring you to a thunderous climax.")
 				EndIf
 				Sound.StopInstance(msID)
 				ActorOrgasm(akActor, vsID=vsID)
+				ResetExpressionRaw(akActor, 65)
 				if IsVibrating(akActor)
 					msID = MoanSound.Play(akActor)
 					Sound.SetInstanceVolume(msID, GetMoanVolume(akActor))
@@ -2114,7 +2131,7 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 		;;;;;;;;;;
 		if (vibAnimStarted != 0) && (timeVibrated - vibAnimStarted >= 6) ; Stop animation after 5 seconds.
 			; Log("XXX Stopping Horny Idle")
-			ApplyExpression(akActor, expression, (timeVibrated / duration) * 75, openMouth=False)
+			ApplyExpression_v2(akActor, expression,15, (timeVibrated / duration) * 75, openMouth=False)
 			EndThirdPersonAnimation(akActor, cameraState, permitRestrictive=true)
 			vibAnimStarted = 0
 			; Log("XXX VibrateEffect: Done stopping horny idle")
@@ -2136,7 +2153,7 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 	Sound.StopInstance(msID)
 	if IsValidActor(akActor)
 		; Reset expression
-		ResetExpression(akActor, expression)
+		ResetExpressionRaw(akActor, 15)
 	EndIf
 	;;;;;;;;;;
 	; Make sure actor isn't stuck in animation
@@ -2352,7 +2369,9 @@ int Function GetVibrating(actor akActor)
 EndFunction
 
 Function ApplyGagEffect(actor akActor)	
+	ExpLibs.ApplyGagEffect(akActor)
 	; apply this affect to actual gags only, not hoods that also share this keyword.
+	;/
 	If akActor.WornHasKeyword(zad_GagCustomExpression)
 		SendGagEffectEvent(akActor, false)
 		Return
@@ -2378,9 +2397,12 @@ Function ApplyGagEffect(actor akActor)
 		SetPhonemeModifier(akActor, 0, 1, 100)
 		SetPhonemeModifier(akActor, 0, 11, 70)		
 	EndIf
+	/;
 EndFunction
 
 Function RemoveGagEffect(actor akActor)
+	ExpLibs.RemoveGagEffect(akActor)
+	;/
 	If akActor.WornHasKeyword(zad_GagCustomExpression)
 		SendGagEffectEvent(akActor, false)
 		Return
@@ -2399,6 +2421,7 @@ Function RemoveGagEffect(actor akActor)
 		SetPhonemeModifier(akActor, 0, 1, 0)
 		SetPhonemeModifier(akActor, 0, 11, 0)
 	Endif
+	/;
 EndFunction
 
 Function SendGagEffectEvent(actor akActor, bool isRemove)
@@ -2860,6 +2883,7 @@ EndFunction
 Function ShockActor(actor akActor)
 	if akActor == playerRef
 		NotifyPlayer("The plugs within you let out a powerful electrical shock!")
+		log("zadLibs: ShockActor")
 	Else
 		NotifyNPC(akActor.GetLeveledActorBase().GetName()+" squirms uncomfortably as electricity runs through her.")
 	EndIf
