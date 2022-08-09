@@ -16,3 +16,15 @@ endFunction
 bool function UnlockScan(int lockNum)
     return true
 endfunction
+
+; ==== NO-OP STUBBED FUNCTIONS
+
+Float Property updateFrequency = 120.00 Auto hidden 
+
+int function IsAnimatingFemales()
+    return 0
+endfunction
+
+function setUpdateFrequency(Float newFreq)
+    updateFrequency = newFreq
+endfunction
