@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "oslaroused",
+  "version-string": "2.3.0",
+  "port-version": 0,
+  "description": "High-Performance Arousal Framework. Support for both Sexlab and OStim.",
+  "homepage": "https://www.nexusmods.com/skyrimspecialedition/mods/65454",
+  "license": "MIT",
+  "features": {
+    "scripts": {
+      "description": "Install Papyrus sources for this program to develop on top of it."
+    },
+    "scripts-dev": {
+      "description": "Install Papyrus sources necessary to develop scripts for this plugin.",
+      "dependencies": [
+        "bethesda-skyrim-scripts",
+        {
+          "name": "skse",
+          "default-features": false,
+          "features": [
+            "scripts"
+          ]
+        }
+      ]
+    },
+    "plugin": {
+      "description": "Build the SKSE plugin.",
+      "dependencies": [
+        "articuno",
+        "commonlibsse-ng"
+      ]
+    },
+    "tests": {
+      "description": "Build tests for the SKSE plugin.",
+      "dependencies": [
+        {
+          "name": "oslaroused",
+          "default-features": false,
+          "features": [
+            "plugin"
+          ]
+        },
+        "catch2"
+      ]
+    }
+  },
+  "default-features": [
+    "scripts-dev",
+    "plugin",
+    "tests"
+  ]
+}
