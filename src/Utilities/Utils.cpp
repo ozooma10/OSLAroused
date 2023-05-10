@@ -177,3 +177,7 @@ std::set<RE::FormID> Utilities::Actor::GetWornArmorKeywords(RE::Actor* actorRef,
 	}
 	return wornArmorKeywordIds;
 }
+
+void Utilities::logInvalidArgsVerbose(const char* fnName) {
+	SKSE::log::error("{} was called with invalid arguments!", fnName);
+}

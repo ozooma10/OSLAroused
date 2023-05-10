@@ -657,11 +657,11 @@ Int Function GetSlotMaskForDeviceType(Keyword kw)
 	elseif kw == zad_DeviousCollar
 		return Armor.GetMaskForSlot(45)
 	elseif kw == zad_DeviousHeavyBondage
-        If playerRef.wornhaskeyword(zad_DeviousStraitJacket)
+		If PlayerRef.WornHasKeyword(zad_DeviousStraitJacket)
             return Armor.GetMaskForSlot(32)
         Else    
             return Armor.GetMaskForSlot(46)
-        EndIf 
+        EndIf  
 	elseif kw == zad_DeviousPlugAnal
 		return Armor.GetMaskForSlot(48)
 	elseif kw == zad_DeviousBelt
@@ -1430,7 +1430,8 @@ Function UpdateExposure(actor akRef, float val, bool skipMultiplier=false)
 		if newVal > 100
 			newVal = 100
 		EndIf
-		Aroused.SetActorExposure(akRef, (newVal + 1) as int)
+		
+		Aroused.SetActorExposure(akRef, (newVal) as int)
 	Else
 		float rate = Aroused.GetActorExposureRate(akRef)
 		int newRank = (lastRank + (val as float) * rate) as int	
@@ -1703,13 +1704,39 @@ function Masturbate(actor a, bool feedback = false)
 	SexLab.StartSex(tmp, Manims)
 EndFunction
 
+
+;Event DeviceActorOrgasmExp example
+;*   ScriptName SomeScript extends ParentScript
+;*
+;*   Event OnInit()
+;*       RegisterForModEvent("DeviceActorOrgasmExp","ReceiveFunction")
+;*   EndEvent
+;*
+;*   Function ReceiveFunction(Form akSource,Form akFormActor,Int aiSetArousal)
+;*      Actor akActor = akFormActor as Actor
+;*      ;process function
+;*   EndFunction
+Function SendOrgasmEvent(Actor akActor, int aiArousalSet = -1)
+    SendModEvent("DeviceActorOrgasm", akActor.GetLeveledActorBase().GetName())
+    
+    ;new event
+    Int loc_handle = ModEvent.Create("DeviceActorOrgasmEx")
+    if loc_handle
+        ModEvent.PushForm(loc_handle, self)         ;Event source (zadlibs), in case that some other mode might call this function from different place
+        ModEvent.PushForm(loc_handle, akActor)      ;Actor
+        ModEvent.PushInt(loc_handle, aiArousalSet)  ;Arousal after orgasm
+        ModEvent.Send(loc_handle)
+    endif
+EndFunction
+
 ; Cause actor to have an orgasm.
 ;;; Function ActorOrgasm(actor akActor, int setArousalTo=-1, int vsID=-1)
 ;;;             actor akActor, ; The actor to operate on.
 ;;;             int setArousalTo=-1, ; The arousal value the actor should be set to post-orgasm
 ;;;             int vsID=-1, ; Vibrating sound ID. If provided, will stop vibration sound.
 Function ActorOrgasm(actor akActor, int setArousalTo=-1, int vsID=-1)
-	SendModEvent("DeviceActorOrgasm", akActor.GetLeveledActorBase().GetName())
+	;SendModEvent("DeviceActorOrgasm", akActor.GetLeveledActorBase().GetName())
+    SendOrgasmEvent(akActor,setArousalTo)
 	if setArousalTo < 0
 		setArousalTo = Utility.RandomInt(0, 75)
 	EndIf
@@ -1796,9 +1823,34 @@ bool Function PlaySceneAndWait(Scene toPlay, bool forceStart=false, int timeout=
 	return true
 EndFunction
 
+
+;Event DeviceEdgedActorEx example
+;*   ScriptName SomeScript extends ParentScript
+;*
+;*   Event OnInit()
+;*       RegisterForModEvent("DeviceEdgedActorEx","ReceiveFunction")
+;*   EndEvent
+;*
+;*   Function ReceiveFunction(Form akSource,Form akFormActor)
+;*      Actor akActor = akFormActor as Actor
+;*      ;process function
+;*   EndFunction
+Function SendEdgeEvent(Actor akActor)
+    SendModEvent("DeviceEdgedActor", akActor.GetLeveledActorBase().GetName())
+    
+    ;new event
+    Int loc_handle = ModEvent.Create("DeviceEdgedActorEx")
+    if loc_handle
+        ModEvent.PushForm(loc_handle, self)         ;Event source (zadQuest), in case that some other mode might call this function from different place
+        ModEvent.PushForm(loc_handle, akActor)      ;Actor
+        ModEvent.Send(loc_handle)
+    endif
+EndFunction
+
 ; Cause an actor to experience being edged.
 Function EdgeActor(actor akActor)
-	SendModEvent("DeviceEdgedActor", akActor.GetLeveledActorBase().GetName())
+	;SendModEvent("DeviceEdgedActor", akActor.GetLeveledActorBase().GetName())
+    SendEdgeEvent(akActor)
 	int sID = EdgedSound.Play(akActor)
 	Sound.SetInstanceVolume(sid, Config.VolumeEdged)
 	PlayThirdPersonAnimation(akActor, AnimSwitchKeyword(akActor, "Edged"), 19, permitRestrictive=true)
@@ -2368,60 +2420,16 @@ int Function GetVibrating(actor akActor)
 	return akActor.GetFactionRank(zadVibratorFaction)
 EndFunction
 
-Function ApplyGagEffect(actor akActor)	
-	ExpLibs.ApplyGagEffect(akActor)
-	; apply this affect to actual gags only, not hoods that also share this keyword.
-	;/
-	If akActor.WornHasKeyword(zad_GagCustomExpression)
-		SendGagEffectEvent(akActor, false)
-		Return
-	EndIf
-	If akActor.WornHasKeyword(zad_GagNoOpenMouth)
-		return
-	EndIf
-	If akActor.WornHasKeyword(zad_DeviousGagLarge)
-		if (GetPhonemeModifier(akActor, 0, 1) != 100 || GetPhonemeModifier(akActor, 0, 11) != 30 || GetPhonemeModifier(akActor, 0, 0) != 100 || GetPhonemeModifier(akActor, 0, 5) != 100) && GetPhonemeModifier(akActor, 0, 0) != 70 ; Last check is for vibration mouth expressions. HoC
-			SetPhonemeModifier(akActor, 0, 0, 100)
-			SetPhonemeModifier(akActor, 0, 1, 100)
-			;SetPhonemeModifier(akActor, 0, 5, 100)
-			SetPhonemeModifier(akActor, 0, 11, 30)
-			
-			SetPhonemeModifier(akActor, 1, 4, 100)
-			SetPhonemeModifier(akActor, 1, 5, 100)
-			SetPhonemeModifier(akActor, 1, 6, 100)
-			SetPhonemeModifier(akActor, 1, 7, 100)
-		EndIf		
-		Return
-	EndIf
-	if (GetPhonemeModifier(akActor, 0, 1) != 100 || GetPhonemeModifier(akActor, 0, 11) != 70) && GetPhonemeModifier(akActor, 0, 0) != 70 ; Last check is for vibration mouth expressions. HoC
-		SetPhonemeModifier(akActor, 0, 1, 100)
-		SetPhonemeModifier(akActor, 0, 11, 70)		
-	EndIf
-	/;
+Function ApplyGagEffect(actor akActor)
+    ExpLibs.ApplyGagEffect(akActor)
+EndFunction
+
+Function ApplyGagEffect_v2(actor akActor,Int[] apGagExp,Faction[] apGagModFactions)
+    ExpLibs.ApplyGagEffect_v2(akActor,apGagExp,apGagModFactions)
 EndFunction
 
 Function RemoveGagEffect(actor akActor)
-	ExpLibs.RemoveGagEffect(akActor)
-	;/
-	If akActor.WornHasKeyword(zad_GagCustomExpression)
-		SendGagEffectEvent(akActor, false)
-		Return
-	EndIf
-	If akActor.WornHasKeyword(zad_DeviousGagLarge)
-		SetPhonemeModifier(akActor, 0, 0, 0)
-		SetPhonemeModifier(akActor, 0, 1, 0)
-		;SetPhonemeModifier(akActor, 0, 5, 0)
-		SetPhonemeModifier(akActor, 0, 11, 0)
-		
-		SetPhonemeModifier(akActor, 1, 4, 0)
-		SetPhonemeModifier(akActor, 1, 5, 0)
-		SetPhonemeModifier(akActor, 1, 6, 0)
-		SetPhonemeModifier(akActor, 1, 7, 0)
-	else
-		SetPhonemeModifier(akActor, 0, 1, 0)
-		SetPhonemeModifier(akActor, 0, 11, 0)
-	Endif
-	/;
+    ExpLibs.RemoveGagEffect(akActor)
 EndFunction
 
 Function SendGagEffectEvent(actor akActor, bool isRemove)
@@ -2680,6 +2688,13 @@ String Function AnimSwitchKeyword(actor akActor, string idleName )
 				ElseIf i == 12
 					return "ft_horny_frontcuffs_7"
 				Endif
+			ElseIf akActor.WornHasKeyword(zad_DeviousPetSuit)
+				i = Utility.RandomInt(1, 2)
+				If i == 1
+					return "DDPetSuit_Horny01"
+				else
+					return "DDPetSuit_Struggle"
+				endif
 			ElseIf akActor.WornHasKeyword(zad_DeviousElbowTie)
 				i = Utility.RandomInt(1, 2)
 				If i == 1
@@ -2727,6 +2742,8 @@ String Function AnimSwitchKeyword(actor akActor, string idleName )
 				return "ft_edged_bbyoke_1"
 			ElseIf akActor.WornHasKeyword(zad_DeviousCuffsFront)
 				return "ft_edged_frontcuffs_1"
+			ElseIf akActor.WornHasKeyword(zad_DeviousPetSuit)
+				return "DDPetSuit_Horny01"
 			Else 
 				return "DDZazHornyD"
 			EndIf
@@ -2764,6 +2781,8 @@ String Function AnimSwitchKeyword(actor akActor, string idleName )
 				return "ft_orgasm_frontcuffs_1"
 			ElseIf akActor.WornHasKeyword(zad_DeviousElbowTie)				
 				return "DDElbowTie_orgasm"				
+			ElseIf akActor.WornHasKeyword(zad_DeviousPetSuit)
+				return "DDPetSuit_Orgasm"
 			Else 
 				return "DDZazHornyE"
 			EndIf
@@ -2780,7 +2799,9 @@ String Function AnimSwitchKeyword(actor akActor, string idleName )
 		ElseIf akActor.WornHasKeyword(zad_DeviousCuffsFront)
 			return "ft_out_of_breath_frontcuffs"
 		ElseIf akActor.WornHasKeyword(zad_DeviousElbowTie)				
-				return "DDElbowTie_outofbreath"				
+			return "DDElbowTie_outofbreath"				
+		ElseIf akActor.WornHasKeyword(zad_DeviousPetSuit)
+			return "DDPetSuit_Horny01"
 		Else 
 			return "BleedOutStart"
 		EndIf
@@ -3332,6 +3353,22 @@ Function PlayBoundIdle()
 	if !IsAnimating(PlayerRef) && !PlayerRef.IsInFaction(SexLabAnimatingFaction) 
 		ApplyBoundAnim(PlayerRef)
 	EndIf
+EndFunction
+
+Bool Function UseRubberSounds()
+	Return (Config.RubberSoundMode > 0)
+EndFunction
+
+Float Function GetRubberSoundOffset()
+	Float offset = 0.0
+	If Config.RubberSoundMode == 1
+		offset = 30.0
+	elseif Config.RubberSoundMode == 2
+		offset = 10.0
+	elseif Config.RubberSoundMode == 3
+		offset = 0.0
+	EndIf
+	return offset
 EndFunction
 
 Function UnsetStoredDevice(actor akActor, keyword zad_DeviousDevice)

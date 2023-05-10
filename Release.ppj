@@ -10,6 +10,7 @@
     <Imports>
         <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
         <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skyrim</Import>
+        <Import>C:\dev\Skyrim\PapyrusScripts</Import>
     </Imports>
     <Folders>
         <Folder>.\contrib\Distribution\PapyrusSources</Folder>

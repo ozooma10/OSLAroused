@@ -6,6 +6,8 @@
 
 namespace Utilities
 {
+    void logInvalidArgsVerbose(const char* fnName);
+
 	inline float GenerateRandomFloat(float min, float max)
 	{
 		std::random_device rd;

@@ -1,5 +1,6 @@
 #include "PapyrusConfig.h"
 #include "Settings.h"
+#include <Utilities/Utils.h>
 
 void PapyrusConfig::SetMinLibidoValue(RE::StaticFunctionTag*, bool bPlayerVal, float newVal)
 {
@@ -43,6 +44,10 @@ void PapyrusConfig::SetViewingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 
 void PapyrusConfig::SetEroticArmorBaseline(RE::StaticFunctionTag*, float newVal, RE::BGSKeyword* keyword)
 {
+    if (!keyword) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return;
+    }
 	Settings::GetSingleton()->SetEroticArmorBaseline(newVal, keyword);
 }
 

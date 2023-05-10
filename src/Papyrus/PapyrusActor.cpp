@@ -5,11 +5,21 @@
 
 std::vector<RE::TESForm*> PapyrusActor::GetAllEquippedArmor(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return std::vector<RE::TESForm*>();
+    }
+
 	return Utilities::Actor::GetWornArmor(actorRef);
 }
 
 std::vector<int> PapyrusActor::GetActiveDeviceTypeIds(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+		return std::vector<int>();
+	}
+
 	const auto wornDevices = DevicesIntegration::GetSingleton()->GetActorWornDevices(actorRef);
 
 	std::vector<int> deviceTypeIds;

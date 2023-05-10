@@ -9,6 +9,10 @@
 
 float PapyrusInterface::GetArousal(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return ArousalManager::GetArousal(actorRef);
 }
 
@@ -17,6 +21,11 @@ std::vector<float> PapyrusInterface::GetArousalMultiple(RE::StaticFunctionTag*, 
 	std::vector<float> results;
 
 	for (const auto actorRef : actorRefs) {
+        if (!actorRef) {
+            Utilities::logInvalidArgsVerbose(__FUNCTION__);
+            results.push_back(0);
+			continue;
+        }
 		results.push_back(ArousalManager::GetArousal(actorRef));
 	}
 
@@ -25,40 +34,62 @@ std::vector<float> PapyrusInterface::GetArousalMultiple(RE::StaticFunctionTag*, 
 
 float PapyrusInterface::GetArousalNoSideEffects(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {  Utilities::logInvalidArgsVerbose(__FUNCTION__); return 0; }
 	return ArousalManager::GetArousal(actorRef, false);
 }
 
 float PapyrusInterface::SetArousal(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
 {
+    if (!actorRef) {  Utilities::logInvalidArgsVerbose(__FUNCTION__); return 0; }
 	return ArousalManager::SetArousal(actorRef, value);
 }
 
 void PapyrusInterface::SetArousalMultiple(RE::StaticFunctionTag*, RE::reference_array<RE::Actor*> actorRefs, float value)
 {
 	for (const auto actorRef : actorRefs) {
+        if (!actorRef) { 
+			Utilities::logInvalidArgsVerbose(__FUNCTION__); 
+			continue;
+		}
 		ArousalManager::SetArousal(actorRef, value);
 	}
 }
 
 float PapyrusInterface::ModifyArousal(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return ArousalManager::ModifyArousal(actorRef, value);
 }
 
 void PapyrusInterface::ModifyArousalMultiple(RE::StaticFunctionTag*, RE::reference_array<RE::Actor*> actorRefs, float value)
 {
 	for (const auto actorRef : actorRefs) {
+        if (!actorRef) {
+            Utilities::logInvalidArgsVerbose(__FUNCTION__);
+            continue;
+        }
 		ArousalManager::ModifyArousal(actorRef, value);
 	}
 }
 
 float PapyrusInterface::GetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
 }
 
 float PapyrusInterface::SetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	value = std::clamp(value, 0.0f, 100.f);
 
 	PersistedData::ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, value);
@@ -67,6 +98,10 @@ float PapyrusInterface::SetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* 
 
 float PapyrusInterface::ModifyArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	float curMult = PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
 	float newVal = curMult + value;
 	PersistedData::ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, newVal);
@@ -75,21 +110,37 @@ float PapyrusInterface::ModifyArousalMultiplier(RE::StaticFunctionTag*, RE::Acto
 
 float PapyrusInterface::GetArousalBaseline(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return LibidoManager::GetSingleton()->GetBaselineArousal(actorRef);
 }
 
 float PapyrusInterface::GetLibido(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return LibidoManager::GetSingleton()->GetBaseLibido(actorRef);
 }
 
 float PapyrusInterface::SetLibido(RE::StaticFunctionTag*, RE::Actor* actorRef, float newVal)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return LibidoManager::GetSingleton()->SetBaseLibido(actorRef, newVal);
 }
 
 float PapyrusInterface::GetDaysSinceLastOrgasm(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
 	if (lastOrgasmTime < 0) {
 		lastOrgasmTime = 0;
@@ -100,26 +151,46 @@ float PapyrusInterface::GetDaysSinceLastOrgasm(RE::StaticFunctionTag*, RE::Actor
 
 bool PapyrusInterface::IsNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return Utilities::Actor::IsNakedCached(actorRef);
 }
 
 bool PapyrusInterface::IsViewingNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return Utilities::Actor::IsViewingNaked(actorRef);
 }
 
 bool PapyrusInterface::IsInScene(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return Utilities::Actor::IsParticipatingInScene(actorRef);
 }
 
 bool PapyrusInterface::IsViewingScene(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return Utilities::Actor::IsViewingScene(actorRef);
 }
 
 bool PapyrusInterface::IsWearingEroticArmor(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	if (!Utilities::Actor::IsNakedCached(actorRef)) {
 		if (const auto eroticKeyword = Settings::GetSingleton()->GetEroticArmorKeyword()) {
 			const auto wornKeywords = Utilities::Actor::GetWornArmorKeywords(actorRef);
@@ -131,6 +202,10 @@ bool PapyrusInterface::IsWearingEroticArmor(RE::StaticFunctionTag*, RE::Actor* a
 
 float PapyrusInterface::WornDeviceBaselineGain(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0;
+    }
 	return DevicesIntegration::GetSingleton()->GetArousalBaselineFromDevices(actorRef);
 }
 
