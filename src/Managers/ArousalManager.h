@@ -9,4 +9,9 @@ namespace ArousalManager
 	float ModifyArousal(RE::Actor* actorRef, float value);
 
 	float CalculateArousal(RE::Actor* actorRef, float timePassed);
+
+	//modified functions to allow paralel proc from different plugin
+	extern "C" DLLEXPORT float GetArousalExt(RE::Actor* actorRef);
+	extern "C" DLLEXPORT float SetArousalExt(RE::Actor* actorRef, float value, bool sendevent);
+	extern "C" DLLEXPORT float ModifyArousalExt(RE::Actor* actorRef, float value,bool sendevent);
 }
