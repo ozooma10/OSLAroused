@@ -114,7 +114,7 @@ std::vector<RE::Actor*> GetNakedActorsInCell(RE::Actor* source)
 	float scanDistance = Settings::GetSingleton()->GetScanDistance();
 	const auto actorStateManager = ActorStateManager::GetSingleton();
 
-	RE::TES::GetSingleton()->ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
+	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
 		if (actor && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
@@ -145,7 +145,7 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 	radius *= radius;
 
 	const auto sourceLocation = source->GetPosition();
-	RE::TES::GetSingleton()->ForEachReferenceInRange(source, radius, [&](RE::TESObjectREFR& ref) {
+    Utilities::World::ForEachReferenceInRange(source, radius, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
 		if (actor && actor != source && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {

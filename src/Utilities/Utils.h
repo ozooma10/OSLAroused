@@ -65,7 +65,8 @@ namespace Utilities
 
 	namespace World
 	{
-		void ForEachReferenceInRange(RE::TESObjectREFR* origin, float radius, std::function<bool(RE::TESObjectREFR& ref)> callback);
+        void ForEachReferenceInRange(RE::TESObjectREFR* origin, float radius,
+                                     std::function<RE::BSContainer::ForEachResult(RE::TESObjectREFR& ref)> callback);
 	}
 }
 #pragma once
