@@ -6,8 +6,7 @@
 #include "Papyrus/PapyrusInterface.h"
 
 #include "RuntimeEvents.h"
-
-#include <stddef.h>
+#include "Utilities/Utils.h"
 
 using namespace RE::BSScript;
 using namespace SKSE::log;
@@ -30,9 +29,9 @@ namespace {
             log = std::make_shared<spdlog::logger>(
                 "Global", std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true));
         }
-        //const auto& debugConfig = Sample::Config::GetSingleton().GetDebug();
-        //log->set_level(debugConfig.GetLogLevel());
-        //log->flush_on(debugConfig.GetFlushLevel());
+        log->set_level(spdlog::level::debug);
+        log->flush_on(spdlog::level::trace);
+
 
         spdlog::set_default_logger(std::move(log));
         spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%t] [%s:%#] %v");
@@ -60,10 +59,13 @@ namespace {
     void InitializeMessaging() {
         if (!SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* message) {
             switch (message->type) {
-                    case SKSE::MessagingInterface::kDataLoaded:  // All ESM/ESL/ESP plugins have loaded, main menu is
-                                                                 // now active.
+                case SKSE::MessagingInterface::kDataLoaded:  // All ESM/ESL/ESP plugins have loaded, main menu is now active
                     RuntimeEvents::OnEquipEvent::RegisterEvent();
                     WorldChecks::ArousalUpdateTicker ::GetSingleton()->Start();
+                    break;
+                case SKSE::MessagingInterface::kPostLoadGame:
+                    //Distribute Persisted Keywords
+                    Utilities::Keywords::DistributeKeywords();
                     break;
             }
         })) {

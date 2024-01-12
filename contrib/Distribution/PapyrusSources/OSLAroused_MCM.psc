@@ -120,7 +120,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 240 ; 2.4.0
+    return 241 ; 2.4.1
 endfunction
 
 Event OnConfigInit()
