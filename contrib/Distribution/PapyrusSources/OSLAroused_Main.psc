@@ -171,7 +171,6 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 		ConditionVars.OSLAroused_PlayerTimeRate = 10.0 ;Not used in new system
 
 		if EnableArousalStatBuffs
-			; We check for OArousedMode so we can bypass an arousal fetch and directly use updated val
 			ApplyArousedEffects()
 		else  
 			RemoveAllArousalSpells()
