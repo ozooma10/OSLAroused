@@ -2,7 +2,7 @@
 <PapyrusProject xmlns="PapyrusProject.xsd"
     Flags="TESV_Papyrus_Flags.flg"
     Game="sse"
-    Output="contrib/Distribution/PapyrusDebug"
+    Output="C:\Users\jel-m\AppData\Local\ModOrganizer\Skyrim Special Edition\mods\OSL Aroused\Scripts"
     Optimize="false"
     Release="false"
     Anonymize="true"
