@@ -67,7 +67,7 @@ Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 	endif
 
 	OSexIntegrationMain OStim = OUtils.GetOStim()
-	actor orgasmer = OStim.GetMostRecentOrgasmedActor()
+	actor orgasmer = OStim.GetMostRecentOrgasmedActor() ; Was never all that reliable but it is the only failsafe if Sender isnt sent
 	if orgasmer
 		HandleActorOrgasm(0, orgasmer)
 	endif
