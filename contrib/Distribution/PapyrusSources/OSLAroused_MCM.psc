@@ -212,7 +212,11 @@ function OverviewLeftColumn()
         AddTextOption("SexLab", "$OSL_Disabled", OPTION_FLAG_DISABLED)
     EndIf
     If (Main.OStimAdapterLoaded)
-        AddTextOption("OStim", "$OSL_Enabled")
+        If (Main.IsOStimLegacy)
+            AddTextOption("OStim", "$OSL_Enabled")
+        else
+            AddTextOption("OStim Standalone", "$OSL_Enabled")
+        endif
     Else
         AddTextOption("OStim", "$OSL_Disabled", OPTION_FLAG_DISABLED)
     EndIf

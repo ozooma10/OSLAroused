@@ -16,6 +16,7 @@ OSLAroused_ArousalBar Property ArousalBar Auto
 OSLAroused_Conditions Property ConditionVars Auto 
 
 bool property OStimAdapterLoaded = false Auto Hidden
+bool property IsOStimLegacy = false Auto Hidden
 OSLAroused_AdapterOStim Property OStimAdapter Auto
 
 bool property SexLabAdapterLoaded = false Auto Hidden
@@ -115,7 +116,9 @@ Function OnGameLoaded()
 		EndIf
 	endif
 
-	OStimAdapterLoaded = OStimAdapter.LoadAdapter()
+	int OStimLoadResult = OStimAdapter.LoadAdapter()
+	OStimAdapterLoaded = OStimLoadResult > 0
+	IsOStimLegacy = OStimLoadResult == 2
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
 
 	SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
