@@ -138,6 +138,25 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     OSLAroused_ModInterface.ModifyArousal(act, exposureMod, "sexlab orgasm")
 EndEvent
 
+; ========== SCENE RELATED ==================
+function StartMasturbationScene(Actor target)
+    sslBaseAnimation[] animations
+    Actor[] actors = new Actor[1]
+    actors[0] = target
+
+    SexLabFramework SexLab = SexLabUtil.GetAPI() 
+    If 0 == target.GetLeveledActorBase().GetSex()
+        animations = SexLab.GetAnimationsByTag(1, "Masturbation", "M")
+    Else
+        animations = SexLab.GetAnimationsByTag(1, "Masturbation", "F")
+    EndIf
+
+    Int id = SexLab.StartSex(actors, animations)
+    If id < 0
+        Debug.Notification("SexLab animation failed to start [" + id + "]")
+    EndIf
+endfunction
+
 ; ========== DEBUG RELATED ==================
 
 function Log(string msg) global

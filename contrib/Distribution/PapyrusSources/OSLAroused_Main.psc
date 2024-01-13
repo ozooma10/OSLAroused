@@ -252,6 +252,14 @@ Event OnKeyDown(int keyCode)
 	; endif
 EndEvent
 
+Event OnKeyUp(Int KeyCode, Float HoldTime)
+	If !Utility.IsInMenuMode() && CheckArousalKey == keyCode
+        If (HoldTime > 4.0)
+            StartPCMasturbationScene()
+        EndIf
+    EndIf
+EndEvent
+
 function UpdateSOSPosition(Actor act, float arousal)
 	if(act == none || !EnableSOSIntegration)
 		return
@@ -268,6 +276,12 @@ function UpdateSOSPosition(Actor act, float arousal)
 	endif
 endfunction
 
+; =========== SCENE RELATED =============
+function StartPCMasturbationScene()
+	if(SexLabAdapterLoaded)
+		SexLabAdapter.StartMasturbationScene(PlayerRef)
+	endif
+endfunction
 
 ; ========= SETTINGS UPDATE =================
 int function GetShowArousalKeybind()
