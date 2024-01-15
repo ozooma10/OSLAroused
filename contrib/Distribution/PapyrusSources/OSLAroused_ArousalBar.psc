@@ -230,8 +230,12 @@ Function InitializeBar(float initialPercent)
 
 	SetColors(0xdc143c, 0xF6C4CE)
 
-	Utility.Wait(1) ;Wait a bit the bar to initialize
-	SetBarVisible(DisplayMode == kDisplayMode_On)
+	If DisplayMode == kDisplayMode_On
+		Utility.Wait(1) ;Wait a bit the bar to initialize
+		SetBarVisible(true)
+	else
+		SetBarVisible(false)
+	endif
 EndFunction
 
 function DisplayBarWithAutohide(float hideDelay)
