@@ -26,14 +26,17 @@ int function LoadAdapter()
 		return 0
 	endif
 
+	;OStim and OStimNG Events, OStim Standalone Player scene events
 	RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
 	RegisterForModEvent("ostim_start", "OStimStart")
 	RegisterForModEvent("ostim_end", "OStimEnd")
 
-	RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
-	RegisterForModEvent("ostim_thread_start", "OStimStartThread")
-	RegisterForModEvent("ostim_thread_end", "OStimEndThread")
-	if (OStim.GetAPIVersion() >= 29)
+	if (OStim.GetAPIVersion() >= 33) ;OStim Standalone NPC only scene Events
+		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
+		RegisterForModEvent("ostim_thread_start", "OStimStartThread")
+		RegisterForModEvent("ostim_thread_end", "OStimEndThread")
+	endif
+	if (OStim.GetAPIVersion() >= 29) ; 
 		return 1
 	endif
 	return 2
@@ -41,12 +44,7 @@ EndFunction
 
 Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	OSexIntegrationMain OStim = OUtils.GetOStim()
-	; If this is OStim NG, bail out (Since Below code is processed in OStimStartThread)
-	if (OStim.GetAPIVersion() >= 29)
-		return
-	endif
-
-	ActiveSceneActors = OUtils.GetOStim().GetActors()
+	ActiveSceneActors = OStim.GetActors()
 	HandleStartScene(0, ActiveSceneActors)
 EndEvent
 
@@ -55,10 +53,6 @@ Event OStimStartThread(String EventName, String Args, float ThreadID, Form Sende
 EndEvent
 
 Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
-	; If this is OStim NG, bail out (Since Below code is processed in OStimEndThread)
-	if (OUtils.GetOStim().GetAPIVersion() >= 29)
-		return
-	endif
 	HandleEndScene(0, ActiveSceneActors)
 EndEvent
 
@@ -67,13 +61,13 @@ Event OStimEndThread(String EventName, String Args, Float ThreadID, Form Sender)
 EndEvent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
-	OSexIntegrationMain OStim = OUtils.GetOStim()
-	; If this is OStim NG, bail out (Since Below code is processed in OStimEndThread)
-	if (OStim.GetAPIVersion() >= 29)
+	if sender as Actor
+		HandleActorOrgasm(0, sender as Actor)
 		return
 	endif
 
-	actor orgasmer = OStim.GetMostRecentOrgasmedActor()
+	OSexIntegrationMain OStim = OUtils.GetOStim()
+	actor orgasmer = OStim.GetMostRecentOrgasmedActor() ; Was never all that reliable but it is the only failsafe if Sender isnt sent
 	if orgasmer
 		HandleActorOrgasm(0, orgasmer)
 	endif
@@ -81,7 +75,7 @@ EndEvent
 
 Event OStimOrgasmThread(String EventName, String Args, Float ThreadID, Form Sender)
 	if sender as Actor
-		HandleActorOrgasm(0, sender as Actor)
+		HandleActorOrgasm(ThreadID as int, sender as Actor)
 	endif
 EndEvent
 
@@ -153,27 +147,28 @@ Function CalculateStimMultipliers(int threadId, Actor[] threadActors)
 	endwhile
 EndFunction
 
+;I found this method today "OMetadata.GetActorCount(ThreadID)" - SimonPhil
 Function CreatePreviousModifiers(int ThreadID)
 	if ThreadID == 0
-		previousModifiersThread0 = Utility.CreateFloatArray(10)
+		previousModifiersThread0 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 1
-		previousModifiersThread1 = Utility.CreateFloatArray(10)
+		previousModifiersThread1 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 2
-		previousModifiersThread2 = Utility.CreateFloatArray(10)
+		previousModifiersThread2 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 3
-		previousModifiersThread3 = Utility.CreateFloatArray(10)
+		previousModifiersThread3 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 4
-		previousModifiersThread4 = Utility.CreateFloatArray(10)
+		previousModifiersThread4 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 5
-		previousModifiersThread5 = Utility.CreateFloatArray(10)
+		previousModifiersThread5 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 6
-		previousModifiersThread6 = Utility.CreateFloatArray(10)
+		previousModifiersThread6 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 7
-		previousModifiersThread7 = Utility.CreateFloatArray(10)
+		previousModifiersThread7 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 8
-		previousModifiersThread8 = Utility.CreateFloatArray(10)
+		previousModifiersThread8 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	elseif ThreadID == 9
-		previousModifiersThread9 = Utility.CreateFloatArray(10)
+		previousModifiersThread9 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
 	endif
 EndFunction
 
