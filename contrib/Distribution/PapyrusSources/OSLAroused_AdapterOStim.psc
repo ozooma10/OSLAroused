@@ -26,17 +26,15 @@ int function LoadAdapter()
 		return 0
 	endif
 
-	;OStim and OStimNG Events, OStim Standalone Player scene events
+	;OStim and OStimNG Events, Only Player scene events
 	RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
 	RegisterForModEvent("ostim_start", "OStimStart")
 	RegisterForModEvent("ostim_end", "OStimEnd")
 
-	if (OStim.GetAPIVersion() >= 33) ;OStim Standalone NPC only scene Events
+	if (OStim.GetAPIVersion() >= 29) ;OStim Standalone NPC only scene Events
 		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
 		RegisterForModEvent("ostim_thread_start", "OStimStartThread")
 		RegisterForModEvent("ostim_thread_end", "OStimEndThread")
-	endif
-	if (OStim.GetAPIVersion() >= 29) ; 
 		return 1
 	endif
 	return 2
@@ -44,6 +42,10 @@ EndFunction
 
 Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
 	OSexIntegrationMain OStim = OUtils.GetOStim()
+	; If this is OStim NG, bail out (Since Below code is processed in OStimStartThread)
+	if (OStim.GetAPIVersion() >= 29)
+		return
+	endif
 	ActiveSceneActors = OStim.GetActors()
 	HandleStartScene(0, ActiveSceneActors)
 EndEvent
@@ -53,6 +55,10 @@ Event OStimStartThread(String EventName, String Args, float ThreadID, Form Sende
 EndEvent
 
 Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
+	; If this is OStim NG, bail out (Since Below code is processed in OStimEndThread)
+	if (OUtils.GetOStim().GetAPIVersion() >= 29)
+		return
+	endif
 	HandleEndScene(0, ActiveSceneActors)
 EndEvent
 
@@ -61,16 +67,22 @@ Event OStimEndThread(String EventName, String Args, Float ThreadID, Form Sender)
 EndEvent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
-	if sender as Actor
-		HandleActorOrgasm(0, sender as Actor)
+	OSexIntegrationMain OStim = OUtils.GetOStim()
+	; If this is OStim NG, bail out (Since Below code is processed in OStimOrgasmThread)
+	if (OStim.GetAPIVersion() >= 29)
 		return
 	endif
 
-	OSexIntegrationMain OStim = OUtils.GetOStim()
-	actor orgasmer = OStim.GetMostRecentOrgasmedActor() ; Was never all that reliable but it is the only failsafe if Sender isnt sent
-	if orgasmer
-		HandleActorOrgasm(0, orgasmer)
+	if sender as Actor
+		HandleActorOrgasm(0, sender as Actor)
+		return
+	else ;Backup check for most recent orgasmer
+		actor orgasmer = OStim.GetMostRecentOrgasmedActor() ; Was never all that reliable but it is the only failsafe if Sender isnt sent
+		if orgasmer
+			HandleActorOrgasm(0, orgasmer)
+		endif
 	endif
+
 EndEvent
 
 Event OStimOrgasmThread(String EventName, String Args, Float ThreadID, Form Sender)
