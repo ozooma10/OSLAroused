@@ -25,7 +25,7 @@ bool Utilities::Keywords::AddKeyword(RE::TESForm* form, RE::BGSKeyword* newKeywo
 	//If already exists return false
 	if (keywordForm->keywords) {
 		for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-			if (keywordForm->keywords[i] == newKeyword) {
+			if (keywordForm->keywords[i]->formID == newKeyword->formID) {
 				return false;
 			}
 		}
@@ -66,7 +66,7 @@ bool Utilities::Keywords::RemoveKeyword(RE::TESForm* form, RE::BGSKeyword* keywo
 	int keywordIndex = -1;
 	if (keywordForm->keywords) {
 		for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-			if (keywordForm->keywords[i] == keyword) {
+			if (keywordForm->keywords[i]->formID == keyword->formID) {
 				keywordIndex = i;
 			}
 		}

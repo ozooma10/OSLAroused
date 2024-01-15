@@ -80,6 +80,8 @@ bool function AddKeywordToForm(Form form, Keyword keyword) global native
 bool function RemoveKeywordFromForm(Form form, Keyword keyword) global native
 
 bool function FormHasKeywordString(form form, string kwd) global native
+string[] function GetRegisteredKeywords() global native
+bool function RegisterNewKeyword(string kwd) global native
 
 ; ==================== UTILITIES =========================
 

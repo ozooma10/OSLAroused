@@ -7,7 +7,7 @@
 #include "Managers/ActorStateManager.h"
 #include "Managers/ArousalManager.h"
 #include "Managers/SceneManager.h"
-
+#include "Config.h"
 
 
 bool Papyrus::IsActorNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
@@ -75,6 +75,26 @@ bool Papyrus::FormHasKeywordString(RE::StaticFunctionTag*, RE::TESForm* form, RE
 	return false;
 }
 
+std::vector<RE::BSFixedString> Papyrus::GetRegisteredKeywords(RE::StaticFunctionTag* base)
+{
+	std::vector<RE::BSFixedString> registeredKeywords;
+	for (auto& keyword : Config::GetSingleton()->GetRegisteredKeywords()) {
+		registeredKeywords.emplace_back(keyword.EditorId);
+	}
+
+	return registeredKeywords;
+}
+
+bool Papyrus::RegisterNewKeyword(RE::StaticFunctionTag* base, RE::BSFixedString keywordEditorId)
+{
+	auto keywordForm = RE::TESForm::LookupByEditorID<RE::BGSKeyword>(keywordEditorId);
+	if (!keywordForm) {
+		return false;
+	}
+
+	return Config::GetSingleton()->RegisterKeyword(keywordEditorId.c_str());
+}
+
 float Papyrus::GenerateRandomFloat(RE::StaticFunctionTag*, float min, float max)
 {
 	return Utilities::GenerateRandomFloat(min, max);
@@ -112,6 +132,8 @@ bool Papyrus::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("AddKeywordToForm", "OSLArousedNative", AddKeywordToForm);
 	vm->RegisterFunction("RemoveKeywordFromForm", "OSLArousedNative", RemoveKeywordFromForm);
 	vm->RegisterFunction("FormHasKeywordString", "OSLArousedNative", FormHasKeywordString);
+	vm->RegisterFunction("GetRegisteredKeywords", "OSLArousedNative", GetRegisteredKeywords);
+	vm->RegisterFunction("RegisterNewKeyword", "OSLArousedNative", RegisterNewKeyword);
 	
 	//Utilities
 	vm->RegisterFunction("GenerateRandomFloat", "OSLArousedNative", GenerateRandomFloat);

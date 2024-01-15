@@ -16,6 +16,8 @@ namespace Papyrus
 	bool RemoveKeywordFromForm(RE::StaticFunctionTag* base, RE::TESForm* form, RE::BGSKeyword* keyword);
 
 	bool FormHasKeywordString(RE::StaticFunctionTag* base, RE::TESForm* form, RE::BSFixedString keyword);
+	std::vector<RE::BSFixedString> GetRegisteredKeywords(RE::StaticFunctionTag* base);
+	bool RegisterNewKeyword(RE::StaticFunctionTag* base, RE::BSFixedString keywordEditorId);
 
 	//Utilities
 	float GenerateRandomFloat(RE::StaticFunctionTag* base, float min, float max);

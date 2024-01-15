@@ -80,29 +80,13 @@ Armor SelectedArmor
 string[] FoundArmorNames
 int[] FoundArmorIds
 
-int EroticArmorOid
 Keyword Property EroticArmorKeyword Auto
-bool EroticArmorState
 
-int BikiniArmorOid
-Keyword BikiniArmorKeyword
-bool BikiniArmorState
+Form[] RegisteredKeywords
+bool[] RegisteredKeywordStates
+int[] RegisteredKeywordOids
 
-int SLAArmorPrettyOid
-Keyword SLAArmorPrettyKeyword
-bool SLAArmorPrettyState
-
-int SLAArmorHalfNakedOid
-Keyword SLAArmorHalfNakedKeyword
-bool SLAArmorHalfNakedState
-
-int SLAArmorSpendexOid
-Keyword SLAArmorSpendexKeyword
-bool SLAArmorSpendexState
-
-int SLAHasStockingsOid
-Keyword SLAHasStockingsKeyword
-bool SLAHasStockingsState
+int RegisterKeywordOid
 
 ;------ Baseline Explain -------
 int ExplainNakedOid
@@ -167,12 +151,20 @@ Event OnGameLoaded()
 
     PuppetActor = Game.GetPlayer()
     
-	EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")
-	BikiniArmorKeyword = Keyword.GetKeyword("_SLS_BikiniArmor")
-	SLAArmorPrettyKeyword = Keyword.GetKeyword("SLA_ArmorPretty")
-	SLAArmorHalfNakedKeyword = Keyword.GetKeyword("SLA_ArmorHalfNaked")
-	SLAArmorSpendexKeyword = Keyword.GetKeyword("SLA_ArmorSpendex")
-	SLAHasStockingsKeyword = Keyword.GetKeyword("SLA_HasStockings")
+    EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")
+
+    string[] keywords = OSLArousedNative.GetRegisteredKeywords()
+    RegisteredKeywords = Utility.CreateFormArray(keywords.Length)
+    RegisteredKeywordStates  = Utility.CreateBoolArray(keywords.Length)
+    RegisteredKeywordOids = Utility.CreateIntArray(keywords.Length)
+    int index = 0
+    while(index < keywords.Length)
+        Keyword kw = Keyword.GetKeyword(keywords[index])
+        RegisteredKeywords[index] = kw
+        index += 1
+    endwhile
+
+    Keyword kw
 EndEvent
 
 Event OnPageReset(string page)
@@ -281,14 +273,16 @@ endfunction
 
 function KeywordPage()
     AddHeaderOption("$OSL_KeywordManagement")
+    RegisterKeywordOid = AddInputOption("Register New Keyword", "Register", 0)
     ArmorListMenuOid = AddMenuOption("$OSL_LoadArmorList", "")
     SetCursorPosition(1)
-    EroticArmorOid = AddToggleOption("EroticArmor", false, OPTION_FLAG_DISABLED)
-    BikiniArmorOid = AddToggleOption("SLS Bikini Armor", false, OPTION_FLAG_DISABLED)
-    SLAArmorPrettyOid = AddToggleOption("SLA_ArmorPretty", false, OPTION_FLAG_DISABLED)
-    SLAArmorHalfNakedOid = AddToggleOption("SLA_ArmorHalfNaked", false, OPTION_FLAG_DISABLED)
-    SLAArmorSpendexOid = AddToggleOption("SLA_ArmorSpendex", false, OPTION_FLAG_DISABLED)
-    SLAHasStockingsOid = AddToggleOption("SLA_HasStockings", false, OPTION_FLAG_DISABLED)
+    int index = 0
+    while(index < RegisteredKeywords.Length)
+        Keyword kw = RegisteredKeywords[index] as Keyword
+
+        RegisteredKeywordOids[index] = AddToggleOption((RegisteredKeywords[index] as Keyword).GetString(), RegisteredKeywordStates[index], OPTION_FLAG_DISABLED)
+        index += 1
+    endwhile
 endfunction
 
 function UIPage()
@@ -416,61 +410,22 @@ event OnOptionSelect(int optionId)
             SetToggleOptionValue(EnableSOSIntegrationOid, Main.EnableSOSIntegration)
         endif
     ElseIf (CurrentPage == "$OSL_Keywords")
-        if(optionId == EroticArmorOid)
-            if(EroticArmorState)
-                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, EroticArmorKeyword)
-                EroticArmorState = !removeSuccess ;if remove success fails, indicate keyword still on
-            else
-                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, EroticArmorKeyword)
-                EroticArmorState = updateSuccess
+        int index = 0
+        bool bBreak = false
+        while((index < RegisteredKeywordOids.Length) && !bBreak)
+            if(optionId == RegisteredKeywordOids[index])
+                if(RegisteredKeywordStates[index])
+                    bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, RegisteredKeywords[index] as Keyword)
+                    RegisteredKeywordStates[index] = !removeSuccess ;if remove success fails, indicate keyword still on
+                else
+                    bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, RegisteredKeywords[index] as Keyword)
+                    RegisteredKeywordStates[index] = updateSuccess
+                endif
+                SetToggleOptionValue(RegisteredKeywordOids[index], RegisteredKeywordStates[index])
+                bBreak = true
             endif
-            SetToggleOptionValue(EroticArmorOid, EroticArmorState)
-        elseif(optionId == BikiniArmorOid)
-            if(BikiniArmorState)
-                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, BikiniArmorKeyword)
-                BikiniArmorState = !removeSuccess ;if remove success fails, indicate keyword still on
-            else
-                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, BikiniArmorKeyword)
-                BikiniArmorState = updateSuccess
-            endif
-            SetToggleOptionValue(BikiniArmorOid, BikiniArmorState)
-        elseif(optionId == SLAArmorPrettyOid)
-            if(SLAArmorPrettyState)
-                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAArmorPrettyKeyword)
-                SLAArmorPrettyState = !removeSuccess ;if remove success fails, indicate keyword still on
-            else
-                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAArmorPrettyKeyword)
-                SLAArmorPrettyState = updateSuccess
-            endif
-            SetToggleOptionValue(SLAArmorPrettyOid, SLAArmorPrettyState)
-        elseif(optionId == SLAArmorHalfNakedOid)
-            if(SLAArmorHalfNakedState)
-                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAArmorHalfNakedKeyword)
-                SLAArmorHalfNakedState = !removeSuccess ;if remove success fails, indicate keyword still on
-            else
-                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAArmorHalfNakedKeyword)
-                SLAArmorHalfNakedState = updateSuccess
-            endif
-            SetToggleOptionValue(SLAArmorHalfNakedOid, SLAArmorHalfNakedState)
-        elseif(optionId == SLAArmorSpendexOid)
-            if(SLAArmorSpendexState)
-                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAArmorSpendexKeyword)
-                SLAArmorSpendexState = !removeSuccess ;if remove success fails, indicate keyword still on
-            else
-                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAArmorSpendexKeyword)
-                SLAArmorSpendexState = updateSuccess
-            endif
-            SetToggleOptionValue(SLAArmorSpendexOid, SLAArmorSpendexState)
-        elseif(optionId == SLAHasStockingsOid)
-            if(SLAHasStockingsState)
-                bool removeSuccess = OSLArousedNative.RemoveKeywordFromForm(SelectedArmor, SLAHasStockingsKeyword)
-                SLAHasStockingsState = !removeSuccess ;if remove success fails, indicate keyword still on
-            else
-                bool updateSuccess = OSLArousedNative.AddKeywordToForm(SelectedArmor, SLAHasStockingsKeyword)
-                SLAHasStockingsState = updateSuccess
-            endif
-            SetToggleOptionValue(SLAHasStockingsOid, SLAHasStockingsState)
-        endif
+            index += 1
+        endwhile
     ElseIf(CurrentPage == "$OSL_System")
         if(optionId == DumpArousalData)
             OSLArousedNative.DumpArousalData()
@@ -547,6 +502,10 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoArousalToggle")
         elseif(optionId == CheckArousalKeyOid)
             SetInfoText("$OSL_InfoCheckArousal")
+        endif
+    elseif(CurrentPage == "$OSL_Keywords")
+        if(optionId == RegisterKeywordOid)
+            SetInfoText("Enter the Editor Id of the Keyword you wish to register to allow Adding/Removing from armor. (ex. SLA_ArmorPretty, SLA_ArmorSpendex, SLA_HasStockings, etc..)")
         endif
     elseif(CurrentPage == "$OSL_Settings")
         if(optionId == EnableStatBuffsOid)
@@ -893,6 +852,22 @@ event OnOptionDefault(int option)
     endif
 endevent
 
+event OnOptionInputAccept(int option, string inputVal)
+    if(option == RegisterKeywordOid)
+        ; First check if this keyword can be found
+        if(!Keyword.GetKeyword(inputVal))
+            Debug.MessageBox("Keyword: " + inputVal + " not found. Please try again.")
+            return
+        endif
+
+        if(OSLArousedNative.RegisterNewKeyword(inputVal))
+            Debug.MessageBox("Keyword: " + inputVal + " Registered Successfully. Please save and load your game to see the new keyword in the list.")
+        else
+            Debug.MessageBox("Keyword: " + inputVal + " Failed to Register. Please try again or Check OSLAroused.log file.")
+        endif
+    endif
+endevent
+
 event OnKeyDown(int keyCode)
     if(!Utility.IsInMenuMode() && keyCode == Main.GetShowArousalKeybind())
         Actor target = Game.GetCurrentCrosshairRef() as Actor
@@ -937,12 +912,14 @@ function ArmorSelected()
         return
     endif
 
-    EroticArmorState = CheckKeyword(EroticArmorKeyword, EroticArmorOid)
-    BikiniArmorState = CheckKeyword(BikiniArmorKeyword, BikiniArmorOid)
-    SLAArmorPrettyState = CheckKeyword(SLAArmorPrettyKeyword, SLAArmorPrettyOid)
-    SLAArmorHalfNakedState = CheckKeyword(SLAArmorHalfNakedKeyword, SLAArmorHalfNakedOid)
-    SLAArmorSpendexState = CheckKeyword(SLAArmorSpendexKeyword, SLAArmorSpendexOid)
-    SLAHasStockingsState = CheckKeyword(SLAHasStockingsKeyword, SLAHasStockingsOid)
+    int index = 0
+    while(index < RegisteredKeywords.Length)
+        Keyword kw = RegisteredKeywords[index] as Keyword
+        if(kw)
+            RegisteredKeywordStates[index] = CheckKeyword(kw, RegisteredKeywordOids[index])
+        endif
+        index += 1
+    endwhile
 endfunction
 
 bool function CheckKeyword(Keyword armorKeyword, int oid)
