@@ -32,46 +32,46 @@ int function LoadAdapter()
 	RegisterForModEvent("ostim_end", "OStimEnd")
 
 	if (OStim.GetAPIVersion() >= 29) ;OStim Standalone NPC only scene Events
-		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
-		RegisterForModEvent("ostim_thread_start", "OStimStartThread")
-		RegisterForModEvent("ostim_thread_end", "OStimEndThread")
+		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread"); This is not a dupicate in OStim SA of ostim_orgasm
+		RegisterForModEvent("ostim_thread_start", "OStimStartThread"); This is not a dupicate in OStim SA of ostim_start
+		RegisterForModEvent("ostim_thread_end", "OStimEndThread"); This is not a dupicate in OStim SA of ostim_end
 		return 1
 	endif
 	return 2
 EndFunction
 
-Event OStimStart(String EventName, String Args, Float Nothing, Form Sender)
+Event OStimStart(String EventName, String Args, Float Nothing, Form Sender); This will always be called on a scene with the player
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; If this is OStim NG, bail out (Since Below code is processed in OStimStartThread)
-	if (OStim.GetAPIVersion() >= 29)
-		return
-	endif
+	;if (OStim.GetAPIVersion() >= 29); This return will completley stop the starting register for the player thread in OStim SA
+	;	return 
+	;endif
 	ActiveSceneActors = OStim.GetActors()
 	HandleStartScene(0, ActiveSceneActors)
 EndEvent
 
-Event OStimStartThread(String EventName, String Args, float ThreadID, Form Sender)
+Event OStimStartThread(String EventName, String Args, float ThreadID, Form Sender); This will never be called on a scene with the player
 	HandleStartScene(ThreadID as int, OThread.GetActors(ThreadID as int))
 EndEvent
 
-Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
+Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender); This will always be called on a scene with the player
 	; If this is OStim NG, bail out (Since Below code is processed in OStimEndThread)
-	if (OUtils.GetOStim().GetAPIVersion() >= 29)
-		return
-	endif
+	;if (OUtils.GetOStim().GetAPIVersion() >= 29); This return will completley stop the end register for the player thread in OStim SA
+	;	return
+	;endif
 	HandleEndScene(0, ActiveSceneActors)
 EndEvent
 
-Event OStimEndThread(String EventName, String Args, Float ThreadID, Form Sender)
+Event OStimEndThread(String EventName, String Args, Float ThreadID, Form Sender); This will never be called on a scene with the player
 	HandleEndScene(ThreadID as int, OThread.GetActors(ThreadID as int))
 EndEvent
 
-Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
+Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender); This will always be called on the player and the players parner
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; If this is OStim NG, bail out (Since Below code is processed in OStimOrgasmThread)
-	if (OStim.GetAPIVersion() >= 29)
-		return
-	endif
+	;if (OStim.GetAPIVersion() >= 29); This return will completley stop any Orgasm register for the Player or there parners in a scene
+	;	return
+	;endif
 
 	if sender as Actor
 		HandleActorOrgasm(0, sender as Actor)
@@ -85,7 +85,7 @@ Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
 
 EndEvent
 
-Event OStimOrgasmThread(String EventName, String Args, Float ThreadID, Form Sender)
+Event OStimOrgasmThread(String EventName, String Args, Float ThreadID, Form Sender); This does not get called on the Player or the players partner ever
 	if sender as Actor
 		HandleActorOrgasm(ThreadID as int, sender as Actor)
 	endif
