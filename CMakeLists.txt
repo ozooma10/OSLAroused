@@ -33,22 +33,11 @@ file(GLOB sources "src/*.cpp"
 )
 
 
-set(tests
-        test/HitCounterManager.cpp)
-
 source_group(
         TREE ${CMAKE_CURRENT_SOURCE_DIR}
         FILES
         ${headers}
-        ${sources}
-        ${tests})
-
-#########################################################################################################################
-### Build options
-#########################################################################################################################
-message("Options:")
-option(BUILD_TESTS "Build unit tests." OFF)
-message("\tTests: ${BUILD_TESTS}")
+        ${sources})
 
 ########################################################################################################################
 ## Configure target DLL

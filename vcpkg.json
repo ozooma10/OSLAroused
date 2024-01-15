@@ -17,35 +17,14 @@
         {
           "name": "skse",
           "default-features": false,
-          "features": [
-            "scripts"
-          ]
+          "features": ["scripts"]
         }
       ]
     },
     "plugin": {
       "description": "Build the SKSE plugin.",
-      "dependencies": [
-        "commonlibsse-ng"
-      ]
-    },
-    "tests": {
-      "description": "Build tests for the SKSE plugin.",
-      "dependencies": [
-        {
-          "name": "oslaroused",
-          "default-features": false,
-          "features": [
-            "plugin"
-          ]
-        },
-        "catch2"
-      ]
+      "dependencies": ["commonlibsse-ng"]
     }
   },
-  "default-features": [
-    "scripts-dev",
-    "plugin",
-    "tests"
-  ]
+  "default-features": ["scripts-dev", "plugin"]
 }
