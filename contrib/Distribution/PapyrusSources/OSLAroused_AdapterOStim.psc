@@ -162,25 +162,25 @@ EndFunction
 ;I found this method today "OMetadata.GetActorCount(ThreadID)" - SimonPhil
 Function CreatePreviousModifiers(int ThreadID)
 	if ThreadID == 0
-		previousModifiersThread0 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread0 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 1
-		previousModifiersThread1 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread1 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 2
-		previousModifiersThread2 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread2 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 3
-		previousModifiersThread3 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread3 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 4
-		previousModifiersThread4 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread4 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 5
-		previousModifiersThread5 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread5 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 6
-		previousModifiersThread6 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread6 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 7
-		previousModifiersThread7 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread7 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 8
-		previousModifiersThread8 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread8 = Utility.CreateFloatArray(10)
 	elseif ThreadID == 9
-		previousModifiersThread9 = Utility.CreateFloatArray(OMetadata.GetActorCount(ThreadID))
+		previousModifiersThread9 = Utility.CreateFloatArray(10)
 	endif
 EndFunction
 
