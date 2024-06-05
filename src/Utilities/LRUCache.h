@@ -2,6 +2,7 @@
 
 #include <map>
 #include <list>
+#include "Spinlock.h"
 
 namespace Utilities
 {
@@ -23,6 +24,7 @@ namespace Utilities
 
 		ValType operator()(const KeyType& key)
 		{
+            auto loc_lock = UniqueLock(m_Lock);
 			const auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				//In cache, update tracked by moving key to back
@@ -32,6 +34,7 @@ namespace Utilities
 			} else {
 				//Cache miss, evaluate function and add new record
 				const ValType val = m_OnCacheMiss(key);
+                m_Lock.Unlock();
 				AddToCache(key, val);
 
 				return val;
@@ -40,10 +43,12 @@ namespace Utilities
 
 		void UpdateItem(const KeyType& key, const ValType& val)
 		{
+            auto loc_lock = UniqueLock(m_Lock);
 			auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				(*it).second.first = val;
 			} else {
+                m_Lock.Unlock();
 				AddToCache(key, val);
 			}
 		}
@@ -51,6 +56,7 @@ namespace Utilities
 		//Remove item from cache so it will be recalculated on next fetch
 		void PurgeItem(const KeyType& key)
 		{
+            auto loc_lock = UniqueLock(m_Lock);
 			const auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				m_CacheKeyTracker.erase((*it).second.second);
@@ -61,10 +67,14 @@ namespace Utilities
 	private:
 		void AddToCache(const KeyType& key, const ValType& val)
 		{
+            auto loc_lock = UniqueLock(m_Lock);
+
 			assert(m_CacheData.find(key) == m_CacheData.end());
 
 			if (m_CacheData.size() == m_MaxCacheSize) {
+                m_Lock.Unlock();
 				ClearOldestValue();
+                m_Lock.Lock();
 			}
 
 			const auto it = m_CacheKeyTracker.insert(m_CacheKeyTracker.end(), key);
@@ -75,6 +85,7 @@ namespace Utilities
 
 		void ClearOldestValue()
 		{
+            auto loc_lock = UniqueLock(m_Lock);
 			assert(!m_CacheKeyTracker.empty());
 
 			//Front of tracker has oldest access
@@ -90,6 +101,7 @@ namespace Utilities
 
 		KeyTrackingType m_CacheKeyTracker;
 		KeyToValType m_CacheData;
+        Spinlock m_Lock;
 	};
 
 }
