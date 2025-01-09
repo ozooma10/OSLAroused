@@ -121,7 +121,7 @@ Function OnGameLoaded()
 	IsOStimLegacy = OStimLoadResult == 2
 	Log("OStim Integration Status: " + OStimAdapterLoaded)
 
-	SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
+		SexLabAdapterLoaded = SexLabAdapter.LoadAdapter()
 	Log("SexLab IntegrationStatus: " + SexLabAdapterLoaded)
 
 	OSLAroused_MCM.Get().OnGameLoaded()
@@ -166,7 +166,7 @@ EndFunction
 event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
 	
-	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
+	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 

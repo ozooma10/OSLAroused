@@ -52,7 +52,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 	return RE::BSEventNotifyControl::kContinue;
 }
 
-std::vector<RE::Actor*> GetNakedActorsInCell(RE::Actor* source);
+std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source);
 
 std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radius);
 
@@ -80,7 +80,8 @@ void WorldChecks::ArousalUpdateLoop()
 	float curHours = RE::Calendar::GetSingleton()->GetHoursPassed();
 
 	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime, 0.f, 1.f);
-	//logger::trace("ArousalUpdateLoop: {} Game Hours have elapsed since last check {}", elapsedGameTimeSinceLastCheck, curHours);
+	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime, 0.f, 1.f);
+	//logger::trace("ArousalUpdateLoop: {} Game Hours have elapsed since last check {} - Nearby Actors: {} {}", elapsedGameTimeSinceLastCheck, curHours, elapsedGameTimeSinceLastNearbyArousalCheck, WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime);
 
 	WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime = curHours;
 
@@ -97,44 +98,57 @@ void WorldChecks::ArousalUpdateLoop()
 	if (!player) {
 		return;
 	}
+
+	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.25 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
+	if (performNearbyArousalUpdates) {
+		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
+	}
+
 	
 	std::set<RE::Actor*> spectatingActors;
 	float scanDistance = Settings::GetSingleton()->GetScanDistance();
-	const auto nakedActors = GetNakedActorsInCell(player);
-	for (const auto actor : nakedActors) {
-		const auto spectators = GetNearbySpectatingActors(actor, scanDistance);
-		for (const auto spectator : spectators) {
-			spectatingActors.insert(spectator);
+	const auto nearbyActors = GetNearbyActorsInCell(player);
+	const auto actorStateManager = ActorStateManager::GetSingleton();
+
+	for (const auto actor : nearbyActors) {
+		//If the actor is naked, then get nearby spectators to update spectator array
+		if (actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
+			const auto spectators = GetNearbySpectatingActors(actor, scanDistance);
+			for (const auto spectator : spectators) {
+				spectatingActors.insert(spectator);
+			}
+		}
+
+		//Get the actors arousal (this will trigger updates to dependent mods. We dont want to do this to frequently, so keep it to once per 0.25 game hours)
+		if (performNearbyArousalUpdates) {
+			ArousalManager::GetArousal(actor, true);
 		}
 	}
+
 	ActorStateManager::GetSingleton()->UpdateActorsSpectating(spectatingActors);
 }
 
-std::vector<RE::Actor*> GetNakedActorsInCell(RE::Actor* source)
+std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source)
 {
-	std::vector<RE::Actor*> nakedActors;
+	std::vector<RE::Actor*> nearbyActors;
 
 	if (!source || !source->parentCell) {
-		logger::warn("GetNakedActorsInCell - source can not be null");
-		return nakedActors;
+		logger::warn("GetNearbyActorsInCell - source can not be null");
+		return nearbyActors;
 	}
 
 	float scanDistance = Settings::GetSingleton()->GetScanDistance();
-	const auto actorStateManager = ActorStateManager::GetSingleton();
 
 	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
 		if (actor && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
-			if(actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
-				//If Actor is naked
-				nakedActors.push_back(actor);
-			}
+			nearbyActors.push_back(actor);
 		}
 		return RE::BSContainer::ForEachResult::kContinue;
 	});
 
-	return nakedActors;
+	return nearbyActors;
 }
 
 std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radius)

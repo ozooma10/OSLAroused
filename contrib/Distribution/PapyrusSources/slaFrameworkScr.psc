@@ -29,6 +29,8 @@ function OnGameLoaded()
     slaGenderPreference = Game.GetFormFromFile(0x79A72, "SexLabAroused.esm") as Faction
 
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
+
+    UnregisterForUpdate()
 	RegisterForSingleUpdate(120)
 endfunction
 

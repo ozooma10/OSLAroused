@@ -2,15 +2,15 @@
 <PapyrusProject xmlns="PapyrusProject.xsd"
     Flags="TESV_Papyrus_Flags.flg"
     Game="sse"
-    Output="C:\Users\jel-m\AppData\Local\ModOrganizer\Skyrim Special Edition\mods\OSL Aroused\Scripts"
+    Output="C:\Modding\MO2\mods\OSL Aroused\Scripts"
     Optimize="false"
     Release="false"
     Anonymize="true"
     Final="false">
     <Imports>
         <Import>.\build\debug-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
-        <Import>.\build\debug-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skyrim</Import>
-        <Import>C:\dev\Skyrim\PapyrusScripts</Import>
+        <Import>C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Source\Scripts</Import>
+        <Import>C:\Modding\PapyrusScripts</Import>
     </Imports>
     <Folders>
         <Folder>.\contrib\Distribution\PapyrusSources</Folder>

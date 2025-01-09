@@ -6,7 +6,7 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 ########################################################################################################################
 project(
         OSLAroused
-        VERSION 2.5.0
+        VERSION 2.6.0
         DESCRIPTION "High-Performance Arousal Framework. Support for both Sexlab and OStim."
         LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)

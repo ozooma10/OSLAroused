@@ -38,5 +38,7 @@ namespace WorldChecks
 		}
 
 		float LastUpdatePollGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
+
+		float LastNearbyArousalUpdateGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
 	};
 }
