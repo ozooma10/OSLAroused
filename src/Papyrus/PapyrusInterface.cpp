@@ -6,6 +6,7 @@
 #include "Utilities/Utils.h"
 #include <Settings.h>
 #include <Integrations/DevicesIntegration.h>
+#include "RuntimeEvents.h"
 
 float PapyrusInterface::GetArousal(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
@@ -209,6 +210,13 @@ float PapyrusInterface::WornDeviceBaselineGain(RE::StaticFunctionTag*, RE::Actor
 	return DevicesIntegration::GetSingleton()->GetArousalBaselineFromDevices(actorRef);
 }
 
+
+std::vector<RE::Actor*> PapyrusInterface::GetLastScannedActors(RE::StaticFunctionTag* base)
+{
+    return WorldChecks::ArousalUpdateTicker::GetSingleton()->LastScannedActors;
+}
+
+
 bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	vm->RegisterFunction("GetArousal", "OSLArousedNative", GetArousal);
@@ -229,6 +237,8 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("SetLibido", "OSLArousedNative", SetLibido);
 
 	vm->RegisterFunction("GetDaysSinceLastOrgasm", "OSLArousedNative", GetDaysSinceLastOrgasm);
+
+	vm->RegisterFunction("GetLastScannedActors", "OSLArousedNative", GetLastScannedActors);
 
 	//Explainer
 	vm->RegisterFunction("IsNaked", "OSLArousedNative", IsNaked);

@@ -35,6 +35,8 @@ namespace Papyrus
 		void SendActorLibidoUpdatedEvent(RE::Actor* actorRef, float newLibido);
 
 		void SendActorNakedUpdatedEvent(RE::Actor* actorRef, bool newNaked);
+
+		void SendUpdateCompleteEvent(float numNearbyActors);
 	}
 
 };

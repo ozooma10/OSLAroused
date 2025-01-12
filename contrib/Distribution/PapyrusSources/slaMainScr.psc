@@ -6,10 +6,8 @@ bool Function IsActorNaked(Actor akRef)
 EndFunction
 
 
-;@TODO: Hook this into the native dll to return nearby actors
 Actor [] function getLoadedActors(int lockNum)
-	Actor[] emptyArray
-	return emptyArray
+    return OSLArousedNative.GetLastScannedActors();
 endFunction
 
 ;This isnt necessary

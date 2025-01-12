@@ -43,6 +43,9 @@ float function GetArousalMultiplier(Actor actor) global native
 ;Gets the number of days since this actor last orgasmed
 float function GetDaysSinceLastOrgasm(Actor actor) global native
 
+;Gets the array of actors from the last nearby actor scan (updates every ~15-30 seconds)
+Actor[] function GetLastScannedActors() global native
+
 ; =================== ACTOR STATE =======================
 
 ;Returns if Actor is Naked

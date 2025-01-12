@@ -172,3 +172,9 @@ void Papyrus::Events::SendActorNakedUpdatedEvent(RE::Actor* actorRef, bool newNa
 {
 	SendModEvent("OSLA_ActorNakedUpdated", newNaked ? 1.f : 0.f, actorRef);
 }
+
+void Papyrus::Events::SendUpdateCompleteEvent(float numNearbyActors)
+{
+	//Clamp actor count to 20 (since sla limitation)
+	SendModEvent("sla_UpdateComplete", std::clamp(numNearbyActors, 0.f, 20.f), nullptr);
+}

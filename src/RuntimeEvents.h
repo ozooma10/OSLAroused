@@ -33,12 +33,14 @@ namespace WorldChecks
 
 		static ArousalUpdateTicker* GetSingleton()
 		{
-            static ArousalUpdateTicker singleton(std::chrono::milliseconds(5000));
+            static ArousalUpdateTicker singleton(std::chrono::milliseconds(15000));
 			return &singleton;
 		}
 
 		float LastUpdatePollGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
 
 		float LastNearbyArousalUpdateGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
+
+		std::vector<RE::Actor*> LastScannedActors;
 	};
 }

@@ -126,6 +126,15 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 
 	ActorStateManager::GetSingleton()->UpdateActorsSpectating(spectatingActors);
+
+	if (performNearbyArousalUpdates) {
+		//Also get player value to trigger the update for player
+		ArousalManager::GetArousal(player, true);
+
+		//If we are updating all nearby actors, then we want to update the stored nearby actors array, and emit the sla_UpdateComplete event
+		Papyrus::Events::SendUpdateCompleteEvent(static_cast<float>(nearbyActors.size()));
+		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastScannedActors = nearbyActors;
+	}
 }
 
 std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source)
