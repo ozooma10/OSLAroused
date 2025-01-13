@@ -535,5 +535,5 @@ build/
 
 contrib/Distribution/**/*.dll
 contrib/Distribution/**/*.pdb
-contrib/Distribution/**/*.pex
+contrib/Distribution/PapyrusRelease/*.pex
 vcpkg_installed
