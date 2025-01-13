@@ -67,10 +67,10 @@ bool Property RequireLowArousalToEndScene Auto
 float[] Property DeviceBaselineModifications Auto
 
 ; ============ SPELLS =============
-;OAroused Spells
+;SL Aroused Spells
 Spell Property SLADesireSpell Auto
 
-;SL Aroused Spells
+;OAroused Spells
 Spell Property OArousedHornySpell Auto
 Spell Property OArousedRelievedSpell Auto
 
