@@ -2,6 +2,8 @@
 
 #include <map>
 #include <list>
+#include <shared_mutex>
+#include <mutex>
 
 namespace Utilities
 {
@@ -23,27 +25,70 @@ namespace Utilities
 
 		ValType operator()(const KeyType& key)
 		{
-			const auto it = m_CacheData.find(key);
-			if (it != m_CacheData.end()) {
-				//In cache, update tracked by moving key to back
-				m_CacheKeyTracker.splice(m_CacheKeyTracker.end(), m_CacheKeyTracker, (*it).second.second);
+			//First try to read with shared Lock
+			{
+				std::shared_lock<std::shared_mutex> readLock(m_Mutex);
+				auto it = m_CacheData.find(key);
+				if (it != m_CacheData.end())
+				{
+					//Cache Hit - Copy value while holding the read lock
+					ValType val = it->second.first;
+					KeyType trackingKey = *(it->second.second);
 
-				return (*it).second.first;
-			} else {
-				//Cache miss, evaluate function and add new record
-				const ValType val = m_OnCacheMiss(key);
+					//Release Read lock and acquire Write Lock
+					readLock.unlock();
+					std::unique_lock<std::shared_mutex> writeLock(m_Mutex);
+
+					//Recheck if key exists and iterator valid
+					it = m_CacheData.find(key);
+					if (it != m_CacheData.end() && *(it->second.second) == trackingKey) {
+						m_CacheKeyTracker.splice(m_CacheKeyTracker.end(), m_CacheKeyTracker, it->second.second);
+						return val;
+					}
+				}
+			}
+
+			//Handle Cache Miss - (release lock before calling callback)
+			ValType val;
+			{
+				std::unique_lock<std::shared_mutex> tempLock(m_Mutex);
+				auto it = m_CacheData.find(key);
+				if (it != m_CacheData.end()) {
+					val = it->second.first;
+					m_CacheKeyTracker.splice(m_CacheKeyTracker.end(), m_CacheKeyTracker, it->second.second);
+					return val;
+				}
+				tempLock.unlock();
+			}
+
+			val = m_OnCacheMiss(key);
+
+			//Re-aquire Lock to update cache
+			{
+				std::unique_lock<std::shared_mutex> writeLock(m_Mutex);
+
+				auto it = m_CacheData.find(key);
+				if (it != m_CacheData.end())
+				{
+					//Some other thread updated cache before we re-acquired lock
+					m_CacheKeyTracker.splice(m_CacheKeyTracker.end(), m_CacheKeyTracker, it->second.second);
+					return it->second.first;
+				}
+
 				AddToCache(key, val);
-
 				return val;
 			}
 		}
 
 		void UpdateItem(const KeyType& key, const ValType& val)
 		{
+			std::unique_lock<std::shared_mutex> lock(m_Mutex);
 			auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				(*it).second.first = val;
-			} else {
+				m_CacheKeyTracker.splice(m_CacheKeyTracker.end(), m_CacheKeyTracker, (*it).second.second);
+			}
+			else {
 				AddToCache(key, val);
 			}
 		}
@@ -51,6 +96,8 @@ namespace Utilities
 		//Remove item from cache so it will be recalculated on next fetch
 		void PurgeItem(const KeyType& key)
 		{
+			std::unique_lock<std::shared_mutex> lock(m_Mutex);
+
 			const auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				m_CacheKeyTracker.erase((*it).second.second);
@@ -59,6 +106,7 @@ namespace Utilities
 		}
 
 	private:
+		//Caller must hold exclusive Lock
 		void AddToCache(const KeyType& key, const ValType& val)
 		{
 			assert(m_CacheData.find(key) == m_CacheData.end());
@@ -73,6 +121,7 @@ namespace Utilities
 				std::make_pair(val, it)));
 		}
 
+		//Caller must hold exclusive Lock
 		void ClearOldestValue()
 		{
 			assert(!m_CacheKeyTracker.empty());
@@ -90,6 +139,8 @@ namespace Utilities
 
 		KeyTrackingType m_CacheKeyTracker;
 		KeyToValType m_CacheData;
+
+		mutable std::shared_mutex m_Mutex;
 	};
 
 }
