@@ -1,14 +1,12 @@
 #pragma once
+
 #include "IArousalSystem.h"
-#include "Utilities/LRUCache.h"
 
-float CalculateActorLibidoModifier(RE::Actor* actorFormId);
-
-class ArousalSystemOSL : public IArousalSystem
+class ArousalSystemSLA : public IArousalSystem
 {
 public:
-	ArousalSystemOSL() : m_LibidoModifierCache(std::function<float(RE::Actor*)>(CalculateActorLibidoModifier), 100) {
-		m_Mode = ArousalMode::kOSL;
+	ArousalSystemSLA() {
+		m_Mode = ArousalMode::kSLA;
 	}
 
 	// Inherited via IArousalSystem
@@ -27,13 +25,4 @@ public:
 	float ModifyArousalMultiplier(RE::Actor* actorRef, float value) override;
 
 	float GetBaselineArousal(RE::Actor* actorRef) override;
-	
-	void ActorLibidoModifiersUpdated(RE::Actor* actorRef);
-private:
-
-	float UpdateActorLibido(RE::Actor* actorRef, float gameHoursPassed, float targetLibido);
-
-	//Cache of additional Arousal values on top of actors base libido (Resulting in Baseline Arousal)
-	Utilities::LRUCache<RE::Actor*, float> m_LibidoModifierCache;
-
 };

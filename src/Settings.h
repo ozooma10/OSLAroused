@@ -187,7 +187,20 @@ public:
 		return m_EroticArmorKeyword;
 	}
 
+	float GetTimeRateHalfLife() const
+	{
+		Locker locker(m_Lock);
+		return m_TimeRateHalfLife;
+	}
+	void SetTimeRateHalfLife(float newVal)
+	{
+		newVal = std::clamp(newVal, 0.f, 10.f);
+		Locker locker(m_Lock);
+		m_TimeRateHalfLife = newVal;
+	}
+
 private:
+
 	float m_PlayerMinLibidoValue = 30.f;
 	float m_NPCMinLibidoValue = 80.f;
 	float m_ArousalChangeRate = 0.2f;
@@ -206,6 +219,10 @@ private:
 
 	float m_EroticArmorBaseline = 20.f;
 	RE::BGSKeyword* m_EroticArmorKeyword = nullptr;
+
+
+	//SLA property
+	float m_TimeRateHalfLife = 2.f;
 
 	mutable Lock m_Lock;
 };
