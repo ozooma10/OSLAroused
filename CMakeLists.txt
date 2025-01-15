@@ -27,6 +27,7 @@ configure_file(
 file(GLOB sources "src/*.cpp"
         "src/Papyrus/*.cpp"
         "src/Managers/*.cpp"
+        "src/Managers/ArousalSystem/*.cpp"
         "src/Utilities/*.cpp"
         "src/Integrations/*.cpp"
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc
