@@ -57,6 +57,7 @@ bool Config::RegisterKeyword(std::string keywordEditorId)
 		SKSE::log::error("RegisterKeyword: Failed to find keyword form.");
 		return false;
 	}
+    m_RegisteredKeywordEditorIds.emplace_back(keywordForm->formID, keywordEditorId);
 
     CSimpleIniA ini(false, true, false);
     SI_Error rc = ini.LoadFile("Data/SKSE/Plugins/OSLAroused_Custom.ini");
@@ -73,8 +74,8 @@ bool Config::RegisterKeyword(std::string keywordEditorId)
     rc = ini.SaveFile("Data/SKSE/Plugins/OSLAroused_Custom.ini");
     if (rc < 0) {
 		SKSE::log::error("RegisterKeyword: Failed to save INI file. Error: {}", rc);
+		return false;
     }
 
-    m_RegisteredKeywordEditorIds.emplace_back(keywordForm->formID, keywordEditorId);
     return true;
 }
