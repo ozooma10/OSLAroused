@@ -1,7 +1,7 @@
 #include "ActorStateManager.h"
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
-#include "Managers/LibidoManager.h"
+#include "Managers/ArousalManager.h"
 
 bool IsActorNaked(RE::Actor* actorRef)
 {
@@ -19,7 +19,10 @@ void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNake
 	Papyrus::Events::SendActorNakedUpdatedEvent(actorRef, newNaked);
 	
 	//Actor Naked updated so remove libido cache entry to force refresh on next fetch
-	LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated(actorRef);
+			//Only emit update events for OSL mode
+	if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+		oslSystem->ActorLibidoModifiersUpdated(actorRef);
+	}
 }
 
 bool ActorStateManager::GetActorSpectatingNaked(RE::Actor* actorRef)
@@ -39,7 +42,9 @@ void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor*> spectators)
 	//Need to do this to purge libido modifier cache
 	for (auto itr = m_NakedSpectatingMap.begin(); itr != m_NakedSpectatingMap.end();) {
 		if (!spectators.contains((*itr).first)) {
-			LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated((*itr).first);
+			if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+				oslSystem->ActorLibidoModifiersUpdated((*itr).first);
+			}
 			itr = m_NakedSpectatingMap.erase(itr);
 		} else {
 			itr++;
@@ -49,7 +54,9 @@ void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor*> spectators)
 	float currentTime = RE::Calendar::GetSingleton()->GetCurrentGameTime();
 	for (const auto spectator : spectators) {
 		m_NakedSpectatingMap[spectator] = currentTime;
-		LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated(spectator);
+		if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+			oslSystem->ActorLibidoModifiersUpdated(spectator);
+		}
 	}
 }
 

@@ -2,6 +2,7 @@
 
 namespace PapyrusInterface
 {
+	// =================== SLA/OSL Mode Shared Methods =======================
 	float GetArousal(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	float GetArousalNoSideEffects(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	std::vector<float> GetArousalMultiple(RE::StaticFunctionTag* base, RE::reference_array<RE::Actor*> actorRefs);
@@ -16,12 +17,20 @@ namespace PapyrusInterface
 	float SetArousalMultiplier(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
 	float ModifyArousalMultiplier(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
 
-	float GetArousalBaseline(RE::StaticFunctionTag* base, RE::Actor* actorRef);
-
 	float GetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	float SetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef, float newVal);
-
+	float ModifyLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef, float modVal);
 	
+	// =================== OSL Mode Methods =======================
+	
+	float GetArousalBaseline(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+
+	// =================== SLA Mode Methods =======================
+	float GetExposure(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+
+
+	// ================== = ACTOR STATE ====================== =
+
 	float GetDaysSinceLastOrgasm(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 
 	bool IsNaked(RE::StaticFunctionTag* base, RE::Actor* actorRef);

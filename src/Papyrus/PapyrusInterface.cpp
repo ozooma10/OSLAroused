@@ -2,7 +2,6 @@
 
 #include "PersistedData.h"
 #include "Managers/ArousalManager.h"
-#include "Managers/LibidoManager.h"
 #include "Utilities/Utils.h"
 #include <Settings.h>
 #include <Integrations/DevicesIntegration.h>
@@ -82,7 +81,8 @@ float PapyrusInterface::GetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* 
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
+
+	return ArousalManager::GetSingleton()->GetArousalSystem().GetArousalMultiplier(actorRef);
 }
 
 float PapyrusInterface::SetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
@@ -91,10 +91,7 @@ float PapyrusInterface::SetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* 
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	value = std::clamp(value, 0.0f, 100.f);
-
-	PersistedData::ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, value);
-	return value;
+	return ArousalManager::GetSingleton()->GetArousalSystem().SetArousalMultiplier(actorRef, value);
 }
 
 float PapyrusInterface::ModifyArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
@@ -103,10 +100,7 @@ float PapyrusInterface::ModifyArousalMultiplier(RE::StaticFunctionTag*, RE::Acto
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	float curMult = PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
-	float newVal = curMult + value;
-	PersistedData::ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, newVal);
-	return newVal;
+	return ArousalManager::GetSingleton()->GetArousalSystem().ModifyArousalMultiplier(actorRef, value);
 }
 
 float PapyrusInterface::GetArousalBaseline(RE::StaticFunctionTag*, RE::Actor* actorRef)
@@ -115,7 +109,7 @@ float PapyrusInterface::GetArousalBaseline(RE::StaticFunctionTag*, RE::Actor* ac
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return LibidoManager::GetSingleton()->GetBaselineArousal(actorRef);
+	return ArousalManager::GetSingleton()->GetArousalSystem().GetBaselineArousal(actorRef);
 }
 
 float PapyrusInterface::GetLibido(RE::StaticFunctionTag*, RE::Actor* actorRef)
@@ -124,7 +118,7 @@ float PapyrusInterface::GetLibido(RE::StaticFunctionTag*, RE::Actor* actorRef)
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return LibidoManager::GetSingleton()->GetBaseLibido(actorRef);
+	return ArousalManager::GetSingleton()->GetArousalSystem().GetLibido(actorRef);
 }
 
 float PapyrusInterface::SetLibido(RE::StaticFunctionTag*, RE::Actor* actorRef, float newVal)
@@ -133,7 +127,27 @@ float PapyrusInterface::SetLibido(RE::StaticFunctionTag*, RE::Actor* actorRef, f
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return LibidoManager::GetSingleton()->SetBaseLibido(actorRef, newVal);
+	return ArousalManager::GetSingleton()->GetArousalSystem().SetLibido(actorRef, newVal);
+}
+
+float PapyrusInterface::ModifyLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef, float modVal)
+{
+	if (!actorRef) {
+		Utilities::logInvalidArgsVerbose(__FUNCTION__);
+		return 0;
+	}
+	
+	return ArousalManager::GetSingleton()->GetArousalSystem().ModifyLibido(actorRef, modVal);
+}
+
+float PapyrusInterface::GetExposure(RE::StaticFunctionTag* base, RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		Utilities::logInvalidArgsVerbose(__FUNCTION__);
+		return 0;
+	}
+
+	return ArousalManager::GetSingleton()->GetArousalSystem().GetExposure(actorRef);
 }
 
 float PapyrusInterface::GetDaysSinceLastOrgasm(RE::StaticFunctionTag*, RE::Actor* actorRef)
@@ -228,16 +242,19 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("ModifyArousal", "OSLArousedNative", ModifyArousal);
 	vm->RegisterFunction("ModifyArousalMultiple", "OSLArousedNative", ModifyArousalMultiple);
 
-	vm->RegisterFunction("SetArousalMultiplier", "OSLArousedNative", SetArousalMultiplier);
 	vm->RegisterFunction("GetArousalMultiplier", "OSLArousedNative", GetArousalMultiplier);
 	vm->RegisterFunction("ModifyArousalMultiplier", "OSLArousedNative", ModifyArousalMultiplier);
+	vm->RegisterFunction("SetArousalMultiplier", "OSLArousedNative", SetArousalMultiplier);
 
-	vm->RegisterFunction("GetArousalBaseline", "OSLArousedNative", GetArousalBaseline);
 	vm->RegisterFunction("GetLibido", "OSLArousedNative", GetLibido);
 	vm->RegisterFunction("SetLibido", "OSLArousedNative", SetLibido);
+	vm->RegisterFunction("ModifyLibido", "OSLArousedNative", ModifyLibido);
+
+	vm->RegisterFunction("GetArousalBaseline", "OSLArousedNative", GetArousalBaseline);
+
+	vm->RegisterFunction("GetExposure", "OSLArousedNative", GetExposure);
 
 	vm->RegisterFunction("GetDaysSinceLastOrgasm", "OSLArousedNative", GetDaysSinceLastOrgasm);
-
 	vm->RegisterFunction("GetLastScannedActors", "OSLArousedNative", GetLastScannedActors);
 
 	//Explainer

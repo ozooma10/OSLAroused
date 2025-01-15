@@ -1,7 +1,7 @@
 #include "DevicesIntegration.h"
 #include "Utilities/Utils.h"
 #include "Settings.h"
-#include <Managers/LibidoManager.h>
+#include <Managers/ArousalManager.h>
 
 WornDeviceField GetWornDevices(RE::Actor* actorRef, RE::TESForm* equipmentToIgnore)
 {
@@ -159,7 +159,10 @@ void DevicesIntegration::ActiveEquipmentChanged(RE::Actor* actorRef, RE::TESForm
 	float updatedVal = GetArousalBaselineFromDevices(actorRef);
 
 	if (existingValue != updatedVal) {
-		LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated(actorRef);
+		//Only emit update events for OSL mode
+		if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+			oslSystem->ActorLibidoModifiersUpdated(actorRef);
+		}
 	}
 }
 

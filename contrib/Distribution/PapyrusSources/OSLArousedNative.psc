@@ -1,9 +1,13 @@
 scriptname OSLArousedNative hidden
 
+; =================== SLA/OSL Mode Shared Methods =======================
+
+;NOTE: In SLA Mode, Arousal = Exposure
+
 ;Retrieves arousal value for a given Actor
-;In SLAroused mode, This is a calculated value based off exposure and time rate
 ;NOTE: THIS FUNCTION HAS SIDE EFFECTS. Will internally update arousal based off time. Use GetArousalNoSideEffects if you want a pure read.
 float function GetArousal(Actor actor) global native
+
 ;Retrieves arousal for passed in actors. Results in *same* order as passed in array
 float[] function GetArousalMultiple(Actor[] actorArray) global native
 
@@ -12,23 +16,17 @@ float[] function GetArousalMultiple(Actor[] actorArray) global native
 float function GetArousalNoSideEffects(Actor actor) global native
 
 ;Sets the arousal value for a given actor
-;In SLAroused Mode this is the Exposure Value (Arousal is calculated)
+;In SLA Mode this is the Exposure Value (Arousal is calculated)
 float function SetArousal(Actor actor, float value) global native
 function SetArousalMultiple(Actor[] actorArray, float value) global native
 
 ;Modifies the arousal value by the specified amount (Relative to current arousal value)
+;In SLA Mode this is the Exposure Value (Arousal is calculated)
 float function ModifyArousal(Actor actor, float value) global native
-
-;Modifies all actors in array by sepcified amount (relative to current arousal)
 function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 
-;Retrieves Arousal Baseline
-float function GetArousalBaseline(Actor actor) global native
-
-;Retrieves Actor Base Libido
-float function GetLibido(Actor actor) global native
-;Sets Actor Base Libido
-float function SetLibido(Actor actor, float newVal) global native
+;Gets the actors current arousal multiplier
+float function GetArousalMultiplier(Actor actor) global native
 
 ;Modifies the arousal multiplier by the specified amount
 float function ModifyArousalMultiplier(Actor actor, float value) global native
@@ -36,17 +34,31 @@ float function ModifyArousalMultiplier(Actor actor, float value) global native
 ;Sets the arousal multiplier for a given actor
 float function SetArousalMultiplier(Actor actor, float value) global native
 
-;Gets the actors current arousal multiplier
-float function GetArousalMultiplier(Actor actor) global native
 
+;Retrieves Actor Base Libido
+float function GetLibido(Actor actor) global native
+;Sets Actor Base Libido
+float function SetLibido(Actor actor, float newVal) global native
+float function ModifyLibido(Actor actor, float modVal) global native
+
+
+
+; =================== OSL Mode Methods =======================
+
+;Retrieves Arousal Baseline
+float function GetArousalBaseline(Actor actor) global native
+
+; =================== SLA Mode Methods =======================
+
+float function GetExposure(Actor actor) global native
+
+; =================== ACTOR STATE =======================
 
 ;Gets the number of days since this actor last orgasmed
 float function GetDaysSinceLastOrgasm(Actor actor) global native
 
 ;Gets the array of actors from the last nearby actor scan (updates every ~15-30 seconds)
 Actor[] function GetLastScannedActors() global native
-
-; =================== ACTOR STATE =======================
 
 ;Returns if Actor is Naked
 bool function IsActorNaked(Actor actor) global native
