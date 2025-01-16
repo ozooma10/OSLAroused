@@ -2,6 +2,7 @@
 
 #include "ArousalSystem/IArousalSystem.h"
 #include "ArousalSystem/ArousalSystemOSL.h"
+#include "ArousalSystem/ArousalSystemSLA.h"
 
 namespace ArousalManager
 {
@@ -9,7 +10,7 @@ namespace ArousalManager
 	{
 	public:
 
-		ArousalManager() : m_pArousalSystem(std::make_unique<ArousalSystemOSL>()) {};
+		ArousalManager() : m_pArousalSystem(std::make_unique<ArousalSystemSLA>()) {};
 
 		void SetArousalSystem(std::unique_ptr<IArousalSystem> pArousalSystem)
 		{

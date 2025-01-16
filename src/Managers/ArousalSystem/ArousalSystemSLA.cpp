@@ -46,8 +46,8 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
 	value = std::clamp(value, 0.0f, 100.f);
+	//@TODO: Update Faction Rank
 	ArousalData::GetSingleton()->SetData(actorRef->formID, value);
-
 	//Also update LastCheckTime (Which represents ExposureDate)
 	LastCheckTimeData::GetSingleton()->SetData(actorRef->formID, RE::Calendar::GetSingleton()->GetCurrentGameTime());
 
@@ -130,22 +130,76 @@ float ArousalSystemSLA::ModifyLibido(RE::Actor* actorRef, float value)
 	return SetLibido(actorRef, val);
 }
 
+
+const RE::FormID kVoiceTypeFemaleSultryFormId = 0x13AE0;
+const RE::FormID kVoiceTypeFemaleYoungEagerFormId = 0x13ADC;
+const RE::FormID kVoiceTypeMaleYoungEagerFormId = 0x13AD1;
+const RE::FormID kVoiceTypeMaleDrunkFormId = 0x13AD4;
+
+const std::vector<RE::FormID> kArousedVoiceTypes = { kVoiceTypeFemaleSultryFormId, kVoiceTypeFemaleYoungEagerFormId, kVoiceTypeMaleYoungEagerFormId, kVoiceTypeMaleDrunkFormId };
+
+const RE::FormID kVoiceTypeFemaleOldGrumpyFormId = 0x13AE2;
+const RE::FormID kVoiceTypeFemaleOldKindlyFormId = 0x13AE1;
+const RE::FormID kVoiceTypeMaleOldGrumpyFormId = 0x13AD7;
+const RE::FormID kVoiceTypeMaleOldKindlyFormId = 0x13AD6;
+
+const std::vector<RE::FormID> kUnarousedVoiceTypes = { kVoiceTypeFemaleOldGrumpyFormId, kVoiceTypeFemaleOldKindlyFormId, kVoiceTypeMaleOldGrumpyFormId, kVoiceTypeMaleOldKindlyFormId };
+const float kDefaultExposureRate = 2.f;
+
+//In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 {
-	return 0.0f;
+	float exposureRate = ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, -1.f);
+
+	//If not set, roll initial value
+	if (exposureRate < 0)
+	{
+		auto voiceType = actorRef->GetActorBase()->GetVoiceType();
+		if (voiceType) {
+			if (std::find(kArousedVoiceTypes.begin(), kArousedVoiceTypes.end(), voiceType->formID) != kArousedVoiceTypes.end()) {
+				exposureRate = kDefaultExposureRate + 1.f;
+			}
+			else if (std::find(kUnarousedVoiceTypes.begin(), kUnarousedVoiceTypes.end(), voiceType->formID) != kUnarousedVoiceTypes.end()) {
+				exposureRate = kDefaultExposureRate - 1.f;
+			}
+			else {
+				exposureRate = kDefaultExposureRate;
+			}
+		}
+		else {
+			exposureRate = kDefaultExposureRate;
+		}
+	}
+
+	return std::clamp(exposureRate, 0.f, 10.f);
 }
 
+//In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::SetArousalMultiplier(RE::Actor* actorRef, float value)
 {
-	return 0.0f;
+	float res = value * 10;
+	if (value < 0) {
+		value = 0;
+		res = 0;
+	}
+	else if (value > 10)
+	{
+		value = 10.f;
+		res = 100.f;
+	}
+
+	//@TODO: SetFactionRank slaExposureRate
+	ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, value);
+	return value;
 }
 
 float ArousalSystemSLA::ModifyArousalMultiplier(RE::Actor* actorRef, float value)
 {
-	return 0.0f;
+	float res = GetArousalMultiplier(actorRef) + value;
+	return SetArousalMultiplier(actorRef, res);
 }
 
 float ArousalSystemSLA::GetBaselineArousal(RE::Actor* actorRef)
 {
-	return 0.0f;
+	return GetExposure(actorRef);
 }
