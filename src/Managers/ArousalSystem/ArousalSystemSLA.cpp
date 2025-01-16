@@ -34,6 +34,9 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 		Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
 	}
 
+	logger::debug("Got Arousal for {} val: {}", actorRef->GetDisplayFullName(), newArousal);
+	logger::debug("Debug Values: Libido: {} Exposure: {} DaysSinceLast: {}", GetLibido(actorRef), GetExposure(actorRef), GetDaysSinceLastOrgasm(actorRef));
+
 	//@TODO: Handle player updates
 
 	//@TODO: Update Most aroused Actor IN Location
@@ -72,6 +75,8 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 		float timeSinceUpdate = RE::Calendar::GetSingleton()->GetCurrentGameTime() - LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
 		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
 	}
+
+	logger::debug("ModifyArousal: {} + {} = {}", exposure - modifiedValue, modifiedValue, exposure);
 
 	return SetArousal(actorRef, exposure, bSendEvent);
 }

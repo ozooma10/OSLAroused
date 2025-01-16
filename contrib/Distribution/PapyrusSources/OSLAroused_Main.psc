@@ -30,7 +30,7 @@ bool property OArousedStubLoaded = false Auto Hidden
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 int ToggleArousalBarKey = 157
-int ShowDebugKey = 34
+int DebugActionKey = 34
 
 ;Do not directly set these settings. Use the associated Set function (so that dll is updated)
 ;Percentage of Difference from Arousal to Baseline closed after 1 in game hour. (ex. 50 = Arousal 0, Baseline 50, Arousal is 25 after 1 hour, 37.5 after 2 hours, etc...)
@@ -128,7 +128,7 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 	RegisterForKey(ToggleArousalBarKey)
-	; RegisterForKey(ShowDebugKey)
+	RegisterForKey(DebugActionKey)
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
@@ -242,14 +242,15 @@ Event OnKeyDown(int keyCode)
 		ArousalBar.UpdateDisplay()
 	EndIf
 
-	; if(keyCode == ShowDebugKey)
-	; 	Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
-	; 	if(crosshairTarget != none)
-	; 		OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
-	; 	else
-	; 		OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
-	; 	endif
-	; endif
+	if(keyCode == DebugActionKey)
+		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+		if(crosshairTarget != none)
+			OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
+		else
+			OSLArousedNative.ModifyArousal(PlayerRef, 1.0)
+			; OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
+		endif
+	endif
 EndEvent
 
 Event OnKeyUp(Int KeyCode, Float HoldTime)
