@@ -28,7 +28,6 @@ void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNake
 bool ActorStateManager::GetActorSpectatingNaked(RE::Actor* actorRef)
 {
 	if (const auto lastViewedGameTime = m_NakedSpectatingMap[actorRef]) {
-		//@TODO: Calculate time based off global update cycle [not just 0.72 game hours]
 		if (RE::Calendar::GetSingleton()->GetCurrentGameTime() - lastViewedGameTime < 0.1f) {
 			return true;
 		}
