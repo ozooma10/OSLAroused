@@ -43,7 +43,7 @@ bool Config::LoadINI(std::string fileName)
         }
         else
         {
-			SKSE::log::error("Keyword: {} failed to register.", keyword.pItem);
+			SKSE::log::warn("Keyword: {} failed to register. Failed to find Keyword Form.", keyword.pItem);
 		}
     }
 
