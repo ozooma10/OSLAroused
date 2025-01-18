@@ -46,6 +46,10 @@ int Function GetActorArousal(Actor akRef)
     return OSLAroused_ModInterface.GetArousal(akRef) as int
 EndFunction
 
+Actor Function GetMostArousedActorInLocation()
+	Return OSLArousedNative.GetMostArousedActorInLocation()
+EndFunction
+
 int Function GetActorExposure(Actor akRef)
     if(akRef == none)
         return -2

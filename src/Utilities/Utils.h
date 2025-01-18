@@ -21,6 +21,12 @@ namespace Utilities
 		RE::FormID ResolveFormId(uint32_t modIndex, RE::FormID rawFormId);
 	}
 
+	namespace Factions
+	{
+		void SetFactionRank(RE::Actor* actorRef, const std::string_view& editorId, int rank);
+		int GetFactionRank(RE::Actor* actorRef, const std::string_view& editorId);
+	}
+
 	//Keyword logic based off powerof3's CommonLibSSE implementation
 	namespace Keywords
 	{

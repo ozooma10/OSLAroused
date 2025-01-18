@@ -230,6 +230,11 @@ std::vector<RE::Actor*> PapyrusInterface::GetLastScannedActors(RE::StaticFunctio
     return WorldChecks::ArousalUpdateTicker::GetSingleton()->LastScannedActors;
 }
 
+RE::Actor* PapyrusInterface::GetMostArousedActorInLocation(RE::StaticFunctionTag* base)
+{
+	return ActorStateManager::GetSingleton()->GetMostArousedActorInLocation();
+}
+
 
 bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
@@ -256,6 +261,7 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("GetDaysSinceLastOrgasm", "OSLArousedNative", GetDaysSinceLastOrgasm);
 	vm->RegisterFunction("GetLastScannedActors", "OSLArousedNative", GetLastScannedActors);
+	vm->RegisterFunction("GetMostArousedActorInLocation", "OSLArousedNative", GetMostArousedActorInLocation);
 
 	//Explainer
 	vm->RegisterFunction("IsNaked", "OSLArousedNative", IsNaked);

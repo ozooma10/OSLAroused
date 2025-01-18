@@ -16,11 +16,29 @@ float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 	return RE::Calendar::GetSingleton()->GetCurrentGameTime() - lastOrgasmTime;
 }
 
+//Check if actor has their arousal locked
+bool IsArousalLocked(RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return true;
+	}
+	return Utilities::Factions::GetFactionRank(actorRef, "sla_Arousal_Locked") >= 0;
+}
+
 float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
-	//@TODO: If arousal blocked or is child, abort
+	//Check for arousal blocked ignored since internal to sla
+	if (actorRef->IsChild())
+	{
+		Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal", 0);
+		return 0;
+	}
 
-	//@TODO: If arousal Locked, abort
+	//If locked, get the last faction rank (which is the last retrieved value)
+	if (IsArousalLocked(actorRef))
+	{
+		return Utilities::Factions::GetFactionRank(actorRef, "sla_Arousal");
+	}
 
 	float newArousal = (GetDaysSinceLastOrgasm(actorRef) * GetLibido(actorRef)) + GetExposure(actorRef);
 	if (newArousal < 0) {
@@ -29,18 +47,15 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 	else if (newArousal > 100) {
 		newArousal = 100;
 	}
-	
-	if (bUpdateState) {
+
+	if (bUpdateState || LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f) == 0.f) {
 		Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
 	}
 
 	logger::debug("Got Arousal for {} val: {}", actorRef->GetDisplayFullName(), newArousal);
-	logger::debug("Debug Values: Libido: {} Exposure: {} DaysSinceLast: {}", GetLibido(actorRef), GetExposure(actorRef), GetDaysSinceLastOrgasm(actorRef));
+	logger::debug("Debug Values: Libido: {} Exposure: {} DaysSinceLast: {} LastCheckTime: {}", GetLibido(actorRef), GetExposure(actorRef), GetDaysSinceLastOrgasm(actorRef), LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f));
 
-	//@TODO: Handle player updates
-
-	//@TODO: Update Most aroused Actor IN Location
-
+	ActorStateManager::GetSingleton()->OnActorArousalUpdated(actorRef, newArousal);
 	return newArousal;
 }
 
@@ -49,7 +64,7 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
 	value = std::clamp(value, 0.0f, 100.f);
-	//@TODO: Update Faction Rank
+	//TODO: Update Faction Rank
 	ArousalData::GetSingleton()->SetData(actorRef->formID, value);
 	//Also update LastCheckTime (Which represents ExposureDate)
 	LastCheckTimeData::GetSingleton()->SetData(actorRef->formID, RE::Calendar::GetSingleton()->GetCurrentGameTime());
@@ -65,7 +80,7 @@ float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 //Arousal = Exposure
 float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
-	//@TODO: If arousal Locked, abort
+	//TODO: If arousal Locked, abort
 
 	float modifiedValue = value * GetArousalMultiplier(actorRef);
 	float exposure = GetExposure(actorRef);
@@ -99,7 +114,7 @@ float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife);
 	}
 
-	//@TODO: UPdate Exposure Faction
+	//TODO: UPdate Exposure Faction
 	
 	return exposure;
 }
@@ -118,7 +133,7 @@ float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 
 	timeRate = timeRate * std::pow(1.5, -daysSinceLastOrgasm / timeRateHalfLife);
 
-	//@TODO: Update TimeRate Faction
+	//TODO: Update TimeRate Faction
 	return timeRate;
 }
 
@@ -193,7 +208,7 @@ float ArousalSystemSLA::SetArousalMultiplier(RE::Actor* actorRef, float value)
 		res = 100.f;
 	}
 
-	//@TODO: SetFactionRank slaExposureRate
+	//TODO: SetFactionRank slaExposureRate
 	ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, value);
 	return value;
 }

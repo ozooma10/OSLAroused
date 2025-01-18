@@ -49,11 +49,18 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 
     //If set to update state, or we have never checked (last check time is 0), then update the lastchecktime
     if (bUpdateState || lastCheckTime == 0.f) {
+        Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal", newArousal);
+
         LastCheckTimeData->SetData(actorFormId, curTime);
         SetArousal(actorRef, newArousal, true);
 
         UpdateActorLibido(actorRef, gameHoursPassed, newArousal);
     }
+
+
+    ActorStateManager::GetSingleton()->OnActorArousalUpdated(actorRef, newArousal);
+
+
     //logger::debug("Got Arousal for {} val: {}", actorRef->GetDisplayFullName(), newArousal);
     return newArousal;
 }

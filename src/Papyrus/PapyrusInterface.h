@@ -44,4 +44,6 @@ namespace PapyrusInterface
 	bool RegisterFunctions(RE::BSScript::IVirtualMachine* vm);
 
 	std::vector<RE::Actor*> GetLastScannedActors(RE::StaticFunctionTag* base);
+
+	RE::Actor* GetMostArousedActorInLocation(RE::StaticFunctionTag* base);
 }

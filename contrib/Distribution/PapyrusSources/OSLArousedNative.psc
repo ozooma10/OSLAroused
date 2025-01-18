@@ -41,8 +41,6 @@ float function GetLibido(Actor actor) global native
 float function SetLibido(Actor actor, float newVal) global native
 float function ModifyLibido(Actor actor, float modVal) global native
 
-
-
 ; =================== OSL Mode Methods =======================
 
 ;Retrieves Arousal Baseline
@@ -59,6 +57,9 @@ float function GetDaysSinceLastOrgasm(Actor actor) global native
 
 ;Gets the array of actors from the last nearby actor scan (updates every ~15-30 seconds)
 Actor[] function GetLastScannedActors() global native
+
+;Gets the most aroused non-player character at players location
+Actor function GetMostArousedActorInLocation() global native
 
 ;Returns if Actor is Naked
 bool function IsActorNaked(Actor actor) global native

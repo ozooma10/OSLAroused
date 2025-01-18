@@ -224,3 +224,22 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
         RE::TES::GetSingleton()->ForEachReference([&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
     }
 }
+
+void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, const std::string_view& editorId, int rank)
+{
+	const auto faction = RE::TESForm::LookupByEditorID<RE::TESFaction>(editorId);
+	if (!faction) {
+		return;
+	}
+	actorRef->AddToFaction(faction, rank);
+}
+
+int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, const std::string_view& editorId)
+{
+	const auto faction = RE::TESForm::LookupByEditorID<RE::TESFaction>(editorId);
+	if (!faction) {
+		return -2;
+	}
+
+	return actorRef->GetFactionRank(faction, actorRef->IsPlayer());
+}
