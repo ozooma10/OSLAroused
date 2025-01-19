@@ -51,7 +51,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 	return RE::BSEventNotifyControl::kContinue;
 }
 
-std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source);
+std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source);
 
 std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radius);
 
@@ -109,7 +109,15 @@ void WorldChecks::ArousalUpdateLoop()
 	const auto nearbyActors = GetNearbyActorsInCell(player);
 	const auto actorStateManager = ActorStateManager::GetSingleton();
 
-	for (const auto actor : nearbyActors) {
+	for (const auto actorHandle : nearbyActors) {
+		auto actorPtr = actorHandle.get();
+		if (!actorPtr) {
+			continue;
+		}
+		auto actor = actorPtr.get();
+		if (!actor) {
+			continue;
+		}
 		//If the actor is naked, then get nearby spectators to update spectator array
 		if (actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
 			const auto spectators = GetNearbySpectatingActors(actor, scanDistance);
@@ -136,9 +144,9 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 }
 
-std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source)
+std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)
 {
-	std::vector<RE::Actor*> nearbyActors;
+	std::vector<RE::ActorHandle> nearbyActors;
 
 	if (!source || !source->parentCell) {
 		logger::warn("GetNearbyActorsInCell - source can not be null");
@@ -151,7 +159,7 @@ std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source)
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
 		if (actor && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
-			nearbyActors.push_back(actor);
+			nearbyActors.push_back(actor->GetHandle());
 		}
 		return RE::BSContainer::ForEachResult::kContinue;
 	});

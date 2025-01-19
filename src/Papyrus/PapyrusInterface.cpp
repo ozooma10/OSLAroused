@@ -227,7 +227,15 @@ float PapyrusInterface::WornDeviceBaselineGain(RE::StaticFunctionTag*, RE::Actor
 
 std::vector<RE::Actor*> PapyrusInterface::GetLastScannedActors(RE::StaticFunctionTag* base)
 {
-    return WorldChecks::ArousalUpdateTicker::GetSingleton()->LastScannedActors;
+	std::vector<RE::Actor*> actors;
+	for (const auto& actorHandle : WorldChecks::ArousalUpdateTicker::GetSingleton()->LastScannedActors)
+	{
+		if (auto actor = actorHandle.get())
+		{
+			actors.push_back(actor.get());
+		}
+	}
+	return actors;
 }
 
 RE::Actor* PapyrusInterface::GetMostArousedActorInLocation(RE::StaticFunctionTag* base)
