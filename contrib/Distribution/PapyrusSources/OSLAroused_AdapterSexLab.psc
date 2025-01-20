@@ -139,6 +139,7 @@ event OnAnimationEnd(int tid, bool hasPlayer)
 endevent
 
 function SLAModeUpdateActorOrgasmDate(Actor akRef)
+    Log("SLAModeUpdateActorOrgasmDate: " + akRef.GetDisplayName())
     if(akRef == none)
         return
     endif
@@ -229,11 +230,13 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     EndIf
 
     Log("OnSexLabOrgasm: " + actorForm + " enjoyment: " + enjoyment)
-    if(OSLArousedNativeConfig.IsInOSLMode())
-        OSLArousedNative.RegisterActorOrgasm(act)
-    else
+
+    if(SLSODetected && !OSLArousedNativeConfig.IsInOSLMode())
         SLAModeUpdateActorOrgasmDate(act)
+    else
+        OSLArousedNative.RegisterActorOrgasm(act)
     endif
+
 
     ;Update arousal for any victims
     ;@TODO: Tie this into a lewdness system
