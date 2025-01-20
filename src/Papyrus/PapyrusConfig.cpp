@@ -1,6 +1,7 @@
 #include "PapyrusConfig.h"
 #include "Settings.h"
 #include <Utilities/Utils.h>
+#include "Managers/ArousalManager.h"
 
 void PapyrusConfig::SetMinLibidoValue(RE::StaticFunctionTag*, bool bPlayerVal, float newVal)
 {
@@ -147,6 +148,17 @@ void PapyrusConfig::SetDeviceTypeBaseline(RE::StaticFunctionTag*, int deviceType
 	Settings::GetSingleton()->SetDeviceBaseline(arousalBaselineConfig);
 }
 
+bool PapyrusConfig::IsInOSLMode(RE::StaticFunctionTag* base)
+{
+	auto arousalMode = ArousalManager::GetSingleton()->GetArousalSystem().GetMode();
+	return arousalMode == IArousalSystem::ArousalMode::kOSL;
+}
+
+void PapyrusConfig::SetOSLMode(RE::StaticFunctionTag* base, bool newVal)
+{
+	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
+}
+
 bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	vm->RegisterFunction("SetMinLibidoValue", "OSLArousedNativeConfig", SetMinLibidoValue);
@@ -164,6 +176,9 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("SetDeviceTypesBaseline1", "OSLArousedNativeConfig", SetDeviceTypesBaseline1);
 	vm->RegisterFunction("SetDeviceTypesBaseline2", "OSLArousedNativeConfig", SetDeviceTypesBaseline2);
 	vm->RegisterFunction("SetDeviceTypeBaseline", "OSLArousedNativeConfig", SetDeviceTypeBaseline);
+
+	vm->RegisterFunction("IsInOSLMode", "OSLArousedNativeConfig", IsInOSLMode);
+	vm->RegisterFunction("SetOSLMode", "OSLArousedNativeConfig", SetOSLMode);
 	
 	return true;
 }

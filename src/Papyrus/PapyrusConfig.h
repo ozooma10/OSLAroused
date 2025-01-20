@@ -19,5 +19,8 @@ namespace PapyrusConfig
 	void SetDeviceTypesBaseline2(RE::StaticFunctionTag* base, float plugVag, float plugAnal, float corset, float boots, float gloves, float hood, float suit, float heavyBondage, float bondageMittens);
 	void SetDeviceTypeBaseline(RE::StaticFunctionTag* base, int deviceTypeId, float newVal);
 
+	bool IsInOSLMode(RE::StaticFunctionTag* base);
+	void SetOSLMode(RE::StaticFunctionTag* base, bool newVal);
+
 	bool RegisterFunctions(RE::BSScript::IVirtualMachine* vm);
 }

@@ -12,9 +12,16 @@ namespace ArousalManager
 
 		ArousalManager() : m_pArousalSystem(std::make_unique<ArousalSystemSLA>()) {};
 
-		void SetArousalSystem(std::unique_ptr<IArousalSystem> pArousalSystem)
+		void SetArousalSystem(IArousalSystem::ArousalMode newMode)
 		{
-			m_pArousalSystem = std::move(pArousalSystem);
+			if (newMode == IArousalSystem::ArousalMode::kOSL)
+			{
+				m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
+			}
+			else
+			{
+				m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
+			}
 		}
 
 		IArousalSystem& GetArousalSystem() const
