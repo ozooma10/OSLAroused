@@ -60,6 +60,10 @@ Function SetActorExhibitionist(Actor akRef, bool val = false) global
     OSLArousedNative.SetActorExhibitionist(akRef, val)
 endfunction
 
+float function GetSLADefaultExposureRate() global
+    return OSLAroused_Main.Get().SLADefaultExposureRate
+endfunction
+
 function Log(string msg) global
     Debug.Trace("---OSLAroused--- [ModInterface] " + msg)
 endfunction

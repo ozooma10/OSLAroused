@@ -151,6 +151,9 @@ Function OnGameLoaded()
 	OSLArousedNativeConfig.SetDeviceTypesBaseline1(DeviceBaselineModifications[0], DeviceBaselineModifications[1], DeviceBaselineModifications[2], DeviceBaselineModifications[3], DeviceBaselineModifications[4], DeviceBaselineModifications[5], DeviceBaselineModifications[6], DeviceBaselineModifications[7], DeviceBaselineModifications[8], DeviceBaselineModifications[9])
 	OSLArousedNativeConfig.SetDeviceTypesBaseline2(DeviceBaselineModifications[10], DeviceBaselineModifications[11], DeviceBaselineModifications[12], DeviceBaselineModifications[13], DeviceBaselineModifications[14], DeviceBaselineModifications[15], DeviceBaselineModifications[16], DeviceBaselineModifications[17], DeviceBaselineModifications[18])
 
+	OSLArousedNativeConfig.SetSLADefaultExposureRate(SLADefaultExposureRate)
+	OSLArousedNativeConfig.SetSLATimeRateHalfLife(SLATimeRateHalfLife)
+
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
 		ApplyArousedEffects()
