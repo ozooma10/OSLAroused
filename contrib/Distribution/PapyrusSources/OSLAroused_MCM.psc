@@ -224,13 +224,13 @@ function RenderActorStatus(Actor target, bool bInOSLMode)
     else
         int exposure = (OSLArousedNative.GetExposure(target)) as int
         float timeRate = OSLArousedNative.GetLibido(target)
-        float exposureRate = OSLArousedNative.GetArousalMultiplier(target)
+        float exposureRate = (OSLArousedNative.GetArousalMultiplier(target) * 10) as int
         float daysSinceLast = OSLArousedNative.GetDaysSinceLastOrgasm(target)
         int timeArousal = (daysSinceLast * timeRate) as int
         int arousal = exposure + timeArousal
         AddTextOption("$OSL_CurrentArousalSLA", arousal)
         AddTextOption("$OSL_Exposure", exposure)
-        AddTextOption("$OSL_ExposureRate", exposureRate)
+        AddTextOption("$OSL_ExposureRate", (exposureRate / 10) as int)
         AddTextOption("$OSL_TimeArousal", timeArousal)
         AddTextOption("$OSL_DaysSinceLast", daysSinceLast)
         AddTextOption("$OSL_TimeRate", timeRate)
@@ -251,15 +251,24 @@ function PuppeteerPage(Actor target)
     endif
     AddHeaderOption(target.GetLeveledActorBase().GetName())
 
-    float arousal = OSLArousedNative.GetArousal(PuppetActor)
-    SetArousalOid = AddSliderOption("$OSL_Arousal", ((arousal * 100) / 100) as int, "{1}")
+    bool bIsOSLMode = OSLArousedNativeConfig.IsInOSLMode()
+    if(bIsOSLMode)
+        float arousal = OSLArousedNative.GetArousal(PuppetActor)
+        SetArousalOid = AddSliderOption("$OSL_Arousal", ((arousal * 100) / 100) as int, "{1}")
 
-    float libido = OSLArousedNative.GetLibido(PuppetActor)
-    SetLibidoOid = AddSliderOption("$OSL_Libido", ((libido * 100) / 100) as int, "{1}")
-    
-    float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
-    SetArousalMultiplierOid = AddSliderOption("$OSL_ArousalMultiplier", arousalMultiplier, "{1}")
-
+        float libido = OSLArousedNative.GetLibido(PuppetActor)
+        SetLibidoOid = AddSliderOption("$OSL_Libido", ((libido * 100) / 100) as int, "{1}")
+        
+        float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
+        SetArousalMultiplierOid = AddSliderOption("$OSL_ArousalMultiplier", arousalMultiplier, "{1}")
+    else
+        int exposure = (OSLArousedNative.GetExposure(target)) as int
+        float timeRate = OSLArousedNative.GetLibido(target)
+        float exposureRate = OSLArousedNative.GetArousalMultiplier(target)
+        SetArousalOid = AddSliderOption("$OSL_Exposure", exposure, "{0}")
+        SetArousalMultiplierOid = AddSliderOption("$OSL_ExposureRate", exposureRate, "{1}")
+        SetLibidoOid = AddSliderOption("$OSL_TimeRate", timeRate, "{0}")
+    endif
     bool bIsArousalLocked = OSLArousedNative.IsActorArousalLocked(target)
     IsArousalLockedOid = AddToggleOption("$OSL_ArousalLocked", bIsArousalLocked)
 
@@ -677,31 +686,46 @@ endevent
 
 event OnOptionSliderOpen(int option)
     if(CurrentPage == "$OSL_Puppeteer")
+        bool bIsOSLMode = OSLArousedNativeConfig.IsInOSLMode()
         if(option == SetArousalOid)
-            float arousal = 0
-            arousal = OSLArousedNative.GetArousal(PuppetActor)
+            int arousal = 0
+            if(bIsOSLMode)
+                arousal = OSLArousedNative.GetArousal(PuppetActor) as int
+            else
+                arousal = OSLArousedNative.GetExposure(PuppetActor) as int
+            endif
             SetSliderDialogStartValue(arousal)
             SetSliderDialogDefaultValue(0)
             SetSliderDialogRange(0, 100)
             SetSliderDialogInterval(1)
         elseif (option == SetLibidoOid)
             float libido = OSLArousedNative.GetLibido(PuppetActor)
-            bool isPlayer = PuppetActor == Game.GetPlayer()
             SetSliderDialogStartValue(libido)
-            if(isPlayer)
-                SetSliderDialogDefaultValue(Main.MinLibidoValuePlayer)
-                SetSliderDialogRange(Main.MinLibidoValuePlayer, 100)
+            if(bIsOSLMode)
+                bool isPlayer = PuppetActor == Game.GetPlayer()
+                if(isPlayer)
+                    SetSliderDialogDefaultValue(Main.MinLibidoValuePlayer)
+                    SetSliderDialogRange(Main.MinLibidoValuePlayer, 100)
+                else
+                    SetSliderDialogDefaultValue(Main.MinLibidoValueNPC)
+                    SetSliderDialogRange(Main.MinLibidoValueNPC, 100)
+                endif
+                SetSliderDialogInterval(1)
             else
-                SetSliderDialogDefaultValue(Main.MinLibidoValueNPC)
-                SetSliderDialogRange(Main.MinLibidoValueNPC, 100)
+                SetSliderDialogDefaultValue(10.0)
+                SetSliderDialogRange(0.0, 100.0)
+                SetSliderDialogInterval(1.0)
             endif
-            SetSliderDialogInterval(1)
         ElseIf (option == SetArousalMultiplierOid)
             float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
             SetSliderDialogStartValue(arousalMultiplier)
-            SetSliderDialogDefaultValue(kDefaultArousalMultiplier)
+            float sliderDefaultValue = kDefaultArousalMultiplier
+            if(!bIsOSLMode)
+                sliderDefaultValue = 2.0
+            endif
+            SetSliderDialogDefaultValue(sliderDefaultValue)
             SetSliderDialogRange(0, 10)
-            SetSliderDialogInterval(0.2)
+            SetSliderDialogInterval(0.1)
         endif
     ElseIf(CurrentPage == "$OSL_UI")
         if(option == ArousalBarXOid)
@@ -859,19 +883,29 @@ event OnOptionDefault(int option)
     elseif(currentPage == "$OSL_Puppeteer")
         if(option == SetArousalOid)
             OSLArousedNative.SetArousal(PuppetActor, 0)
-            SetSliderOptionValue(SetArousalOid, 0, "{1}")
+            SetSliderOptionValue(SetArousalOid, 0, "{0}")
         elseif(option == SetLibidoOid)
-            bool isPlayer = PuppetActor == Game.GetPlayer()
-            if(isPlayer)
-                OSLArousedNative.SetLibido(PuppetActor, Main.MinLibidoValuePlayer)
-                SetSliderOptionValue(SetLibidoOid, Main.MinLibidoValuePlayer, "{1}")
+            if(OSLArousedNativeConfig.IsInOSLMode())
+                bool isPlayer = PuppetActor == Game.GetPlayer()
+                if(isPlayer)
+                    OSLArousedNative.SetLibido(PuppetActor, Main.MinLibidoValuePlayer)
+                    SetSliderOptionValue(SetLibidoOid, Main.MinLibidoValuePlayer, "{1}")
+                else
+                    OSLArousedNative.SetLibido(PuppetActor, Main.MinLibidoValueNPC)
+                    SetSliderOptionValue(SetLibidoOid, Main.MinLibidoValueNPC, "{1}")
+                endif
             else
-                OSLArousedNative.SetLibido(PuppetActor, Main.MinLibidoValueNPC)
-                SetSliderOptionValue(SetLibidoOid, Main.MinLibidoValueNPC, "{1}")
+                OSLArousedNative.SetLibido(PuppetActor, 10)
+                SetSliderOptionValue(SetLibidoOid, 10.0, "{0}")
             endif
         elseif(option == SetArousalMultiplierOid)
-            OSLArousedNative.SetArousalMultiplier(PuppetActor, kDefaultArousalMultiplier)
-            SetSliderOptionValue(SetArousalMultiplierOid, kDefaultArousalMultiplier, "{1}")
+            if(OSLArousedNativeConfig.IsInOSLMode())
+                OSLArousedNative.SetArousalMultiplier(PuppetActor, kDefaultArousalMultiplier)
+                SetSliderOptionValue(SetArousalMultiplierOid, kDefaultArousalMultiplier, "{1}")
+            else
+                OSLArousedNative.SetArousalMultiplier(PuppetActor, 2.0)
+                SetSliderOptionValue(SetArousalMultiplierOid, 2.0, "{1}")
+            endif
         elseif(option == GenderPreferenceOid)
             Main.SlaFrameworkStub.SetGenderPreference(PuppetActor, 3)
             SetMenuOptionValue(GenderPreferenceOid, GenderPreferenceList[3])
