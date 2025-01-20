@@ -199,18 +199,6 @@ public:
 		m_TimeRateHalfLife = newVal;
 	}
 
-	int GetOveruseEffect() const
-	{
-		Locker locker(m_Lock);
-		return m_OveruseEffect;
-	}
-	void SetOveruseEffect(int newVal)
-	{
-		newVal = std::clamp(newVal, 0, 10);
-		Locker locker(m_Lock);
-		m_OveruseEffect = newVal;
-	}
-
 	float GetDefaultExposureRate() const
 	{
 		Locker locker(m_Lock);
@@ -248,7 +236,6 @@ private:
 
 	//SLA property
 	float m_TimeRateHalfLife = 2.f;
-	int m_OveruseEffect = 5;
 	float m_DefaultExposureRate = 2.f;
 
 	mutable Lock m_Lock;

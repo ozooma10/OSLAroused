@@ -164,7 +164,6 @@ const RE::FormID kVoiceTypeMaleOldGrumpyFormId = 0x13AD7;
 const RE::FormID kVoiceTypeMaleOldKindlyFormId = 0x13AD6;
 
 const std::vector<RE::FormID> kUnarousedVoiceTypes = { kVoiceTypeFemaleOldGrumpyFormId, kVoiceTypeFemaleOldKindlyFormId, kVoiceTypeMaleOldGrumpyFormId, kVoiceTypeMaleOldKindlyFormId };
-const float kDefaultExposureRate = 2.f;
 
 //In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
@@ -174,20 +173,21 @@ float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 	//If not set, roll initial value
 	if (exposureRate < 0)
 	{
+		float defaultExposureRate = Settings::GetSingleton()->GetDefaultExposureRate();
 		auto voiceType = actorRef->GetActorBase()->GetVoiceType();
 		if (voiceType) {
 			if (std::find(kArousedVoiceTypes.begin(), kArousedVoiceTypes.end(), voiceType->formID) != kArousedVoiceTypes.end()) {
-				exposureRate = kDefaultExposureRate + 1.f;
+				exposureRate = defaultExposureRate + 1.f;
 			}
 			else if (std::find(kUnarousedVoiceTypes.begin(), kUnarousedVoiceTypes.end(), voiceType->formID) != kUnarousedVoiceTypes.end()) {
-				exposureRate = kDefaultExposureRate - 1.f;
+				exposureRate = defaultExposureRate - 1.f;
 			}
 			else {
-				exposureRate = kDefaultExposureRate;
+				exposureRate = defaultExposureRate;
 			}
 		}
 		else {
-			exposureRate = kDefaultExposureRate;
+			exposureRate = defaultExposureRate;
 		}
 	}
 

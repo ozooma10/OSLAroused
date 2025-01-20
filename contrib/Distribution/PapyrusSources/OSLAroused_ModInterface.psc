@@ -38,6 +38,11 @@ float function ModifyArousalMultiplier(Actor target, float value, string reason 
     return OSLArousedNative.ModifyArousalMultiplier(target, value)
 endfunction
 
+float function ModifyLibido(Actor target, float value, string reason = "unknown") global
+    Log("ModifyLibido: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
+    return OSLArousedNative.ModifyLibido(target, value)
+endfunction
+
 function RegisterOrgasm(Actor target) global
     OSLArousedNative.RegisterActorOrgasm(target)
 endfunction
