@@ -54,6 +54,8 @@ Actor Property PuppetActor Auto
 int Property SetArousalOid Auto
 int Property SetLibidoOid Auto
 int Property SetArousalMultiplierOid Auto
+int Property IsArousalLockedOid Auto
+int Property IsExhibitionistOid Auto
 
 int GenderPreferenceOid
 string[] GenderPreferenceList
@@ -266,9 +268,17 @@ function PuppeteerPage(Actor target)
     float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
     SetArousalMultiplierOid = AddSliderOption("$OSL_ArousalMultiplier", arousalMultiplier, "{1}")
 
+    bool bIsArousalLocked = OSLArousedNative.IsActorArousalLocked(target)
+    IsArousalLockedOid = AddToggleOption("$OSL_ArousalLocked", bIsArousalLocked)
+
+    bool bIsExhibitionist = OSLArousedNative.IsActorExhibitionist(target)
+    IsExhibitionistOid = AddToggleOption("$OSL_IsExhibitionist", bIsExhibitionist)
+
     if(Main.SlaFrameworkStub)
         GenderPreferenceOid = AddMenuOption("$OSL_GenderPreference", GenderPreferenceList[Main.SlaFrameworkStub.GetGenderPreference(target, true)])
     endif
+
+    
 endfunction
 
 function KeywordPage()
@@ -437,6 +447,16 @@ event OnOptionSelect(int optionId)
             Main.EnableDebugMode = !Main.EnableDebugMode
             SetToggleOptionValue(EnableDebugModeOid, Main.EnableDebugMode)
         endif
+    ElseIf(CurrentPage == "$OSL_Puppeteer")
+        if(optionId == IsArousalLockedOid)
+            bool bIsArousalLocked = !OSLArousedNative.IsActorArousalLocked(PuppetActor)
+            SetToggleOptionValue(IsArousalLockedOid, bIsArousalLocked)
+            OSLArousedNative.SetActorArousalLocked(PuppetActor, bIsArousalLocked)
+        elseif(optionId == IsExhibitionistOid)
+            bool bIsExhibitionist = !OSLArousedNative.IsActorExhibitionist(PuppetActor)
+            SetToggleOptionValue(IsExhibitionistOid, bIsExhibitionist)
+            OSLArousedNative.SetActorExhibitionist(PuppetActor, bIsExhibitionist)
+        endif
     ElseIf(CurrentPage == "$OSL_Help")
         if(optionId == HelpOverviewOid)
             Debug.MessageBox("$OSL_HelpOverview")
@@ -496,6 +516,10 @@ event OnOptionHighlight(int optionId)
     elseif(CurrentPage == "$OSL_Puppeteer")
         if(optionId == GenderPreferenceOid)
             SetInfoText("$OSL_InfoGenderPreference")
+        elseif (optionId == IsArousalLockedOid)
+            SetInfoText("$OSL_InfoArousalLocked")
+        elseif (optionId == IsExhibitionistOid)
+            SetInfoText("$OSL_InfoIsExhibitionist")
         endif
     elseif(CurrentPage == "$OSL_UI")
         if(optionId == ArousalBarToggleKeyOid)
@@ -796,6 +820,12 @@ event OnOptionDefault(int option)
         elseif(option == GenderPreferenceOid)
             Main.SlaFrameworkStub.SetGenderPreference(PuppetActor, 3)
             SetMenuOptionValue(GenderPreferenceOid, GenderPreferenceList[3])
+        ElseIf (option == IsArousalLockedOid)
+            OSLArousedNative.SetActorArousalLocked(PuppetActor, false)
+            SetToggleOptionValue(IsArousalLockedOid, false)
+        ElseIf (option == IsExhibitionistOid)
+            OSLArousedNative.SetActorExhibitionist(PuppetActor, false)
+            SetToggleOptionValue(IsExhibitionistOid, false)
         endif
     elseif(currentPage == "$OSL_UI")
         if(option == ArousalBarXOid)

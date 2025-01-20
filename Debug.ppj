@@ -2,7 +2,7 @@
 <PapyrusProject xmlns="PapyrusProject.xsd"
     Flags="TESV_Papyrus_Flags.flg"
     Game="sse"
-    Output="C:\Modding\MO2\mods\OSL Aroused\Scripts"
+    Output="C:\Modding\MO2_Modding\mods\OSL Aroused\Scripts"
     Optimize="false"
     Release="false"
     Anonymize="true"

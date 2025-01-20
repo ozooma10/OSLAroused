@@ -46,6 +46,20 @@ float function GetActorDaysSinceLastOrgasm(Actor target) global
     return OSLArousedNative.GetDaysSinceLastOrgasm(target)
 endfunction
 
+bool Function IsActorArousalLocked(Actor akRef) global
+    return OSLArousedNative.IsActorArousalLocked(akRef)
+endfunction
+Function SetActorArousalLocked(Actor akRef, bool val = false) global
+    OSLArousedNative.SetActorArousalLocked(akRef, val)
+endfunction
+
+bool Function IsActorExhibitionist(Actor akRef) global
+    return OSLArousedNative.IsActorExhibitionist(akRef)
+endfunction
+Function SetActorExhibitionist(Actor akRef, bool val = false) global
+    OSLArousedNative.SetActorExhibitionist(akRef, val)
+endfunction
+
 function Log(string msg) global
     Debug.Trace("---OSLAroused--- [ModInterface] " + msg)
 endfunction

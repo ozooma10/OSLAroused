@@ -70,6 +70,7 @@ Float Function GetActorTimeRate(Actor akRef)
     if(akRef == none)
         return -2.0
     endif    
+
     ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
     return 10.0
 EndFunction
@@ -167,30 +168,25 @@ Int Function GetActorHoursSinceLastSex(Actor akRef)
     return (OSLAroused_ModInterface.GetActorDaysSinceLastOrgasm(akRef) * 24) as Int
 EndFunction
 
-;Send an updatecomplete event every 120 seconds
-;Since OSLAroused update cycle occurs outside of Papyrus and not "Heartbeat" based like in sla, nothing really to bind to
-Event OnUpdate()
-    log("OnUpdate")
-	RegisterForSingleUpdate(120) ;Another update in two more minutes
-    SendModEvent("sla_UpdateComplete")
-EndEvent
+bool Function IsActorArousalLocked(Actor akRef)
+    return OSLAroused_ModInterface.IsActorArousalLocked(akRef)
+EndFunction
+function SetActorArousalLocked(Actor akRef, bool val = false)
+    OSLAroused_ModInterface.SetActorArousalLocked(akRef, val)
+endfunction
 
+bool Function IsActorExhibitionist(Actor akRef)
+    return OSLAroused_ModInterface.IsActorExhibitionist(akRef)
+endfunction
+Function SetActorExhibitionist(Actor akRef, bool val = false)
+    OSLAroused_ModInterface.SetActorExhibitionist(akRef, val)
+endfunction
 
 ;==== NOT IMPLEMENTED
-bool Function IsActorArousalLocked(Actor akRef)
-    return false
-EndFunction
-
 bool Function IsActorArousalBlocked(Actor akRef)
     return false
 EndFunction
 
-Function SetActorExhibitionist(Actor akRef, bool val = false)
-    return
-endfunction
-bool Function IsActorExhibitionist(Actor akRef)
-    return false
-endfunction
 
 ; 0 - Male
 ; 1 - Female

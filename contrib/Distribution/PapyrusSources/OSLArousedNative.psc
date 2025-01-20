@@ -27,10 +27,8 @@ function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 
 ;Gets the actors current arousal multiplier
 float function GetArousalMultiplier(Actor actor) global native
-
 ;Modifies the arousal multiplier by the specified amount
 float function ModifyArousalMultiplier(Actor actor, float value) global native
-
 ;Sets the arousal multiplier for a given actor
 float function SetArousalMultiplier(Actor actor, float value) global native
 
@@ -49,6 +47,10 @@ float function GetArousalBaseline(Actor actor) global native
 ; =================== SLA Mode Methods =======================
 
 float function GetExposure(Actor actor) global native
+
+float function GetActorTimeRate(Actor actor) global native
+float function SetActorTimeRate(Actor actor, float val) global native
+float function ModifyActorTimeRate(Actor actor, float val) global native
 
 ; =================== ACTOR STATE =======================
 
@@ -72,6 +74,12 @@ function RemoveScene(bool bIsOstim, int sceneId) global native
 
 ;Called when an actor from a scene orgasms
 function RegisterActorOrgasm(Actor actorRef) global native
+
+bool function IsActorExhibitionist(Actor actorRef) global native
+function SetActorExhibitionist(Actor actorRef, bool bIsExhibitionist) global native
+
+bool function IsActorArousalLocked(Actor actorRef) global native
+function SetActorArousalLocked(Actor actorRef, bool bIsLocked) global native
 
 ; ==================== SETTINGS =========================
 
