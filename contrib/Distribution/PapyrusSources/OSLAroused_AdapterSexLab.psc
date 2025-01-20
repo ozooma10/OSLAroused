@@ -56,17 +56,17 @@ event OnAnimationEnd(int tid, bool hasPlayer)
         return
     EndIf
 
-    bool bInOslMode = OSLArousedNativeConfig.IsInOSLMode()
-    int exposureValue = 0
-    Bool canHaveOrgasm = False
+    ; bool bInOslMode = OSLArousedNativeConfig.IsInOSLMode()
+    ; int exposureValue = 0
+    ; Bool canHaveOrgasm = False
 
-    if(!bInOslMode)
-        exposureValue = ((controller.TotalTime / GetAnimationDuration(controller)) * -20) as Int
+    ; if(!bInOslMode)
+    ;     exposureValue = ((controller.TotalTime / GetAnimationDuration(controller)) * -20) as Int
             
-        If (controller.Animation.HasTag("Anal") || controller.Animation.HasTag("Vaginal") || controller.Animation.HasTag("Masturbation") || controller.Animation.HasTag("Fisting"))
-            canHaveOrgasm = True
-        EndIf
-    endif
+    ;     If (controller.Animation.HasTag("Anal") || controller.Animation.HasTag("Vaginal") || controller.Animation.HasTag("Masturbation") || controller.Animation.HasTag("Fisting"))
+    ;         canHaveOrgasm = True
+    ;     EndIf
+    ; endif
 
     
 	
@@ -78,40 +78,40 @@ event OnAnimationEnd(int tid, bool hasPlayer)
 
         ;If in OSL Mode, Directly add arousal
         ;If in SLA Mode, Update last sex date so that arousal calculation is used
-        if(bInOslMode)
-            if(SLSODetected)
-                if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
-                    OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - SLSO orgasm")
-                elseif(Main.VictimGainsArousal || !controller.IsVictim(act))
-                    OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
-                endif
-            else
-                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - no orgasm (no SLSO)")
+        ; if(bInOslMode)
+        if(SLSODetected)
+            if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - SLSO orgasm")
+            elseif(Main.VictimGainsArousal || !controller.IsVictim(act))
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
             endif
         else
-            if(controller.IsVictim(act))
-                OSLAroused_ModInterface.ModifyArousal(act, -10, "SLA Mode - Victim to SL Scene")
-            endif
-
-            int sex = act.GetLeveledActorBase().GetSex()
-            ;If sex is male or unknown, dont need to check for belt
-            if(sex == 0 || sex == -1)
-                OSLAroused_ModInterface.ModifyArousal(act, exposureValue, "sexlab end - having orgasm (SLA Mode)")
-                SLAModeUpdateActorOrgasmDate(act)
-            else
-                ;If female, check for belt
-                bool bHasBelt = false
-                if(DeviousBeltKeyword != none)
-                    bHasBelt = act.WornHasKeyword(DeviousBeltKeyword)
-                endif
-                if(canHaveOrgasm && !bHasBelt)
-                    OSLAroused_ModInterface.ModifyArousal(act, exposureValue, "sexlab end - having orgasm (SLA Mode)")
-                    SLAModeUpdateActorOrgasmDate(act)
-                else
-                    Log("Actor: " + act.GetDisplayName() + " can not orgasm. has belt: " + bHasBelt)
-                endif
-            endif
+            OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - no orgasm (no SLSO)")
         endif
+        ; else
+            ; if(controller.IsVictim(act))
+            ;     OSLAroused_ModInterface.ModifyArousal(act, -10, "SLA Mode - Victim to SL Scene")
+            ; endif
+
+            ; int sex = act.GetLeveledActorBase().GetSex()
+            ; ;If sex is male or unknown, dont need to check for belt
+            ; if(sex == 0 || sex == -1)
+            ;     OSLAroused_ModInterface.ModifyArousal(act, exposureValue, "sexlab end - having orgasm (SLA Mode)")
+            ;     SLAModeUpdateActorOrgasmDate(act)
+            ; else
+            ;     ;If female, check for belt
+            ;     bool bHasBelt = false
+            ;     if(DeviousBeltKeyword != none)
+            ;         bHasBelt = act.WornHasKeyword(DeviousBeltKeyword)
+            ;     endif
+            ;     if(canHaveOrgasm && !bHasBelt)
+            ;         OSLAroused_ModInterface.ModifyArousal(act, exposureValue, "sexlab end - having orgasm (SLA Mode)")
+            ;         SLAModeUpdateActorOrgasmDate(act)
+            ;     else
+            ;         Log("Actor: " + act.GetDisplayName() + " can not orgasm. has belt: " + bHasBelt)
+            ;     endif
+            ; endif
+        ; endif
     endwhile
 endevent
 
