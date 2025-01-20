@@ -52,6 +52,19 @@ namespace PersistedData
 		}
 	};
 
+	class BaseFormBool : public BaseData<bool>
+	{
+	public:
+		virtual void DumpToLog() override
+		{
+			Locker locker(m_Lock);
+			for (const auto& [formId, value] : m_Data) {
+				logger::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+			}
+			logger::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+		}
+	};
+
 	class BaseFormArrayData : public BaseData<std::set<RE::FormID>>
 	{
 	public:
@@ -177,6 +190,34 @@ namespace PersistedData
 		}
 	};
 
+	class IsArousalLockedData final : public BaseFormBool
+	{
+	public:
+		static IsArousalLockedData* GetSingleton()
+		{
+			static IsArousalLockedData singleton;
+			return &singleton;
+		}
+		const char* GetType() override
+		{
+			return "IsArousalLocked";
+		}
+	};
+
+	class IsActorExhibitionistData final : public BaseFormBool
+	{
+	public:
+		static IsActorExhibitionistData* GetSingleton()
+		{
+			static IsActorExhibitionistData singleton;
+			return &singleton;
+		}
+		const char* GetType() override
+		{
+			return "IsActorExhibitionist";
+		}
+	};
+
 	constexpr std::uint32_t kSerializationVersion = 1;
 	constexpr std::uint32_t kArousalDataKey = 'OSLA';
 	constexpr std::uint32_t kBaseLibidoDataKey = 'OSLB';
@@ -184,6 +225,8 @@ namespace PersistedData
 	constexpr std::uint32_t kLastCheckTimeDataKey = 'OSLC';
 	constexpr std::uint32_t kLastOrgasmTimeDataKey = 'OSLO';
 	constexpr std::uint32_t kArmorKeywordDataKey = 'OSLK';
+	constexpr std::uint32_t kIsArousalLockedDataKey = 'OSLL';
+	constexpr std::uint32_t kIsActorExhibitionistDataKey = 'OSLE';
 
 	std::string DecodeTypeCode(std::uint32_t typeCode);
 

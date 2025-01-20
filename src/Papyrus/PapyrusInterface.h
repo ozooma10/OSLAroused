@@ -38,6 +38,13 @@ namespace PapyrusInterface
 	bool IsInScene(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	bool IsViewingScene(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	bool IsWearingEroticArmor(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+
+	bool IsActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+	void SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool exhibitionist);
+
+	bool IsArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+	void SetArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked);
+
 	float WornDeviceBaselineGain(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 
 

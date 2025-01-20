@@ -215,6 +215,41 @@ bool PapyrusInterface::IsWearingEroticArmor(RE::StaticFunctionTag*, RE::Actor* a
 	return false;
 }
 
+bool PapyrusInterface::IsActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return false;
+	}
+	return PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(actorRef->formID, false);
+}
+
+void PapyrusInterface::SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool exhibitionist)
+{
+	if (!actorRef) {
+		return;
+	}
+	PersistedData::IsActorExhibitionistData::GetSingleton()->SetData(actorRef->formID, exhibitionist);
+	Utilities::Factions::SetFactionRank(actorRef, "sla_Exhibitionist", exhibitionist ? 0 : -2);
+}
+
+bool PapyrusInterface::IsArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return true;
+	}
+
+	return PersistedData::IsArousalLockedData::GetSingleton()->GetData(actorRef->formID, false);
+}
+
+void PapyrusInterface::SetArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked)
+{
+	if (!actorRef) {
+		return;
+	}
+	PersistedData::IsArousalLockedData::GetSingleton()->SetData(actorRef->formID, locked);
+	Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal_Locked", locked ? 0 : -2);
+}
+
 float PapyrusInterface::WornDeviceBaselineGain(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
     if (!actorRef) {
@@ -266,6 +301,12 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("GetArousalBaseline", "OSLArousedNative", GetArousalBaseline);
 
 	vm->RegisterFunction("GetExposure", "OSLArousedNative", GetExposure);
+
+	vm->RegisterFunction("IsArousalLocked", "OSLArousedNative", IsArousalLocked);
+	vm->RegisterFunction("SetArousalLocked", "OSLArousedNative", SetArousalLocked);
+
+	vm->RegisterFunction("IsActorExhibitionist", "OSLArousedNative", IsActorExhibitionist);
+	vm->RegisterFunction("SetActorExhibitionist", "OSLArousedNative", SetActorExhibitionist);
 
 	vm->RegisterFunction("GetDaysSinceLastOrgasm", "OSLArousedNative", GetDaysSinceLastOrgasm);
 	vm->RegisterFunction("GetLastScannedActors", "OSLArousedNative", GetLastScannedActors);

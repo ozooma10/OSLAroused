@@ -196,6 +196,16 @@ namespace PersistedData
 			logger::critical("Failed to save Armor Keyword Data");
 		}
 
+		const auto isArousalLockedData = IsArousalLockedData::GetSingleton();
+		if (!isArousalLockedData->Save(serializationInterface, kIsArousalLockedDataKey, kSerializationVersion)) {
+			logger::critical("Failed to save Is Arousal Locked Data");
+		}
+
+		const auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
+		if (!isActorExhibitionistData->Save(serializationInterface, kIsActorExhibitionistDataKey, kSerializationVersion)) {
+			logger::critical("Failed to save Is Actor Exhibitionist Data");
+		}
+
 		logger::info("OSLArousal Data Saved");
 	}
 
@@ -263,6 +273,22 @@ namespace PersistedData
 					}
 				}
 				break;
+			case kIsArousalLockedDataKey:
+				{
+					auto isArousalLockedData = IsArousalLockedData::GetSingleton();
+					if (!isArousalLockedData->Load(serializationInterface)) {
+						logger::critical("Failed to Load IsArousalLocked Data"sv);
+					}
+				}
+				break;
+			case kIsActorExhibitionistDataKey:
+				{
+					auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
+					if (!isActorExhibitionistData->Load(serializationInterface)) {
+						logger::critical("Failed to Load IsActorExhibitionist Data"sv);
+					}
+				}
+				break;
 			default:
 				logger::critical("Unrecognized Record Type: {}"sv, DecodeTypeCode(type));
 				break;
@@ -286,6 +312,10 @@ namespace PersistedData
 		lastOrgasmData->Clear();
 		auto armorKeywordData = ArmorKeywordData::GetSingleton();
 		armorKeywordData->Clear();
+		auto isArousalLockedData = IsArousalLockedData::GetSingleton();
+		isArousalLockedData->Clear();
+		auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
+		isActorExhibitionistData->Clear();
 
 		//End All Scenes as well
 		SceneManager::GetSingleton()->ClearScenes();
