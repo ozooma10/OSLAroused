@@ -22,5 +22,9 @@ namespace PapyrusConfig
 	bool IsInOSLMode(RE::StaticFunctionTag* base);
 	void SetInOSLMode(RE::StaticFunctionTag* base, bool newVal);
 
+	//SLA Settings
+	void SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal);
+	void SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float newVal);
+
 	bool RegisterFunctions(RE::BSScript::IVirtualMachine* vm);
 }

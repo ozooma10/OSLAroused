@@ -38,4 +38,3 @@ function SetInOSLMode(bool newVal) global native
 ;SLA Mode Settings
 function SetSLATimeRateHalfLife(float newVal) global native
 function SetSLADefaultExposureRate(float newVal) global native
-function SetSLAOveruseEffect(int newVal) global native

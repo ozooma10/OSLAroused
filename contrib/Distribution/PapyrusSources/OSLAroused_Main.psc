@@ -380,11 +380,6 @@ Function SetSLADefaultExposureRate(float newVal)
 	OSLArousedNativeConfig.SetSLADefaultExposureRate(newVal)
 EndFunction
 
-Function SetSLAOveruseEffect(int newVal)
-	SLAOveruseEffect = newVal
-	OSLArousedNativeConfig.SetSLAOveruseEffect(newVal)
-EndFunction
-
 function InitializeDeviceSettings(bool forceInit = false)
 	if(DeviceBaselineModifications.Length < 19 || forceInit)
 		DeviceBaselineModifications = new float[19]

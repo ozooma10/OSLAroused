@@ -159,6 +159,16 @@ void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
 	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
 }
 
+void PapyrusConfig::SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal)
+{
+	Settings::GetSingleton()->SetTimeRateHalfLife(newVal);
+}
+
+void PapyrusConfig::SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float newVal)
+{
+	Settings::GetSingleton()->SetDefaultExposureRate(newVal);
+}
+
 bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	vm->RegisterFunction("SetMinLibidoValue", "OSLArousedNativeConfig", SetMinLibidoValue);
@@ -179,6 +189,9 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("SetInOSLMode", "OSLArousedNativeConfig", SetInOSLMode);
 	vm->RegisterFunction("IsInOSLMode", "OSLArousedNativeConfig", IsInOSLMode);
+
+	vm->RegisterFunction("SetSLATimeRateHalfLife", "OSLArousedNativeConfig", SetSLATimeRateHalfLife);
+	vm->RegisterFunction("SetSLADefaultExposureRate", "OSLArousedNativeConfig", SetSLADefaultExposureRate);
 	
 	return true;
 }

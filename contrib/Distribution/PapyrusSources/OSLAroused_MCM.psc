@@ -933,7 +933,7 @@ event OnOptionSliderAccept(int option, float value)
             Main.SetSLATimeRateHalfLife(value)
             SetSliderOptionValue(SLATimeRateHalfLifeOid, value, "{1}")
         elseif(option == SLAOveruseEffectOid)
-            Main.SetSLAOveruseEffect(value as int)
+            Main.SLAOveruseEffect = value as int
             SetSliderOptionValue(SLAOveruseEffectOid, value, "{0}")
         endif
     endif
@@ -1043,7 +1043,7 @@ event OnOptionDefault(int option)
             Main.SetSLATimeRateHalfLife(2.0)
             SetSliderOptionValue(SLATimeRateHalfLifeOid, 2.0, "{1}")
         elseif(option == SLAOveruseEffectOid)
-            Main.SetSLAOveruseEffect(5)
+            Main.SLAOveruseEffect = 5
             SetSliderOptionValue(SLAOveruseEffectOid, 5.0, "{0}")
         endif
     endif
