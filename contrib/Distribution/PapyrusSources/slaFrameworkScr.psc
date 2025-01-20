@@ -69,26 +69,23 @@ EndFunction
 Float Function GetActorTimeRate(Actor akRef)
     if(akRef == none)
         return -2.0
-    endif    
+    endif
 
-    ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
-    return 10.0
+    return OSLArousedNative.GetActorTimeRate(akRef)
 EndFunction
 
 Float Function SetActorTimeRate(Actor akRef, Float val)
     if(akRef == none)
         return -2.0
     endif
-    ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
-    return 10.0 
+    return OSLArousedNative.SetActorTimeRate(akRef, val)
 EndFunction
 
 Float Function UpdateActorTimeRate(Actor akRef, Float val)
     if(akRef == none)
         return -2.0
     endif
-    ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
-    return 10.0 
+    return OSLArousedNative.ModifyActorTimeRate(akRef, val)
 EndFunction
 
 ;Additive exposure

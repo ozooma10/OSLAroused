@@ -250,6 +250,57 @@ void PapyrusInterface::SetArousalLocked(RE::StaticFunctionTag* base, RE::Actor* 
 	Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal_Locked", locked ? 0 : -2);
 }
 
+float PapyrusInterface::GetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return -2.0f;
+	}
+	auto arousalMode = ArousalManager::GetSingleton()->GetArousalSystem().GetMode();
+
+	//SLA mode libido = timerate
+	if (arousalMode == IArousalSystem::ArousalMode::kSLA)
+	{
+		return ArousalManager::GetSingleton()->GetArousalSystem().GetLibido(actorRef);
+	}
+	//OSL Mode just return a "sane" value (sla default)
+	return 10.0f;
+}
+
+float PapyrusInterface::SetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef, float timeRate)
+{
+	if (!actorRef) {
+		return -2.0f;
+	}
+	auto arousalMode = ArousalManager::GetSingleton()->GetArousalSystem().GetMode();
+
+	//SLA mode libido = timerate
+	if (arousalMode == IArousalSystem::ArousalMode::kSLA)
+	{
+		return ArousalManager::GetSingleton()->GetArousalSystem().SetLibido(actorRef, timeRate);
+	}
+
+	//OSL Mode just return a "sane" value (sla default)
+	return 10.0f;
+}
+
+float PapyrusInterface::ModifyActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef, float timeRate)
+{
+	if (!actorRef) {
+		return -2.0f;
+	}
+
+	auto arousalMode = ArousalManager::GetSingleton()->GetArousalSystem().GetMode();
+
+	//SLA mode libido = timerate
+	if (arousalMode == IArousalSystem::ArousalMode::kSLA)
+	{
+		return ArousalManager::GetSingleton()->GetArousalSystem().SetLibido(actorRef, timeRate);
+	}
+
+	//OSL Mode just return a "sane" value (sla default)
+	return 10.0f;
+}
+
 float PapyrusInterface::WornDeviceBaselineGain(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
     if (!actorRef) {
@@ -307,6 +358,10 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("IsActorExhibitionist", "OSLArousedNative", IsActorExhibitionist);
 	vm->RegisterFunction("SetActorExhibitionist", "OSLArousedNative", SetActorExhibitionist);
+
+	vm->RegisterFunction("GetActorTimeRate", "OSLArousedNative", GetActorTimeRate);
+	vm->RegisterFunction("SetActorTimeRate", "OSLArousedNative", SetActorTimeRate);
+	vm->RegisterFunction("ModifyActorTimeRate", "OSLArousedNative", ModifyActorTimeRate);
 
 	vm->RegisterFunction("GetDaysSinceLastOrgasm", "OSLArousedNative", GetDaysSinceLastOrgasm);
 	vm->RegisterFunction("GetLastScannedActors", "OSLArousedNative", GetLastScannedActors);

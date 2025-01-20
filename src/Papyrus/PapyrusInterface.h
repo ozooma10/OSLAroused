@@ -45,6 +45,10 @@ namespace PapyrusInterface
 	bool IsArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	void SetArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked);
 
+	float GetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+	float SetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef, float timeRate);
+	float ModifyActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef, float timeRate);
+
 	float WornDeviceBaselineGain(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 
 
