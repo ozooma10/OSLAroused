@@ -55,6 +55,11 @@ float Property OrgasmArousalChange = -50.0 Auto
 float Property SceneEndArousalNoOrgasmChange = -40.0 Auto
 float Property SceneEndArousalOrgasmChange = 0.0 Auto
 
+;SLA Settings
+float Property SLATimeRateHalfLife = 2.0 Auto
+float Property SLADefaultExposureRate = 2.0 Auto
+int property SLAOveruseEffect = 5 Auto Hidden
+
 bool Property EnableArousalStatBuffs = true Auto
 bool Property EnableSOSIntegration = true Auto 
 
@@ -364,6 +369,21 @@ function SetToggleArousalBarKeybind(int newKey)
 	ToggleArousalBarKey = newKey
 	RegisterForKey(newKey)
 endfunction
+
+Function SetSLATimeRateHalfLife(float newVal)
+	SLATimeRateHalfLife = newVal
+	OSLArousedNativeConfig.SetSLATimeRateHalfLife(newVal)
+EndFunction
+
+Function SetSLADefaultExposureRate(float newVal)
+	SLADefaultExposureRate = newVal
+	OSLArousedNativeConfig.SetSLADefaultExposureRate(newVal)
+EndFunction
+
+Function SetSLAOveruseEffect(int newVal)
+	SLAOveruseEffect = newVal
+	OSLArousedNativeConfig.SetSLAOveruseEffect(newVal)
+EndFunction
 
 function InitializeDeviceSettings(bool forceInit = false)
 	if(DeviceBaselineModifications.Length < 19 || forceInit)

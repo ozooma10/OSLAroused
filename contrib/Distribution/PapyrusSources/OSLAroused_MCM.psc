@@ -48,6 +48,10 @@ int SceneEndArousalOrgasmOid
 int ArousalRateOfChangeOid
 int LibidoRateOfChangeOid
 
+int SLATimeRateHalfLifeOid
+int SLADefaultExposureRateOid
+int SLAOveruseEffectOid
+
 ;Settings
 int EnableStatBuffsOid
 int EnableSOSIntegrationOid
@@ -115,15 +119,16 @@ endfunction
 Event OnConfigInit()
     ModName = "OSLAroused"
 
-    Pages = new String[8]
+    Pages = new String[9]
     Pages[0] = "$OSL_Overview"
     Pages[1] = "$OSL_Puppeteer"
     Pages[2] = "$OSL_Keywords"
     Pages[3] = "$OSL_UI"
     Pages[4] = "$OSL_Settings"
-    Pages[5] = "$OSL_System"
-    Pages[6] = "$OSL_BaselineStatus"
-    Pages[7] = "$OSL_Help"
+    Pages[5] = "$OSL_SLASettings"
+    Pages[6] = "$OSL_System"
+    Pages[7] = "$OSL_BaselineStatus"
+    Pages[8] = "$OSL_Help"
 
 
     ArousalBarDisplayModeNames = new String[4]
@@ -190,9 +195,19 @@ Event OnPageReset(string page)
     elseif(page == "$OSL_UI")
         UIPage()
     elseif(page == "$OSL_Settings")
+        if(!OSLArousedNativeConfig.IsInOSLMode())
+            AddTextOption("$OSL_OSLSettingsDisabled", "$OSL_OSLModeOnly", OPTION_FLAG_DISABLED)
+            return
+        endif
         SettingsLeftColumn()
         SetCursorPosition(1)
         SettingsRightColumn()
+    elseif(page == "$OSL_SLASettings")
+        if(OSLArousedNativeConfig.IsInOSLMode())
+            AddTextOption("$OSL_SLASettingsDisabled", "$OSL_SLAModeOnly", OPTION_FLAG_DISABLED)
+            return
+        endif
+        SLASettingsPage()
     elseif(page == "$OSL_System")
         SystemPage()
     elseif(page == "$OSL_BaselineStatus")
@@ -208,6 +223,10 @@ function OverviewLeftColumn(bool inOSLMode)
         arousalModeIndex = 1
     EndIf
     ArousalModeOid = AddMenuOption("$OSL_ArousalMode", ArousalModeList[arousalModeIndex])
+
+    CheckArousalKeyOid = AddKeyMapOption("$OSL_ShowArousalKey", Main.GetShowArousalKeybind())
+    EnableStatBuffsOid = AddToggleOption("$OSL_EnableStat", Main.EnableArousalStatBuffs)
+    EnableSOSIntegrationOid = AddToggleOption("$OSL_EnableSOS", Main.EnableSOSIntegration)
 endfunction
 
 function RenderActorStatus(Actor target, bool bInOSLMode)
@@ -297,8 +316,6 @@ function KeywordPage()
 endfunction
 
 function UIPage()
-    CheckArousalKeyOid = AddKeyMapOption("$OSL_ShowArousalKey", Main.GetShowArousalKeybind())
-
     AddHeaderOption("$OSL_ArousalBar")
     ArousalBarXOid = AddSliderOption("$OSL_XPos", Main.ArousalBar.X)
     ArousalBarYOid = AddSliderOption("$OSL_YPos", Main.ArousalBar.Y)
@@ -308,8 +325,6 @@ function UIPage()
 endfunction
 
 function SettingsLeftColumn()
-    EnableStatBuffsOid = AddToggleOption("$OSL_EnableStat", Main.EnableArousalStatBuffs)
-    EnableSOSIntegrationOid = AddToggleOption("$OSL_EnableSOS", Main.EnableSOSIntegration)
     MinLibidoPlayerOid = AddSliderOption("$OSL_MinLibidoPlayer", Main.MinLibidoValuePlayer, "{1}")
     MinLibidoNPCOid = AddSliderOption("$OSL_MinLibidoNPC", Main.MinLibidoValueNPC, "{1}")
 
@@ -339,8 +354,18 @@ function SettingsRightColumn()
 
 endfunction
 
+Function SLASettingsPage()
+    if(!OSLArousedNativeConfig.IsInOSLMode())
+        AddHeaderOption("Disabled. Enable SLA Mode")
+        return
+    endif
+    SLADefaultExposureRateOid = AddSliderOption("$OSL_SLADefaultExposureRate", Main.SLADefaultExposureRate, "{1}")
+    SLATimeRateHalfLifeOid = AddSliderOption("$OSL_SLATimeRateHalfLife", Main.SLATimeRateHalfLife, "{1}")
+    SLAOveruseEffectOid = AddSliderOption("$OSL_SLAOveruseEffect", Main.SLAOveruseEffect, "{0}")
+EndFunction
+
 function SystemPage()
-    AddTextOption("$OSL_Version", GetVersion())
+    AddTextOption("$OSL_Version", GetVersion(), OPTION_FLAG_DISABLED)
     AddEmptyOption()
     AddHeaderOption("$OSL_FrameworkAdapters")
     If (Main.SexLabAdapterLoaded)
@@ -381,6 +406,10 @@ function SystemPage()
 endfunction
 
 function BaselineStatusPage()
+    if(!OSLArousedNativeConfig.IsInOSLMode())
+        AddTextOption("$OSL_NotInOSLMode", "0", OPTION_FLAG_DISABLED)
+        return
+    endif
     AddHeaderOption("$OSL_BaselineContributions")
     if(OSLArousedNative.IsNaked(PuppetActor))
         AddTextOption("$OSL_Nude", Main.NudityBaselineIncrease)
@@ -443,16 +472,18 @@ function HelpPage()
 endfunction
 
 event OnOptionSelect(int optionId)
-    if(CurrentPage == "$OSL_Settings")
-        if(optionId == VictimGainsArousalOid)
-            Main.VictimGainsArousal = !Main.VictimGainsArousal
-            SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
-        elseif(optionId == EnableStatBuffsOid)
+    if(CurrentPage == "$OSL_Overview")
+        if(optionId == EnableStatBuffsOid)
             Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
             SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
         elseif(optionId == EnableSOSIntegrationOid)
             Main.EnableSOSIntegration = !Main.EnableSOSIntegration
             SetToggleOptionValue(EnableSOSIntegrationOid, Main.EnableSOSIntegration)
+        endif
+    elseif(CurrentPage == "$OSL_Settings")
+        if(optionId == VictimGainsArousalOid)
+            Main.VictimGainsArousal = !Main.VictimGainsArousal
+            SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
         endif
     ElseIf (CurrentPage == "$OSL_Keywords")
         int index = 0
@@ -549,6 +580,12 @@ event OnOptionHighlight(int optionId)
             EndIf
         elseif(optionId == ArousalModeOid)
             SetInfoText("$OSL_InfoArousalMode")
+        elseif(optionId == CheckArousalKeyOid)
+            SetInfoText("$OSL_InfoCheckArousal")
+        elseif(optionId == EnableStatBuffsOid)
+            SetInfoText("$OSL_InfoStat")
+        elseif(optionId == EnableSOSIntegrationOid)
+            SetInfoText("$OSL_InfoSOS")
         endif
     elseif(CurrentPage == "$OSL_Puppeteer")
         if(optionId == GenderPreferenceOid)
@@ -561,19 +598,13 @@ event OnOptionHighlight(int optionId)
     elseif(CurrentPage == "$OSL_UI")
         if(optionId == ArousalBarToggleKeyOid)
             SetInfoText("$OSL_InfoArousalToggle")
-        elseif(optionId == CheckArousalKeyOid)
-            SetInfoText("$OSL_InfoCheckArousal")
         endif
     elseif(CurrentPage == "$OSL_Keywords")
         if(optionId == RegisterKeywordOid)
             SetInfoText("Enter the Editor Id of the Keyword you wish to register to allow Adding/Removing from armor. (ex. SLA_ArmorPretty, SLA_ArmorSpendex, SLA_HasStockings, etc..)")
         endif
     elseif(CurrentPage == "$OSL_Settings")
-        if(optionId == EnableStatBuffsOid)
-            SetInfoText("$OSL_InfoStat")
-        elseif(optionId == EnableSOSIntegrationOid)
-            SetInfoText("$OSL_InfoSOS")
-        elseif(optionId == MinLibidoPlayerOid)
+        if(optionId == MinLibidoPlayerOid)
             SetInfoText("$OSL_InfoMinLibidoPlayer")
         elseif(optionId == MinLibidoNPCOid)
             SetInfoText("$OSL_InfoMinLibidoNPC")
@@ -603,6 +634,14 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoArousalRate")
         elseif(optionId == LibidoRateOfChangeOid)
             SetInfoText("$OSL_InfoLibidoRate")
+        endif
+    elseif(CurrentPage == "$OSL_SLASettings")
+        if(optionId == SLADefaultExposureRateOid)
+            SetInfoText("$OSL_InfoSLADefaultExposureRate")
+        elseif(optionId == SLATimeRateHalfLifeOid)
+            SetInfoText("$OSL_InfoSLATimeRateHalfLife")
+        elseif(optionId == SLAOveruseEffectOid)
+            SetInfoText("$OSL_InfoSLAOveruseEffect")
         endif
     elseif(CurrentPage == "$OSL_System")
         if(optionId == DumpArousalData)
@@ -800,6 +839,23 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogInterval(0.5)
             SetSliderDialogRange(0, 50)
         endif
+    ElseIf (currentPage == "$OSL_SLASettings")
+        if(option == SLADefaultExposureRateOid)
+            SetSliderDialogStartValue(Main.SLADefaultExposureRate)
+            SetSliderDialogDefaultValue(2.0)
+            SetSliderDialogRange(0, 10.0)
+            SetSliderDialogInterval(0.1)
+        elseif(option == SLATimeRateHalfLifeOid)
+            SetSliderDialogStartValue(Main.SLATimeRateHalfLife)
+            SetSliderDialogDefaultValue(2.0)
+            SetSliderDialogRange(0.0, 10.0)
+            SetSliderDialogInterval(0.1)
+        elseif(option == SLAOveruseEffectOid)
+            SetSliderDialogStartValue(Main.SLAOveruseEffect)
+            SetSliderDialogDefaultValue(5.0)
+            SetSliderDialogRange(0.0, 10.0)
+            SetSliderDialogInterval(1)
+        endif
     endif
 endevent
 
@@ -868,6 +924,17 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == LibidoRateOfChangeOid)
             Main.SetLibidoChangeRate(value)
             SetSliderOptionValue(LibidoRateOfChangeOid, value, "{1}")
+        endif
+    elseif(currentPage == "$OSL_SLASettings")
+        if(option == SLADefaultExposureRateOid)
+            Main.SetSLADefaultExposureRate(value)
+            SetSliderOptionValue(SLADefaultExposureRateOid, value, "{1}")
+        elseif(option == SLATimeRateHalfLifeOid)
+            Main.SetSLATimeRateHalfLife(value)
+            SetSliderOptionValue(SLATimeRateHalfLifeOid, value, "{1}")
+        elseif(option == SLAOveruseEffectOid)
+            Main.SetSLAOveruseEffect(value as int)
+            SetSliderOptionValue(SLAOveruseEffectOid, value, "{0}")
         endif
     endif
 endevent
@@ -967,6 +1034,17 @@ event OnOptionDefault(int option)
         elseif(option == LibidoRateOfChangeOid)
             Main.SetLibidoChangeRate(10)
             SetSliderOptionValue(LibidoRateOfChangeOid, 10, "{1}")
+        endif
+    elseif(currentPage == "$OSL_SLASettings")
+        if(option == SLADefaultExposureRateOid)
+            Main.SetSLADefaultExposureRate(2.0)
+            SetSliderOptionValue(SLADefaultExposureRateOid, 2.0, "{1}")
+        elseif(option == SLATimeRateHalfLifeOid)
+            Main.SetSLATimeRateHalfLife(2.0)
+            SetSliderOptionValue(SLATimeRateHalfLifeOid, 2.0, "{1}")
+        elseif(option == SLAOveruseEffectOid)
+            Main.SetSLAOveruseEffect(5)
+            SetSliderOptionValue(SLAOveruseEffectOid, 5.0, "{0}")
         endif
     endif
 endevent
