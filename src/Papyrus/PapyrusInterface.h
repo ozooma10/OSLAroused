@@ -42,8 +42,8 @@ namespace PapyrusInterface
 	bool IsActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	void SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool exhibitionist);
 
-	bool IsArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef);
-	void SetArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked);
+	bool IsActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+	void SetActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked);
 
 	float GetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	float SetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef, float timeRate);

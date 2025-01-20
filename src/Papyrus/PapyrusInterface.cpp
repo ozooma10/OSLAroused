@@ -232,7 +232,7 @@ void PapyrusInterface::SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Ac
 	Utilities::Factions::SetFactionRank(actorRef, "sla_Exhibitionist", exhibitionist ? 0 : -2);
 }
 
-bool PapyrusInterface::IsArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef)
+bool PapyrusInterface::IsActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef)
 {
 	if (!actorRef) {
 		return true;
@@ -241,7 +241,7 @@ bool PapyrusInterface::IsArousalLocked(RE::StaticFunctionTag* base, RE::Actor* a
 	return PersistedData::IsArousalLockedData::GetSingleton()->GetData(actorRef->formID, false);
 }
 
-void PapyrusInterface::SetArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked)
+void PapyrusInterface::SetActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked)
 {
 	if (!actorRef) {
 		return;
@@ -353,8 +353,8 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("GetExposure", "OSLArousedNative", GetExposure);
 
-	vm->RegisterFunction("IsArousalLocked", "OSLArousedNative", IsArousalLocked);
-	vm->RegisterFunction("SetArousalLocked", "OSLArousedNative", SetArousalLocked);
+	vm->RegisterFunction("IsActorArousalLocked", "OSLArousedNative", IsActorArousalLocked);
+	vm->RegisterFunction("SetActorArousalLocked", "OSLArousedNative", SetActorArousalLocked);
 
 	vm->RegisterFunction("IsActorExhibitionist", "OSLArousedNative", IsActorExhibitionist);
 	vm->RegisterFunction("SetActorExhibitionist", "OSLArousedNative", SetActorExhibitionist);
