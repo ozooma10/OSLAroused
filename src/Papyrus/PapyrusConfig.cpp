@@ -154,7 +154,7 @@ bool PapyrusConfig::IsInOSLMode(RE::StaticFunctionTag* base)
 	return arousalMode == IArousalSystem::ArousalMode::kOSL;
 }
 
-void PapyrusConfig::SetOSLMode(RE::StaticFunctionTag* base, bool newVal)
+void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
 {
 	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
 }
@@ -177,8 +177,8 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("SetDeviceTypesBaseline2", "OSLArousedNativeConfig", SetDeviceTypesBaseline2);
 	vm->RegisterFunction("SetDeviceTypeBaseline", "OSLArousedNativeConfig", SetDeviceTypeBaseline);
 
+	vm->RegisterFunction("SetInOSLMode", "OSLArousedNativeConfig", SetInOSLMode);
 	vm->RegisterFunction("IsInOSLMode", "OSLArousedNativeConfig", IsInOSLMode);
-	vm->RegisterFunction("SetOSLMode", "OSLArousedNativeConfig", SetOSLMode);
 	
 	return true;
 }

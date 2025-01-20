@@ -33,4 +33,4 @@ function SetDeviceTypesBaseline2(float plugVag, float plugAnal, float corset, fl
 function SetDeviceTypeBaseline(int deviceTypeId, float newVal) global native
 
 bool function IsInOSLMode() global native
-bool function SetInOSLMode(bool newVal) global native
+function SetInOSLMode(bool newVal) global native

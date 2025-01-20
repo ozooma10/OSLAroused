@@ -20,7 +20,7 @@ namespace PapyrusConfig
 	void SetDeviceTypeBaseline(RE::StaticFunctionTag* base, int deviceTypeId, float newVal);
 
 	bool IsInOSLMode(RE::StaticFunctionTag* base);
-	void SetOSLMode(RE::StaticFunctionTag* base, bool newVal);
+	void SetInOSLMode(RE::StaticFunctionTag* base, bool newVal);
 
 	bool RegisterFunctions(RE::BSScript::IVirtualMachine* vm);
 }

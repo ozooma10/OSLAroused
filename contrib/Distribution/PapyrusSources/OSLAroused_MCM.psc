@@ -15,6 +15,9 @@ int ArousalMultiplierStatusOid
 int SLAStubLoadedOid
 int OArousedStubLoadedOid
 
+int ArousalModeOid
+string[] ArousalModeList
+
 ;---- Settings ----
 
 int MinLibidoPlayerOid
@@ -134,6 +137,10 @@ Event OnConfigInit()
     GenderPreferenceList[1] = "$OSL_Female"
     GenderPreferenceList[2] = "$OSL_Both"
     GenderPreferenceList[3] = "$OSL_Sexlab"
+
+    ArousalModeList = new string[2]
+    ArousalModeList[0] = "$OSL_OSLMode"
+    ArousalModeList[1] = "$OSL_SLAMode"
 EndEvent
 
 Event OnVersionUpdate(Int NewVersion)
@@ -172,9 +179,10 @@ EndEvent
 Event OnPageReset(string page)
     SetCursorFillMode(TOP_TO_BOTTOM)
     if(page == "$OSL_Overview")
-        OverviewLeftColumn()
+        bool inOSLMode = OSLArousedNativeConfig.IsInOSLMode()
+        OverviewLeftColumn(inOSLMode)
         SetCursorPosition(1)
-        RenderActorStatus(PuppetActor)
+        RenderActorStatus(PuppetActor, inOSLMode)
     elseif(page == "$OSL_Puppeteer")
         PuppeteerPage(PuppetActor)
     elseif(page == "$OSL_Keywords")
@@ -194,17 +202,20 @@ Event OnPageReset(string page)
     endif
 EndEvent
 
-function OverviewLeftColumn()
-
+function OverviewLeftColumn(bool inOSLMode)
+    int arousalModeIndex = 0
+    If (!inOSLMode)
+        arousalModeIndex = 1
+    EndIf
+    ArousalModeOid = AddMenuOption("$OSL_ArousalMode", ArousalModeList[arousalModeIndex])
 endfunction
 
-function RenderActorStatus(Actor target)
+function RenderActorStatus(Actor target, bool bInOSLMode)
     if(target == none)
         AddHeaderOption("$OSL_NoTarget")
         return
     endif
     AddHeaderOption(target.GetDisplayName())
-    bool bInOSLMode = OSLArousedNativeConfig.IsInOSLMode()
     if(bInOSLMode)
         ArousalStatusOid = AddTextOption("$OSL_CurrentArousal", OSLArousedNative.GetArousal(target))
         BaselineArousalStatusOid = AddTextOption("$OSL_BaselineArousal", OSLArousedNative.GetArousalBaseline(target))
@@ -527,6 +538,8 @@ event OnOptionHighlight(int optionId)
             elseif(!Main.OArousedStubLoaded)
                 SetInfoText("$OSL_InfoDisabledOAroused")
             EndIf
+        elseif(optionId == ArousalModeOid)
+            SetInfoText("$OSL_InfoArousalMode")
         endif
     elseif(CurrentPage == "$OSL_Puppeteer")
         if(optionId == GenderPreferenceOid)
@@ -592,7 +605,18 @@ event OnOptionHighlight(int optionId)
 endevent
 
 event OnOptionMenuOpen(int optionId)
-    if (CurrentPage == "$OSL_Keywords")
+    if (CurrentPage == "$OSL_Overview")
+        if(optionId == ArousalModeOid)
+            ;Default to OSL, unless SLA is detected
+            int startIndex = 0
+            if(!OSLArousedNativeConfig.IsInOSLMode())
+                startIndex = 1
+            endif
+            SetMenuDialogStartIndex(startIndex)
+            SetMenuDialogDefaultIndex(0)
+            SetMenuDialogOptions(ArousalModeList)
+        endif
+    elseif (CurrentPage == "$OSL_Keywords")
         if(optionId == ArmorListMenuOid)
             LoadArmorList()
         endif
@@ -616,7 +640,16 @@ event OnOptionMenuOpen(int optionId)
 endevent
 
 event OnOptionMenuAccept(int optionId, int index)
-    If (CurrentPage == "$OSL_Keywords")
+    if(CurrentPage == "$OSL_Overview")
+        if(optionId == ArousalModeOid)
+            if(index == 0)
+                OSLArousedNativeConfig.SetInOSLMode(true)
+            else
+                OSLArousedNativeConfig.SetInOSLMode(false)
+            endif
+            SetMenuOptionValue(optionId, ArousalModeList[index])
+        endif
+    elseif (CurrentPage == "$OSL_Keywords")
         If (optionId == ArmorListMenuOid)
             Form[] equippedArmor = OSLArousedNativeActor.GetAllEquippedArmor(Game.GetPlayer())
             SelectedArmor = equippedArmor[FoundArmorIds[index]] as Armor
@@ -816,7 +849,14 @@ event OnOptionSliderAccept(int option, float value)
 endevent
 
 event OnOptionDefault(int option)
-    if(currentPage == "$OSL_Puppeteer")
+    if(currentPage == "$OSL_Overview")
+        if(option == ArousalModeOid)
+            if(!OSLArousedNativeConfig.IsInOSLMode())
+                OSLArousedNativeConfig.SetInOSLMode(true)
+            endif
+            SetMenuOptionValue(option, ArousalModeList[0])
+        endif
+    elseif(currentPage == "$OSL_Puppeteer")
         if(option == SetArousalOid)
             OSLArousedNative.SetArousal(PuppetActor, 0)
             SetSliderOptionValue(SetArousalOid, 0, "{1}")
