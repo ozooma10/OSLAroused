@@ -195,41 +195,7 @@ Event OnPageReset(string page)
 EndEvent
 
 function OverviewLeftColumn()
-    AddHeaderOption("$OSL_ArousedStatus")
-    AddTextOption("$OSL_ArousedIs", "$OSL_Enabled")
-    AddTextOption("$OSL_Version", GetVersion())
-    AddEmptyOption()
-    AddHeaderOption("$OSL_FrameworkAdapters")
-    If (Main.SexLabAdapterLoaded)
-        AddTextOption("SexLab", "$OSL_Enabled")
-    Else
-        AddTextOption("SexLab", "$OSL_Disabled", OPTION_FLAG_DISABLED)
-    EndIf
-    If (Main.OStimAdapterLoaded)
-        If (Main.IsOStimLegacy)
-            AddTextOption("OStim", "$OSL_Enabled")
-        else
-            AddTextOption("OStim Standalone", "$OSL_Enabled")
-        endif
-    Else
-        AddTextOption("OStim", "$OSL_Disabled", OPTION_FLAG_DISABLED)
-    EndIf
-    AddEmptyOption()
-    AddHeaderOption("$OSL_Compatibility")
-    If (Main.InvalidSlaFound)
-        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "$OSL_InvalidInstall")
-    ElseIf (Main.SlaStubLoaded)
-        AddTextOption("SexLab Aroused", "$OSL_Enabled")
-    Else
-        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "$OSL_Disabled")
-    EndIf
-    If (Main.InvalidOArousedFound)
-        OArousedStubLoadedOid = AddTextOption("OAroused", "$OSL_InvalidInstall")
-    elseIf (Main.OArousedStubLoaded)
-        AddTextOption("OAroused", "$OSL_Enabled")
-    Else
-        OArousedStubLoadedOid = AddTextOption("OAroused", "$OSL_Disabled")
-    EndIf
+
 endfunction
 
 function RenderActorStatus(Actor target)
@@ -238,11 +204,26 @@ function RenderActorStatus(Actor target)
         return
     endif
     AddHeaderOption(target.GetDisplayName())
-
-    ArousalStatusOid = AddTextOption("$OSL_CurrentArousal", OSLArousedNative.GetArousal(target))
-    BaselineArousalStatusOid = AddTextOption("$OSL_BaselineArousal", OSLArousedNative.GetArousalBaseline(target))
-    LibidoStatusOid = AddTextOption("$OSL_Libido", OSLArousedNative.GetLibido(target))
-    ArousalMultiplierStatusOid = AddTextOption("$OSL_ArousalMultiplier", OSLArousedNative.GetArousalMultiplier(target))
+    bool bInOSLMode = OSLArousedNativeConfig.IsInOSLMode()
+    if(bInOSLMode)
+        ArousalStatusOid = AddTextOption("$OSL_CurrentArousal", OSLArousedNative.GetArousal(target))
+        BaselineArousalStatusOid = AddTextOption("$OSL_BaselineArousal", OSLArousedNative.GetArousalBaseline(target))
+        LibidoStatusOid = AddTextOption("$OSL_Libido", OSLArousedNative.GetLibido(target))
+        ArousalMultiplierStatusOid = AddTextOption("$OSL_ArousalMultiplier", OSLArousedNative.GetArousalMultiplier(target))
+    else
+        int exposure = (OSLArousedNative.GetExposure(target)) as int
+        float timeRate = OSLArousedNative.GetLibido(target)
+        float exposureRate = OSLArousedNative.GetArousalMultiplier(target)
+        float daysSinceLast = OSLArousedNative.GetDaysSinceLastOrgasm(target)
+        int timeArousal = (daysSinceLast * timeRate) as int
+        int arousal = exposure + timeArousal
+        AddTextOption("$OSL_CurrentArousalSLA", arousal)
+        AddTextOption("$OSL_Exposure", exposure)
+        AddTextOption("$OSL_ExposureRate", exposureRate)
+        AddTextOption("$OSL_TimeArousal", timeArousal)
+        AddTextOption("$OSL_DaysSinceLast", daysSinceLast)
+        AddTextOption("$OSL_TimeRate", timeRate)
+    endif
 
     if(Main.SlaFrameworkStub)
         int genderPrefIndex = Main.SlaFrameworkStub.GetGenderPreference(target)
@@ -339,6 +320,40 @@ function SettingsRightColumn()
 endfunction
 
 function SystemPage()
+    AddTextOption("$OSL_Version", GetVersion())
+    AddEmptyOption()
+    AddHeaderOption("$OSL_FrameworkAdapters")
+    If (Main.SexLabAdapterLoaded)
+        AddTextOption("SexLab", "$OSL_Enabled")
+    Else
+        AddTextOption("SexLab", "$OSL_Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    If (Main.OStimAdapterLoaded)
+        If (Main.IsOStimLegacy)
+            AddTextOption("OStim", "$OSL_Enabled")
+        else
+            AddTextOption("OStim Standalone", "$OSL_Enabled")
+        endif
+    Else
+        AddTextOption("OStim", "$OSL_Disabled", OPTION_FLAG_DISABLED)
+    EndIf
+    AddEmptyOption()
+    AddHeaderOption("$OSL_Compatibility")
+    If (Main.InvalidSlaFound)
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "$OSL_InvalidInstall")
+    ElseIf (Main.SlaStubLoaded)
+        AddTextOption("SexLab Aroused", "$OSL_Enabled")
+    Else
+        SLAStubLoadedOid = AddTextOption("SexLab Aroused", "$OSL_Disabled")
+    EndIf
+    If (Main.InvalidOArousedFound)
+        OArousedStubLoadedOid = AddTextOption("OAroused", "$OSL_InvalidInstall")
+    elseIf (Main.OArousedStubLoaded)
+        AddTextOption("OAroused", "$OSL_Enabled")
+    Else
+        OArousedStubLoadedOid = AddTextOption("OAroused", "$OSL_Disabled")
+    EndIf
+    SetCursorPosition(1)
     AddHeaderOption("$OSL_NativeData")
     DumpArousalData = AddTextOption("$OSL_DumpData", "RUN")
     ClearAllArousalData = AddTextOption("$OSL_ClearData", "RUN")
