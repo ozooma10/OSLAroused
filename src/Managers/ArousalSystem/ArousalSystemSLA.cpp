@@ -46,9 +46,6 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 		Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
 	}
 
-	logger::debug("Got Arousal for {} val: {}", actorRef->GetDisplayFullName(), newArousal);
-	logger::debug("Debug Values: Libido: {} Exposure: {} DaysSinceLast: {} LastCheckTime: {}", GetLibido(actorRef), GetExposure(actorRef), GetDaysSinceLastOrgasm(actorRef), LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f));
-
 	ActorStateManager::GetSingleton()->OnActorArousalUpdated(actorRef, newArousal);
 	return newArousal;
 }

@@ -29,12 +29,12 @@ function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = 
 endfunction
 
 float function SetArousalMultiplier(Actor target, float value, string reason = "unknown") global
-    Log("SetArousalMultiplier: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
-    return 1.0
+    Log("SetArousalMultiplier: " + target.GetDisplayName() + " Set to val: " + value + " Reason: " + reason)
+    return OSLArousedNative.SetArousalMultiplier(target, value)
 endfunction
 
 float function ModifyArousalMultiplier(Actor target, float value, string reason = "unknown") global
-    Log("ModifyArousalMultiplier: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
+    Log("ModifyArousalMultiplier: " + target.GetDisplayName() + " set to val: " + value + " Reason: " + reason)
     return OSLArousedNative.ModifyArousalMultiplier(target, value)
 endfunction
 

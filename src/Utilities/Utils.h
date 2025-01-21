@@ -9,7 +9,9 @@ enum class FactionType
 	sla_Arousal,
 	sla_Arousal_Locked,
 	sla_Exhibitionist,
-	sla_Exposure
+	sla_Exposure,
+	sla_TimeRate,
+	sla_ExposureRate
 };
 
 namespace Utilities
@@ -48,6 +50,8 @@ namespace Utilities
 		RE::TESFaction* m_ArousalLockedFaction;
 		RE::TESFaction* m_ExhibitionistFaction;
 		RE::TESFaction* m_ExposureFaction;
+		RE::TESFaction* m_TimeRateFaction;
+		RE::TESFaction* m_ExposureRateFaction;
 	};
 
 	//Keyword logic based off powerof3's CommonLibSSE implementation

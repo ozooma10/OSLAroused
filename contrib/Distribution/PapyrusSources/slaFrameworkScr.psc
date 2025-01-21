@@ -12,6 +12,10 @@ Faction slaExposureFaction
 Faction slaNakedFaction
 Faction slaGenderPreference
 
+Faction slaExposureRateFaction
+Faction slaTimeRateFaction
+
+
 bool Property IsOSLArousedStub = true Auto
 
 Int Property slaArousalCap = 100 AutoReadOnly
@@ -27,6 +31,9 @@ function OnGameLoaded()
     slaNakedFaction = Game.GetFormFromFile(0x77F87, "SexLabAroused.esm") as Faction
 
     slaGenderPreference = Game.GetFormFromFile(0x79A72, "SexLabAroused.esm") as Faction
+
+    slaExposureRateFaction = Game.GetFormFromFile(0x7649B, "SexLabAroused.esm") as Faction
+    slaTimeRateFaction = Game.GetFormFromFile(0x7C025, "SexLabAroused.esm") as Faction
 
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
 
@@ -121,7 +128,8 @@ function DebugActorState(Actor act)
     float currentArousal = GetActorArousal(act)
     int currentExposure = GetActorExposure(act)
     float currentRate = GetActorExposureRate(act)
-    Log("Initial: " + act.GetDisplayName() + " Arousal: " + currentArousal + " Exposure: " + currentExposure + " ExposureRate: " + currentRate)
+    float currentTimeRate = GetActorTimeRate(act)
+    Log("Initial: " + act.GetDisplayName() + " Arousal: " + currentArousal + " Exposure: " + currentExposure + " ExposureRate: " + currentRate + " TimeRate: " + currentTimeRate)
 
     ;Test modifying
     UpdateActorExposure(act, 2)
@@ -138,7 +146,7 @@ function DebugActorState(Actor act)
         Log("Exposure Mod Failed")
     endif
 
-    Log("Factions: Arousal: " + act.GetFactionRank(slaArousalFaction) + " Exposure: " + act.GetFactionRank(slaExposureFaction) + " Naked: " + act.GetFactionRank(slaNakedFaction) + " GenderPref: " + act.GetFactionRank(slaGenderPreference))   
+    Log("Factions: Arousal: " + act.GetFactionRank(slaArousalFaction) + " Exposure: " + act.GetFactionRank(slaExposureFaction) + " Naked: " + act.GetFactionRank(slaNakedFaction) + " GenderPref: " + act.GetFactionRank(slaGenderPreference) + " ExposureRate: " + act.GetFactionRank(slaExposureRateFaction) + " TimeRate: " + act.GetFactionRank(slaTimeRateFaction))
 endfunction
 
 function OnActorNakedUpdated(Actor act, bool newNaked)

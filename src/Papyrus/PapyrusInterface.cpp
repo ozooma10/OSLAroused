@@ -91,7 +91,9 @@ float PapyrusInterface::SetArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* 
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return ArousalManager::GetSingleton()->GetArousalSystem().SetArousalMultiplier(actorRef, value);
+	float newArousalMultiplier = ArousalManager::GetSingleton()->GetArousalSystem().SetArousalMultiplier(actorRef, value);
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_ExposureRate, newArousalMultiplier);
+	return newArousalMultiplier;
 }
 
 float PapyrusInterface::ModifyArousalMultiplier(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
@@ -257,13 +259,18 @@ float PapyrusInterface::GetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor*
 	}
 	auto arousalMode = ArousalManager::GetSingleton()->GetArousalSystem().GetMode();
 
+	//OSL Mode just return a "sane" value (sla default)
+	float timeRate = 10.f;
+
 	//SLA mode libido = timerate
 	if (arousalMode == IArousalSystem::ArousalMode::kSLA)
 	{
-		return ArousalManager::GetSingleton()->GetArousalSystem().GetLibido(actorRef);
+		timeRate = ArousalManager::GetSingleton()->GetArousalSystem().GetLibido(actorRef);
 	}
-	//OSL Mode just return a "sane" value (sla default)
-	return 10.0f;
+
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_TimeRate, timeRate);
+
+	return timeRate;
 }
 
 float PapyrusInterface::SetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef, float timeRate)
