@@ -248,7 +248,7 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 		return;
 	}
 
-	logger::trace("Adding {} to Faction {}", rank, faction->GetFullName());
+	logger::trace("Updating Value {} for Faction {}", rank, faction->GetFullName());
 
 	actorRef->AddToFaction(faction, rank);
 }

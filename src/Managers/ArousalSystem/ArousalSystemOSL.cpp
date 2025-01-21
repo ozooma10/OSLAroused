@@ -93,7 +93,9 @@ float ArousalSystemOSL::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 
 float ArousalSystemOSL::ModifyArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
-    value *= PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
+	float multiplier = PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
+	logger::trace("ModifyArousal: {} * {} = {}", value, multiplier, value * multiplier);
+    value *= multiplier;
     float currentArousal = GetArousal(actorRef, false);
     return SetArousal(actorRef, currentArousal + value, bSendEvent);
 }

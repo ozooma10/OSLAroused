@@ -6,11 +6,11 @@ float function GetArousal(Actor target) global
 endfunction
 
 float function GetArousalMultiplier(Actor target) global
-    return 1.0
+    return OSLArousedNative.GetArousalMultiplier(target)
 endfunction
 
 float function GetExposure(Actor target) global
-    return OSLArousedNative.GetArousal(target)
+    return OSLArousedNative.GetExposure(target)
 endfunction
 
 float function ModifyArousal(Actor target, float value, string reason = "unknown") global
@@ -39,6 +39,7 @@ float function ModifyArousalMultiplier(Actor target, float value, string reason 
 endfunction
 
 float function GetLibido(Actor target) global
+    Log("GetLibido: " + target.GetDisplayName())
     return OSLArousedNative.GetLibido(target)
 endfunction
 
