@@ -13,7 +13,7 @@ float PapyrusInterface::GetArousal(RE::StaticFunctionTag*, RE::Actor* actorRef)
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return ArousalManager::GetArousal(actorRef);
+	return Arousal::GetArousal(actorRef);
 }
 
 std::vector<float> PapyrusInterface::GetArousalMultiple(RE::StaticFunctionTag*, RE::reference_array<RE::Actor*> actorRefs)
@@ -26,7 +26,7 @@ std::vector<float> PapyrusInterface::GetArousalMultiple(RE::StaticFunctionTag*, 
             results.push_back(0);
 			continue;
         }
-		results.push_back(ArousalManager::GetArousal(actorRef));
+		results.push_back(Arousal::GetArousal(actorRef));
 	}
 
 	return results;
@@ -35,13 +35,13 @@ std::vector<float> PapyrusInterface::GetArousalMultiple(RE::StaticFunctionTag*, 
 float PapyrusInterface::GetArousalNoSideEffects(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
     if (!actorRef) {  Utilities::logInvalidArgsVerbose(__FUNCTION__); return 0; }
-	return ArousalManager::GetArousal(actorRef, false);
+	return Arousal::GetArousal(actorRef, false);
 }
 
 float PapyrusInterface::SetArousal(RE::StaticFunctionTag*, RE::Actor* actorRef, float value)
 {
     if (!actorRef) {  Utilities::logInvalidArgsVerbose(__FUNCTION__); return 0; }
-	return ArousalManager::SetArousal(actorRef, value);
+	return Arousal::SetArousal(actorRef, value);
 }
 
 void PapyrusInterface::SetArousalMultiple(RE::StaticFunctionTag*, RE::reference_array<RE::Actor*> actorRefs, float value)
@@ -51,7 +51,7 @@ void PapyrusInterface::SetArousalMultiple(RE::StaticFunctionTag*, RE::reference_
 			Utilities::logInvalidArgsVerbose(__FUNCTION__); 
 			continue;
 		}
-		ArousalManager::SetArousal(actorRef, value);
+		Arousal::SetArousal(actorRef, value);
 	}
 }
 
@@ -61,7 +61,7 @@ float PapyrusInterface::ModifyArousal(RE::StaticFunctionTag*, RE::Actor* actorRe
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return 0;
     }
-	return ArousalManager::ModifyArousal(actorRef, value);
+	return Arousal::ModifyArousal(actorRef, value);
 }
 
 void PapyrusInterface::ModifyArousalMultiple(RE::StaticFunctionTag*, RE::reference_array<RE::Actor*> actorRefs, float value)
@@ -71,7 +71,7 @@ void PapyrusInterface::ModifyArousalMultiple(RE::StaticFunctionTag*, RE::referen
             Utilities::logInvalidArgsVerbose(__FUNCTION__);
             continue;
         }
-		ArousalManager::ModifyArousal(actorRef, value);
+		Arousal::ModifyArousal(actorRef, value);
 	}
 }
 

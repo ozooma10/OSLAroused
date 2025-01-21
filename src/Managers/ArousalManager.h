@@ -4,45 +4,45 @@
 #include "ArousalSystem/ArousalSystemOSL.h"
 #include "ArousalSystem/ArousalSystemSLA.h"
 
-namespace ArousalManager
+class ArousalManager
 {
-	class ArousalManager
+public:
+	ArousalManager(const ArousalManager&) = delete;
+	ArousalManager& operator=(const ArousalManager&) = delete;
+
+
+	static ArousalManager* GetSingleton()
 	{
-	public:
-		ArousalManager(const ArousalManager&) = delete;
-		ArousalManager& operator=(const ArousalManager&) = delete;
-
-
-		static ArousalManager* GetSingleton()
-		{
-			static ArousalManager singleton;
-			return &singleton;
-		};
-
-		void SetArousalSystem(IArousalSystem::ArousalMode newMode)
-		{
-			logger::trace("ArosualManager::Setting Arousal System to {}", (int)newMode);
-			if (newMode == IArousalSystem::ArousalMode::kOSL)
-			{
-				m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
-			}
-			else
-			{
-				m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
-			}
-		}
-
-		IArousalSystem& GetArousalSystem() const
-		{
-			return *m_pArousalSystem;
-		}
-
-	private:
-		ArousalManager();
-
-		std::unique_ptr<IArousalSystem> m_pArousalSystem;
+		static ArousalManager singleton;
+		return &singleton;
 	};
 
+	void SetArousalSystem(IArousalSystem::ArousalMode newMode)
+	{
+		logger::trace("ArosualManager::Setting Arousal System to {}", (int)newMode);
+		if (newMode == IArousalSystem::ArousalMode::kOSL)
+		{
+			m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
+		}
+		else
+		{
+			m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
+		}
+	}
+
+	IArousalSystem& GetArousalSystem() const
+	{
+		return *m_pArousalSystem;
+	}
+
+private:
+	ArousalManager();
+
+	std::unique_ptr<IArousalSystem> m_pArousalSystem;
+};
+
+
+namespace Arousal {
 	float GetArousal(RE::Actor* actorRef, bool bUpdateState = true);
 	float SetArousal(RE::Actor* actorRef, float value);
 	float ModifyArousal(RE::Actor* actorRef, float value);

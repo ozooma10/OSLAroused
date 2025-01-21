@@ -128,7 +128,7 @@ void WorldChecks::ArousalUpdateLoop()
 
 		//Get the actors arousal (this will trigger updates to dependent mods. We dont want to do this to frequently, so keep it to once per 0.25 game hours)
 		if (performNearbyArousalUpdates) {
-			ArousalManager::GetArousal(actor, true);
+			Arousal::GetArousal(actor, true);
 		}
 	}
 
@@ -136,7 +136,7 @@ void WorldChecks::ArousalUpdateLoop()
 
 	if (performNearbyArousalUpdates) {
 		//Also get player value to trigger the update for player
-		ArousalManager::GetArousal(player, true);
+		Arousal::GetArousal(player, true);
 
 		//If we are updating all nearby actors, then we want to update the stored nearby actors array, and emit the sla_UpdateComplete event
 		Papyrus::Events::SendUpdateCompleteEvent(static_cast<float>(nearbyActors.size()));
