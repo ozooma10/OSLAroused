@@ -7,10 +7,20 @@ OSLAroused_MCM Function Get() Global
 EndFunction
 
 ;---- Overview Properties ----
+
+;OSL Mode
 int ArousalStatusOid
 int BaselineArousalStatusOid
 int LibidoStatusOid
 int ArousalMultiplierStatusOid
+
+;SLA Mode
+int SLAArousalStatusOid
+int SLAExposureStatusOid
+int SLAExposureRateStatusOid
+int SLATimeArousalStatusOid
+int SLADaysSinceLastStatusOid
+int SLATimeRateStatusOid
 
 int SLAStubLoadedOid
 int OArousedStubLoadedOid
@@ -125,10 +135,9 @@ Event OnConfigInit()
     Pages[2] = "$OSL_Keywords"
     Pages[3] = "$OSL_UI"
     Pages[4] = "$OSL_Settings"
-    Pages[5] = "$OSL_SLASettings"
-    Pages[6] = "$OSL_System"
-    Pages[7] = "$OSL_BaselineStatus"
-    Pages[8] = "$OSL_Help"
+    Pages[5] = "$OSL_System"
+    Pages[6] = "$OSL_BaselineStatus"
+    Pages[7] = "$OSL_Help"
 
 
     ArousalBarDisplayModeNames = new String[4]
@@ -195,19 +204,9 @@ Event OnPageReset(string page)
     elseif(page == "$OSL_UI")
         UIPage()
     elseif(page == "$OSL_Settings")
-        if(!OSLArousedNativeConfig.IsInOSLMode())
-            AddTextOption("$OSL_OSLSettingsDisabled", "$OSL_OSLModeOnly", OPTION_FLAG_DISABLED)
-            return
-        endif
         SettingsLeftColumn()
         SetCursorPosition(1)
         SettingsRightColumn()
-    elseif(page == "$OSL_SLASettings")
-        if(OSLArousedNativeConfig.IsInOSLMode())
-            AddTextOption("$OSL_SLASettingsDisabled", "$OSL_SLAModeOnly", OPTION_FLAG_DISABLED)
-            return
-        endif
-        SLASettingsPage()
     elseif(page == "$OSL_System")
         SystemPage()
     elseif(page == "$OSL_BaselineStatus")
@@ -247,12 +246,12 @@ function RenderActorStatus(Actor target, bool bInOSLMode)
         float daysSinceLast = OSLArousedNative.GetDaysSinceLastOrgasm(target)
         int timeArousal = (daysSinceLast * timeRate) as int
         int arousal = exposure + timeArousal
-        AddTextOption("$OSL_CurrentArousalSLA", arousal)
-        AddTextOption("$OSL_Exposure", exposure)
-        AddTextOption("$OSL_ExposureRate", (exposureRate / 10) as int)
-        AddTextOption("$OSL_TimeArousal", timeArousal)
-        AddTextOption("$OSL_DaysSinceLast", daysSinceLast)
-        AddTextOption("$OSL_TimeRate", timeRate)
+        SLAArousalStatusOid = AddTextOption("$OSL_CurrentArousalSLA", arousal)
+        SLAExposureStatusOid = AddTextOption("$OSL_Exposure", exposure)
+        SLAExposureRateStatusOid = AddTextOption("$OSL_ExposureRate", (exposureRate / 10) as int)
+        SLATimeArousalStatusOid = AddTextOption("$OSL_TimeArousal", timeArousal)
+        SLADaysSinceLastStatusOid = AddTextOption("$OSL_DaysSinceLast", daysSinceLast)
+        SLATimeRateStatusOid = AddTextOption("$OSL_TimeRate", timeRate)
     endif
 
     if(Main.SlaFrameworkStub)
@@ -325,44 +324,41 @@ function UIPage()
 endfunction
 
 function SettingsLeftColumn()
-    MinLibidoPlayerOid = AddSliderOption("$OSL_MinLibidoPlayer", Main.MinLibidoValuePlayer, "{1}")
-    MinLibidoNPCOid = AddSliderOption("$OSL_MinLibidoNPC", Main.MinLibidoValueNPC, "{1}")
-
-    AddHeaderOption("$OSL_BaselineArousalGains")
-    SceneParticipantBaselineOid = AddSliderOption("$OSL_Participating", Main.SceneParticipationBaselineIncrease, "{1}")
-    VictimGainsArousalOid = AddToggleOption("$OSL_VictimGains", Main.VictimGainsArousal)
-    SceneViewerBaselineOid = AddSliderOption("$OSL_Spectating", Main.SceneViewingBaselineIncrease, "{1}")
-    BeingNudeBaselineOid = AddSliderOption("$OSL_Nude", Main.NudityBaselineIncrease, "{1}")
-    ViewingNudeBaselineOid = AddSliderOption("$OSL_ViewingNude", Main.ViewingNudityBaselineIncrease, "{1}")
-    EroticArmorBaselineOid = AddSliderOption("$OSL_EroticArmor", Main.EroticArmorBaselineIncrease, "{1}")
-    AddHeaderOption("$OSL_DeviceGains")
-    DeviceBaselineGainTypeOid = AddMenuOption("$OSL_DeviceType", "")
-    DeviceBaselineGainValueOid = AddSliderOption("$OSL_SelectedTypeGain", 0)
-
-endfunction
-
-function SettingsRightColumn()
     AddHeaderOption("$OSL_EventBasedGains")
     SceneBeginArousalOid = AddSliderOption("$OSL_SceneBegin", Main.SceneBeginArousalGain, "{1}")
     StageChangeArousalOid = AddSliderOption("$OSL_SceneChange", Main.StageChangeArousalGain, "{1}")
     OrgasmArousalLossOid = AddSliderOption("$OSL_OrgasmLoss", -Main.OrgasmArousalChange, "{1}")
     SceneEndArousalNoOrgasmOid = AddSliderOption("$OSL_SceneEndNoOrgasm", Main.SceneEndArousalNoOrgasmChange, "{1}")
     SceneEndArousalOrgasmOid = AddSliderOption("$OSL_SceneEndSLSO", Main.SceneEndArousalOrgasmChange, "{1}")
-    AddHeaderOption("$OSL_AttributeChange")
-    ArousalRateOfChangeOid = AddSliderOption("$OSL_ArousalRate", Main.ArousalChangeRate, "{1}")
-    LibidoRateOfChangeOid = AddSliderOption("$OSL_LibidoRate", Main.LibidoChangeRate, "{1}")
-
 endfunction
 
-Function SLASettingsPage()
-    if(!OSLArousedNativeConfig.IsInOSLMode())
-        AddHeaderOption("Disabled. Enable SLA Mode")
-        return
+function SettingsRightColumn()
+    bool inOSLMode = OSLArousedNativeConfig.IsInOSLMode()
+    if(inOSLMode)
+        AddHeaderOption("$OSL_OSLModeSettings")
+        MinLibidoPlayerOid = AddSliderOption("$OSL_MinLibidoPlayer", Main.MinLibidoValuePlayer, "{1}")
+        MinLibidoNPCOid = AddSliderOption("$OSL_MinLibidoNPC", Main.MinLibidoValueNPC, "{1}")
+        AddHeaderOption("$OSL_BaselineArousalGains")
+        SceneParticipantBaselineOid = AddSliderOption("$OSL_Participating", Main.SceneParticipationBaselineIncrease, "{1}")
+        VictimGainsArousalOid = AddToggleOption("$OSL_VictimGains", Main.VictimGainsArousal)
+        SceneViewerBaselineOid = AddSliderOption("$OSL_Spectating", Main.SceneViewingBaselineIncrease, "{1}")
+        BeingNudeBaselineOid = AddSliderOption("$OSL_Nude", Main.NudityBaselineIncrease, "{1}")
+        ViewingNudeBaselineOid = AddSliderOption("$OSL_ViewingNude", Main.ViewingNudityBaselineIncrease, "{1}")
+        EroticArmorBaselineOid = AddSliderOption("$OSL_EroticArmor", Main.EroticArmorBaselineIncrease, "{1}")
+        AddHeaderOption("$OSL_DeviceGains")
+        DeviceBaselineGainTypeOid = AddMenuOption("$OSL_DeviceType", "")
+        DeviceBaselineGainValueOid = AddSliderOption("$OSL_SelectedTypeGain", 0)
+        AddHeaderOption("$OSL_AttributeChange")
+        ArousalRateOfChangeOid = AddSliderOption("$OSL_ArousalRate", Main.ArousalChangeRate, "{1}")
+        LibidoRateOfChangeOid = AddSliderOption("$OSL_LibidoRate", Main.LibidoChangeRate, "{1}")
+    else
+        AddHeaderOption("$OSL_SLAModeSettings")
+        SLADefaultExposureRateOid = AddSliderOption("$OSL_SLADefaultExposureRate", Main.SLADefaultExposureRate, "{1}")
+        SLATimeRateHalfLifeOid = AddSliderOption("$OSL_SLATimeRateHalfLife", Main.SLATimeRateHalfLife, "{1}")
+        SLAOveruseEffectOid = AddSliderOption("$OSL_SLAOveruseEffect", Main.SLAOveruseEffect, "{0}")
     endif
-    SLADefaultExposureRateOid = AddSliderOption("$OSL_SLADefaultExposureRate", Main.SLADefaultExposureRate, "{1}")
-    SLATimeRateHalfLifeOid = AddSliderOption("$OSL_SLATimeRateHalfLife", Main.SLATimeRateHalfLife, "{1}")
-    SLAOveruseEffectOid = AddSliderOption("$OSL_SLAOveruseEffect", Main.SLAOveruseEffect, "{0}")
-EndFunction
+
+endfunction
 
 function SystemPage()
     AddTextOption("$OSL_Version", GetVersion(), OPTION_FLAG_DISABLED)
@@ -586,6 +582,18 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoStat")
         elseif(optionId == EnableSOSIntegrationOid)
             SetInfoText("$OSL_InfoSOS")
+        elseif(optionId == SLAArousalStatusOid)
+            SetInfoText("$OSL_InfoSLAArousal")
+        elseif(optionId == SLAExposureStatusOid)
+            SetInfoText("$OSL_InfoSLAExposure")
+        elseif(optionId == SLAExposureRateStatusOid)
+            SetInfoText("$OSL_InfoSLAExposureRate")
+        elseif(optionId == SLATimeArousalStatusOid)
+            SetInfoText("$OSL_InfoSLATimeArousal")
+        elseif(optionId == SLADaysSinceLastStatusOid)
+            SetInfoText("$OSL_InfoSLADaysSinceLast")
+        elseif(optionId == SLATimeRateStatusOid)
+            SetInfoText("$OSL_InfoSLATimeRate")
         endif
     elseif(CurrentPage == "$OSL_Puppeteer")
         if(optionId == GenderPreferenceOid)
@@ -634,9 +642,7 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoArousalRate")
         elseif(optionId == LibidoRateOfChangeOid)
             SetInfoText("$OSL_InfoLibidoRate")
-        endif
-    elseif(CurrentPage == "$OSL_SLASettings")
-        if(optionId == SLADefaultExposureRateOid)
+        elseif(optionId == SLADefaultExposureRateOid)
             SetInfoText("$OSL_InfoSLADefaultExposureRate")
         elseif(optionId == SLATimeRateHalfLifeOid)
             SetInfoText("$OSL_InfoSLATimeRateHalfLife")
@@ -838,9 +844,7 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogDefaultValue(10)
             SetSliderDialogInterval(0.5)
             SetSliderDialogRange(0, 50)
-        endif
-    ElseIf (currentPage == "$OSL_SLASettings")
-        if(option == SLADefaultExposureRateOid)
+        elseif(option == SLADefaultExposureRateOid)
             SetSliderDialogStartValue(Main.SLADefaultExposureRate)
             SetSliderDialogDefaultValue(2.0)
             SetSliderDialogRange(0, 10.0)
@@ -924,9 +928,7 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == LibidoRateOfChangeOid)
             Main.SetLibidoChangeRate(value)
             SetSliderOptionValue(LibidoRateOfChangeOid, value, "{1}")
-        endif
-    elseif(currentPage == "$OSL_SLASettings")
-        if(option == SLADefaultExposureRateOid)
+        elseif(option == SLADefaultExposureRateOid)
             Main.SetSLADefaultExposureRate(value)
             SetSliderOptionValue(SLADefaultExposureRateOid, value, "{1}")
         elseif(option == SLATimeRateHalfLifeOid)
@@ -1034,9 +1036,7 @@ event OnOptionDefault(int option)
         elseif(option == LibidoRateOfChangeOid)
             Main.SetLibidoChangeRate(10)
             SetSliderOptionValue(LibidoRateOfChangeOid, 10, "{1}")
-        endif
-    elseif(currentPage == "$OSL_SLASettings")
-        if(option == SLADefaultExposureRateOid)
+        elseif(option == SLADefaultExposureRateOid)
             Main.SetSLADefaultExposureRate(2.0)
             SetSliderOptionValue(SLADefaultExposureRateOid, 2.0, "{1}")
         elseif(option == SLATimeRateHalfLifeOid)
