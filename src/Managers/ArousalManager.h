@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ArousalSystem/IArousalSystem.h"
-#include "ArousalSystem/ArousalSystemOSL.h"
-#include "ArousalSystem/ArousalSystemSLA.h"
 
 class ArousalManager
 {
@@ -17,18 +15,7 @@ public:
 		return &singleton;
 	};
 
-	void SetArousalSystem(IArousalSystem::ArousalMode newMode)
-	{
-		logger::trace("ArosualManager::Setting Arousal System to {}", (int)newMode);
-		if (newMode == IArousalSystem::ArousalMode::kOSL)
-		{
-			m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
-		}
-		else
-		{
-			m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
-		}
-	}
+	void SetArousalSystem(IArousalSystem::ArousalMode newMode);
 
 	IArousalSystem& GetArousalSystem() const
 	{

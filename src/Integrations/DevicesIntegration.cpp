@@ -2,6 +2,7 @@
 #include "Utilities/Utils.h"
 #include "Settings.h"
 #include <Managers/ArousalManager.h>
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
 
 WornDeviceField GetWornDevices(RE::Actor* actorRef, RE::TESForm* equipmentToIgnore)
 {

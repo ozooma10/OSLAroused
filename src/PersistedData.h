@@ -277,4 +277,6 @@ namespace PersistedData
 	void SaveCallback(SKSE::SerializationInterface* serializationInterface);
 	void LoadCallback(SKSE::SerializationInterface* serializationInterface);
 	void RevertCallback(SKSE::SerializationInterface* serializationInterface);
+
+	void ResetSystemForModeSwitch();
 };

@@ -1,8 +1,9 @@
 #include "ActorStateManager.h"
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
-#include "Managers/ArousalManager.h"
 #include "PersistedData.h"
+#include "Managers/ArousalManager.h"
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
 
 bool IsActorNaked(RE::Actor* actorRef)
 {

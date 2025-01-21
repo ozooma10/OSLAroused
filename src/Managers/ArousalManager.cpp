@@ -1,4 +1,6 @@
 #include "ArousalManager.h"
+#include "ArousalSystem/ArousalSystemOSL.h"
+#include "ArousalSystem/ArousalSystemSLA.h"
 #include "PersistedData.h"
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
@@ -36,6 +38,28 @@ namespace Arousal
     float ModifyArousalExt(RE::Actor* actorRef, float modValue, bool sendevent)
     {
         return ArousalManager::GetSingleton()->GetArousalSystem().ModifyArousal(actorRef, modValue, sendevent);
+    }
+}
+
+void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode)
+{
+    auto curMode = m_pArousalSystem->GetMode();
+    if (curMode == newMode)
+    {
+        return;
+    }
+
+    //If we are changing modes, we need to Reset arousal data
+    PersistedData::ResetSystemForModeSwitch();
+
+    logger::trace("ArosualManager::Setting Arousal System to {}", (int)newMode);
+    if (newMode == IArousalSystem::ArousalMode::kOSL)
+    {
+        m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
+    }
+    else
+    {
+        m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
     }
 }
 

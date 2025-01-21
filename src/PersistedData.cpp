@@ -337,4 +337,21 @@ namespace PersistedData
 
 		logger::info("Reverting Data State...");
 	}
+
+	void ResetSystemForModeSwitch()
+	{
+		logger::info("Resetting System for Mode Switch...");
+		//Reset relevant data for mode switch
+		auto arousalData = ArousalData::GetSingleton();
+		arousalData->Clear();
+
+		auto baseLibidoData = BaseLibidoData::GetSingleton();
+		baseLibidoData->Clear();
+
+		auto arousalMultiplierData = ArousalMultiplierData::GetSingleton();
+		arousalMultiplierData->Clear();
+
+		auto lastCheckData = LastCheckTimeData::GetSingleton();
+		lastCheckData->Clear();
+	}
 }

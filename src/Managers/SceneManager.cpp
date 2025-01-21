@@ -1,5 +1,7 @@
 #include "Managers/SceneManager.h"
 #include "Managers/ArousalManager.h"
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
+
 
 void SceneManager::RegisterScene(SceneData scene)
 {
