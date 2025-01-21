@@ -10,7 +10,7 @@ namespace ArousalManager
 	{
 	public:
 
-		ArousalManager() : m_pArousalSystem(std::make_unique<ArousalSystemSLA>()) {};
+		ArousalManager() : m_pArousalSystem(std::make_unique<ArousalSystemOSL>()) {};
 
 		void SetArousalSystem(IArousalSystem::ArousalMode newMode)
 		{

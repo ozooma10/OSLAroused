@@ -8,7 +8,7 @@ using namespace PersistedData;
 
 float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 {
-	float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
+	 float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
 	if (lastOrgasmTime < 0) {
 		lastOrgasmTime = 0;
 	}
