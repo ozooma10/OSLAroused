@@ -34,7 +34,7 @@ float CalculateArousal(RE::Actor* actorRef, float gameHoursPassed)
 
 float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
-    if (!actorRef) {
+    if (!actorRef || actorRef->IsChild()) {
         return -2.f;
     }
 
