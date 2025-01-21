@@ -206,12 +206,13 @@ function RunDebugLogic()
 	if(crosshairTarget != none)
 		OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
 	else
-		OSLAroused_ModInterface.ModifyArousal(PlayerRef, 2.0, "Debug")
+		
+
+		; OSLAroused_ModInterface.ModifyArousal(PlayerRef, 2.0, "Debug")
 
 		SlaFrameworkStub.DebugActorState(PlayerRef)
 	endif
 endfunction
-
 
 ; ========== AROUSAL EFFECTS ===========
 function SetArousalEffectsEnabled(bool enabled)
