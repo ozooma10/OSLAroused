@@ -112,6 +112,7 @@ int ExplainNakedOid
 int ExplainSpectatingNakedOid
 
 ;------- Help ---------
+int HelpArousalModeOid
 int HelpOverviewOid
 int HelpCurrentArousalOid
 int HelpBaselineArousalOid
@@ -454,6 +455,7 @@ endfunction
 function HelpPage()
     AddHeaderOption("$OSL_HelpTopics")
 
+    HelpArousalModeOid = AddTextOption("$OSL_ArousalMode", "$OSL_ClickToRead")
     HelpOverviewOid = AddTextOption("$OSL_Overview", "$OSL_ClickToRead")
     HelpCurrentArousalOid = AddTextOption("$OSL_CurrentArousal", "$OSL_ClickToRead")
     HelpBaselineArousalOid = AddTextOption("$OSL_BaselineArousal", "$OSL_ClickToRead")
@@ -520,7 +522,9 @@ event OnOptionSelect(int optionId)
             OSLArousedNative.SetActorExhibitionist(PuppetActor, bIsExhibitionist)
         endif
     ElseIf(CurrentPage == "$OSL_Help")
-        if(optionId == HelpOverviewOid)
+        if(optionId == HelpArousalModeOid)
+            Debug.MessageBox("$OSL_HelpArousalMode")
+        elseif(optionId == HelpOverviewOid)
             Debug.MessageBox("$OSL_HelpOverview")
         elseif(optionId == HelpCurrentArousalOid)
             Debug.MessageBox("$OSL_HelpArousal")
@@ -551,16 +555,6 @@ Event OnOptionKeyMapChange(int optionId, int keyCode, string conflictControl, st
 EndEvent
 
 event OnOptionHighlight(int optionId)
-    if(optionId == ArousalStatusOid)
-        SetInfoText("$OSL_InfoArousal")
-    elseif(optionId == BaselineArousalStatusOid)
-        SetInfoText("$OSL_InfoBaseline")
-    elseif(optionId == LibidoStatusOid)
-        SetInfoText("$OSL_InfoLibido")
-    elseif(optionId == ArousalMultiplierStatusOid)
-        SetInfoText("$OSL_InfoMultiplier")
-    endif
-    
     if(CurrentPage == "$OSL_Overview")
         if(optionId == SLAStubLoadedOid)
             If (Main.InvalidSlaFound)
@@ -582,6 +576,14 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoStat")
         elseif(optionId == EnableSOSIntegrationOid)
             SetInfoText("$OSL_InfoSOS")
+        elseif(optionId == ArousalStatusOid)
+            SetInfoText("$OSL_InfoArousal")
+        elseif(optionId == BaselineArousalStatusOid)
+            SetInfoText("$OSL_InfoBaseline")
+        elseif(optionId == LibidoStatusOid)
+            SetInfoText("$OSL_InfoLibido")
+        elseif(optionId == ArousalMultiplierStatusOid)
+            SetInfoText("$OSL_InfoMultiplier")
         elseif(optionId == SLAArousalStatusOid)
             SetInfoText("$OSL_InfoSLAArousal")
         elseif(optionId == SLAExposureStatusOid)
@@ -602,6 +604,24 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoArousalLocked")
         elseif (optionId == IsExhibitionistOid)
             SetInfoText("$OSL_InfoIsExhibitionist")
+        elseif (optionId == SetArousalOid)
+            if(OSLArousedNativeConfig.IsInOSLMode())
+                SetInfoText("$OSL_InfoArousal")
+            else
+                SetInfoText("$OSL_InfoSLAExposure")
+            endif
+        elseif (optionId == SetLibidoOid)
+            if(OSLArousedNativeConfig.IsInOSLMode())
+                SetInfoText("$OSL_InfoLibido")
+            else
+                SetInfoText("$OSL_InfoSLATimeRate")
+            endif
+        elseif (optionId == SetArousalMultiplierOid)
+            if(OSLArousedNativeConfig.IsInOSLMode())
+                SetInfoText("$OSL_InfoArousalMultiplier")
+            else
+                SetInfoText("$OSL_InfoSLAExposureRate")
+            endif
         endif
     elseif(CurrentPage == "$OSL_UI")
         if(optionId == ArousalBarToggleKeyOid)
