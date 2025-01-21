@@ -225,21 +225,57 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
     }
 }
 
-void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, const std::string_view& editorId, int rank)
+void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factionType, int rank)
 {
-	const auto faction = RE::TESForm::LookupByEditorID<RE::TESFaction>(editorId);
+	RE::TESFaction* faction = nullptr;
+	switch (factionType) {
+		case FactionType::sla_Arousal:
+			faction = m_ArousalFaction;
+			break;
+		case FactionType::sla_Arousal_Locked:
+			faction = m_ArousalLockedFaction;
+			break;
+		case FactionType::sla_Exhibitionist:
+			faction = m_ExhibitionistFaction;
+			break;
+	}
+
 	if (!faction) {
+		logger::warn("Faction {} not found", (int)factionType);
 		return;
 	}
-	actorRef->AddToFaction(faction, rank);
+
+	logger::trace("Adding {} to Faction {}", rank, faction->GetFullName());
 }
 
-int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, const std::string_view& editorId)
+int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType factionType)
 {
-	const auto faction = RE::TESForm::LookupByEditorID<RE::TESFaction>(editorId);
+	RE::TESFaction* faction = nullptr;
+	switch (factionType) {
+	case FactionType::sla_Arousal:
+		faction = m_ArousalFaction;
+		break;
+	case FactionType::sla_Arousal_Locked:
+		faction = m_ArousalLockedFaction;
+		break;
+	case FactionType::sla_Exhibitionist:
+		faction = m_ExhibitionistFaction;
+		break;
+	}
 	if (!faction) {
+		logger::warn("Faction {} not found", (int)factionType);
 		return -2;
 	}
 
-	return actorRef->GetFactionRank(faction, actorRef->IsPlayer());
+	int result = actorRef->GetFactionRank(faction, actorRef->IsPlayer());
+	logger::trace("Getting {} from Faction {}", result, faction->GetFullName());
+	return result;
+}
+
+void Utilities::Factions::Initialize()
+{
+	const auto dataHandler = RE::TESDataHandler::GetSingleton();
+	m_ArousalFaction = dataHandler->LookupForm<RE::TESFaction>(0x3FC36, "SexLabAroused.esm");
+	m_ArousalLockedFaction = dataHandler->LookupForm<RE::TESFaction>(0x7649C, "SexLabAroused.esm");
+	m_ExhibitionistFaction = dataHandler->LookupForm < RE::TESFaction>(0x713DA, "SexLabAroused.esm");
 }

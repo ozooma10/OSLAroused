@@ -72,6 +72,7 @@ namespace
 				RuntimeEvents::OnEquipEvent::RegisterEvent();
 				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 				Config::GetSingleton()->LoadINIs();
+				Utilities::Factions::GetSingleton()->Initialize();
 				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
 				//Distribute Persisted Keywords

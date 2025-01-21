@@ -4,6 +4,13 @@
 #include "Managers/SceneManager.h"
 #include "Managers/ActorStateManager.h"
 
+enum class FactionType
+{
+	sla_Arousal,
+	sla_Arousal_Locked,
+	sla_Exhibitionist
+};
+
 namespace Utilities
 {
     void logInvalidArgsVerbose(const char* fnName);
@@ -21,11 +28,25 @@ namespace Utilities
 		RE::FormID ResolveFormId(uint32_t modIndex, RE::FormID rawFormId);
 	}
 
-	namespace Factions
+	class Factions
 	{
-		void SetFactionRank(RE::Actor* actorRef, const std::string_view& editorId, int rank);
-		int GetFactionRank(RE::Actor* actorRef, const std::string_view& editorId);
-	}
+	public:
+		static Factions* GetSingleton()
+		{
+			static Factions singleton;
+			return &singleton;
+		}
+		void Initialize();
+
+
+		void SetFactionRank(RE::Actor* actorRef, FactionType factionType, int rank);
+		int GetFactionRank(RE::Actor* actorRef, FactionType factionType);
+	private:
+
+		RE::TESFaction* m_ArousalFaction;
+		RE::TESFaction* m_ArousalLockedFaction;
+		RE::TESFaction* m_ExhibitionistFaction;
+	};
 
 	//Keyword logic based off powerof3's CommonLibSSE implementation
 	namespace Keywords

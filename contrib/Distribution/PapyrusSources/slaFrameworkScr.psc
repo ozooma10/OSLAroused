@@ -119,11 +119,12 @@ endfunction
 
 function OnActorArousalUpdated(Actor act, float newArousal, float newExposure)
     ;Update Factions
-    if(slaArousalFaction)
-        act.SetFactionRank(slaArousalFaction, newArousal as int)
-    endif
     if(slaExposureFaction)
         act.SetFactionRank(slaExposureFaction, newExposure as int)
+    endif
+
+    if(slaArousalFaction)
+        Log("Setting Arousal Faction for " + act.GetDisplayName() + " cur: " + act.GetFactionRank(slaArousalFaction) + " test: " + slaArousalFaction.GetFormID())
     endif
 endfunction
 

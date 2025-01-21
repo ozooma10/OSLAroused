@@ -229,7 +229,7 @@ void PapyrusInterface::SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Ac
 		return;
 	}
 	PersistedData::IsActorExhibitionistData::GetSingleton()->SetData(actorRef->formID, exhibitionist);
-	Utilities::Factions::SetFactionRank(actorRef, "sla_Exhibitionist", exhibitionist ? 0 : -2);
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Exhibitionist, exhibitionist ? 0 : -2);
 }
 
 bool PapyrusInterface::IsActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef)
@@ -247,7 +247,7 @@ void PapyrusInterface::SetActorArousalLocked(RE::StaticFunctionTag* base, RE::Ac
 		return;
 	}
 	PersistedData::IsArousalLockedData::GetSingleton()->SetData(actorRef->formID, locked);
-	Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal_Locked", locked ? 0 : -2);
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal_Locked, locked ? 0 : -2);
 }
 
 float PapyrusInterface::GetActorTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef)

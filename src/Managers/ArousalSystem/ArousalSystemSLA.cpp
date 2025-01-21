@@ -16,28 +16,20 @@ float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 	return RE::Calendar::GetSingleton()->GetCurrentGameTime() - lastOrgasmTime;
 }
 
-//Check if actor has their arousal locked
-bool IsArousalLocked(RE::Actor* actorRef)
-{
-	if (!actorRef) {
-		return true;
-	}
-	return Utilities::Factions::GetFactionRank(actorRef, "sla_Arousal_Locked") >= 0;
-}
-
 float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
+	logger::trace("SLA GetArousal for {}", actorRef->GetDisplayFullName());
 	//Check for arousal blocked ignored since internal to sla
 	if (actorRef->IsChild())
 	{
-		Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal", 0);
+		Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, 0);
 		return 0;
 	}
 
 	//If locked, get the last faction rank (which is the last retrieved value)
-	if (IsArousalLocked(actorRef))
+	if (ActorStateManager::GetActorArousalLocked(actorRef))
 	{
-		return Utilities::Factions::GetFactionRank(actorRef, "sla_Arousal");
+		return Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_Arousal);
 	}
 
 	float newArousal = (GetDaysSinceLastOrgasm(actorRef) * GetLibido(actorRef)) + GetExposure(actorRef);
@@ -49,6 +41,7 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 	}
 
 	if (bUpdateState || LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f) == 0.f) {
+		Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
 		Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
 	}
 
