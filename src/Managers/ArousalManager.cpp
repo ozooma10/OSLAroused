@@ -37,4 +37,18 @@ namespace ArousalManager
     {
 		return GetSingleton()->GetArousalSystem().ModifyArousal(actorRef, modValue, sendevent);
     }
+
+    ArousalManager::ArousalManager()
+    {
+        auto arousalMode = (IArousalSystem::ArousalMode)PersistedData::SettingsData::GetSingleton()->GetArousalMode();
+		logger::trace("ArousalManager::ArousalManager Initializing with {}", (int)arousalMode);
+        if (arousalMode == IArousalSystem::ArousalMode::kOSL)
+        {
+            m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
+        }
+        else
+        {
+            m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
+        }
+    }
 }

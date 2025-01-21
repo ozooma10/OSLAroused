@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include <Utilities/Utils.h>
 #include "Managers/ArousalManager.h"
+#include "PersistedData.h"
 
 void PapyrusConfig::SetMinLibidoValue(RE::StaticFunctionTag*, bool bPlayerVal, float newVal)
 {
@@ -156,6 +157,7 @@ bool PapyrusConfig::IsInOSLMode(RE::StaticFunctionTag* base)
 
 void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
 {
+	PersistedData::SettingsData::GetSingleton()->SetArousalMode((int)(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA));
 	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
 }
 

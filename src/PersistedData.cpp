@@ -206,6 +206,11 @@ namespace PersistedData
 			logger::critical("Failed to save Is Actor Exhibitionist Data");
 		}
 
+		const auto settingsData = SettingsData::GetSingleton();
+		if (!settingsData->Save(serializationInterface, kSettingsDataKey, kSerializationVersion)) {
+			logger::critical("Failed to save Settings Data");
+		}
+
 		logger::info("OSLArousal Data Saved");
 	}
 
@@ -289,6 +294,14 @@ namespace PersistedData
 					}
 				}
 				break;
+			case kSettingsDataKey:
+				{
+					auto settingsData = SettingsData::GetSingleton();
+					if (!settingsData->Load(serializationInterface)) {
+						logger::critical("Failed to Load Settings Data"sv);
+					}
+				}
+				break;
 			default:
 				logger::critical("Unrecognized Record Type: {}"sv, DecodeTypeCode(type));
 				break;
@@ -316,6 +329,8 @@ namespace PersistedData
 		isArousalLockedData->Clear();
 		auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
 		isActorExhibitionistData->Clear();
+		auto settingsData = SettingsData::GetSingleton();
+		settingsData->Clear();
 
 		//End All Scenes as well
 		SceneManager::GetSingleton()->ClearScenes();

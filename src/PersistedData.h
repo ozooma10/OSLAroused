@@ -39,6 +39,19 @@ namespace PersistedData
 		mutable Lock m_Lock;
 	};
 
+	class BaseFormInt : public BaseData<int>
+	{
+	public:
+		virtual void DumpToLog() override
+		{
+			Locker locker(m_Lock);
+			for (const auto& [formId, value] : m_Data) {
+				logger::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+			}
+			logger::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+		}
+	};
+
 	class BaseFormFloat : public BaseData<float>
 	{
 	public:
@@ -97,6 +110,36 @@ namespace PersistedData
 		{
 			logger::info("{} Rows Not Dumped For List Type {}", m_Data.size(), GetType());
 		}
+	};
+
+	class SettingsData final : public BaseFormInt
+	{
+	public:
+		enum Setting {
+			ArousalMode,
+		};
+
+		static SettingsData* GetSingleton()
+		{
+			static SettingsData singleton;
+			return &singleton;
+		}
+
+		int GetArousalMode()
+		{
+			//0 = osl mode
+			return GetData(Setting::ArousalMode, 0);
+		}
+
+		void SetArousalMode(int mode)
+		{
+			SetData(Setting::ArousalMode, (int)mode);
+		}
+
+		const char* GetType() override
+		{
+			return "Settings";
+		};
 	};
 
 	class ArousalData final : public BaseFormFloat
@@ -227,6 +270,7 @@ namespace PersistedData
 	constexpr std::uint32_t kArmorKeywordDataKey = 'OSLK';
 	constexpr std::uint32_t kIsArousalLockedDataKey = 'OSLL';
 	constexpr std::uint32_t kIsActorExhibitionistDataKey = 'OSLE';
+	constexpr std::uint32_t kSettingsDataKey = 'OSLS';
 
 	std::string DecodeTypeCode(std::uint32_t typeCode);
 

@@ -9,11 +9,19 @@ namespace ArousalManager
 	class ArousalManager
 	{
 	public:
+		ArousalManager(const ArousalManager&) = delete;
+		ArousalManager& operator=(const ArousalManager&) = delete;
 
-		ArousalManager() : m_pArousalSystem(std::make_unique<ArousalSystemOSL>()) {};
+
+		static ArousalManager* GetSingleton()
+		{
+			static ArousalManager singleton;
+			return &singleton;
+		};
 
 		void SetArousalSystem(IArousalSystem::ArousalMode newMode)
 		{
+			logger::trace("ArosualManager::Setting Arousal System to {}", (int)newMode);
 			if (newMode == IArousalSystem::ArousalMode::kOSL)
 			{
 				m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
@@ -30,13 +38,9 @@ namespace ArousalManager
 		}
 
 	private:
-		std::unique_ptr<IArousalSystem> m_pArousalSystem;
-	};
+		ArousalManager();
 
-	static ArousalManager* GetSingleton()
-	{
-		static ArousalManager singleton;
-		return &singleton;
+		std::unique_ptr<IArousalSystem> m_pArousalSystem;
 	};
 
 	float GetArousal(RE::Actor* actorRef, bool bUpdateState = true);
