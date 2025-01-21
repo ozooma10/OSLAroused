@@ -117,15 +117,9 @@ float function UpdateActorExposureRate(Actor akRef, float val)
     return OSLAroused_ModInterface.ModifyArousalMultiplier(akRef, val, "slaframework UpdateActorExposureRate")
 endfunction
 
-function OnActorArousalUpdated(Actor act, float newArousal, float newExposure)
-    ;Update Factions
-    if(slaExposureFaction)
-        act.SetFactionRank(slaExposureFaction, newExposure as int)
-    endif
-
-    if(slaArousalFaction)
-        Log("Setting Arousal Faction for " + act.GetDisplayName() + " cur: " + act.GetFactionRank(slaArousalFaction) + " test: " + slaArousalFaction.GetFormID())
-    endif
+function DebugActorState(Actor act)
+    Log("DebugActorState: " + act.GetDisplayName() + " Arousal: " + GetActorArousal(act) + " Exposure: " + GetActorExposure(act) + " ExposureRate: " + GetActorExposureRate(act))
+    Log("Factions: Arousal: " + act.GetFactionRank(slaArousalFaction) + " Exposure: " + act.GetFactionRank(slaExposureFaction) + " Naked: " + act.GetFactionRank(slaNakedFaction) + " GenderPref: " + act.GetFactionRank(slaGenderPreference))   
 endfunction
 
 function OnActorNakedUpdated(Actor act, bool newNaked)

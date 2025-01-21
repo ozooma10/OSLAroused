@@ -189,10 +189,6 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 	endif
 
 	UpdateSOSPosition(act, newArousal)
-
-	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newArousal)
-	endif
 endevent
 
 event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat, Form sender)
@@ -204,6 +200,17 @@ event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat
 		SlaFrameworkStub.OnActorNakedUpdated(act, isActorNaked)
 	endif
 endevent
+
+function RunDebugLogic()
+	Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+	if(crosshairTarget != none)
+		OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
+	else
+		OSLAroused_ModInterface.ModifyArousal(PlayerRef, 2.0, "Debug")
+
+		SlaFrameworkStub.DebugActorState(PlayerRef)
+	endif
+endfunction
 
 
 ; ========== AROUSAL EFFECTS ===========
@@ -251,13 +258,7 @@ Event OnKeyDown(int keyCode)
 	EndIf
 
 	if(keyCode == DebugActionKey)
-		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
-		if(crosshairTarget != none)
-			OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
-		else
-			OSLArousedNative.ModifyArousal(PlayerRef, 1.0)
-			; OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
-		endif
+		RunDebugLogic()
 	endif
 EndEvent
 
