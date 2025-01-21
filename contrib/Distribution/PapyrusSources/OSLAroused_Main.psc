@@ -241,7 +241,9 @@ Event OnKeyDown(int keyCode)
 	endif
 	if keyCode == CheckArousalKey
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
-		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
+		if(OSLArousedNativeConfig.IsInOSLMode())
+			Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
+		endif
 		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
 			ArousalBar.UpdateDisplay()
 		endif
