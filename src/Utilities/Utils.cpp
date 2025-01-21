@@ -238,6 +238,9 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 		case FactionType::sla_Exhibitionist:
 			faction = m_ExhibitionistFaction;
 			break;
+		case FactionType::sla_Exposure:
+			faction = m_ExposureFaction;
+			break;
 	}
 
 	if (!faction) {
@@ -246,6 +249,8 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 	}
 
 	logger::trace("Adding {} to Faction {}", rank, faction->GetFullName());
+
+	actorRef->AddToFaction(faction, rank);
 }
 
 int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType factionType)
@@ -260,6 +265,9 @@ int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType faction
 		break;
 	case FactionType::sla_Exhibitionist:
 		faction = m_ExhibitionistFaction;
+		break;
+	case FactionType::sla_Exposure:
+		faction = m_ExposureFaction;
 		break;
 	}
 	if (!faction) {
@@ -278,4 +286,5 @@ void Utilities::Factions::Initialize()
 	m_ArousalFaction = dataHandler->LookupForm<RE::TESFaction>(0x3FC36, "SexLabAroused.esm");
 	m_ArousalLockedFaction = dataHandler->LookupForm<RE::TESFaction>(0x7649C, "SexLabAroused.esm");
 	m_ExhibitionistFaction = dataHandler->LookupForm < RE::TESFaction>(0x713DA, "SexLabAroused.esm");
+	m_ExposureFaction = dataHandler->LookupForm<RE::TESFaction>(0x25837, "SexLabAroused.esm");
 }

@@ -56,8 +56,6 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 
     //If set to update state, or we have never checked (last check time is 0), then update the lastchecktime
     if (bUpdateState || lastCheckTime == 0.f) {
-        Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
-
         LastCheckTimeData->SetData(actorFormId, curTime);
         SetArousal(actorRef, newArousal, true);
 
@@ -81,6 +79,10 @@ float ArousalSystemOSL::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 
     value = std::clamp(value, 0.0f, 100.f);
     ArousalData::GetSingleton()->SetData(actorRef->formID, value);
+
+	//OSL Mode sets both arousal and exposure to the same value
+    Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, value);
+    Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Exposure, value);
 
     if (bSendEvent) {
         Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, value);

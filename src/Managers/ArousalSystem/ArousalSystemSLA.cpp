@@ -40,8 +40,9 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 		newArousal = 100;
 	}
 
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
+
 	if (bUpdateState || LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f) == 0.f) {
-		Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
 		Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
 	}
 
@@ -107,7 +108,8 @@ float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife);
 	}
 
-	//TODO: UPdate Exposure Faction
+
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Exposure, exposure);
 	
 	return exposure;
 }
