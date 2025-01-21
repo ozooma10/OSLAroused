@@ -22,6 +22,9 @@ public:
 		m_CreatureKeyword((RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId)),
 		m_AnimalKeyword((RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId)) {}
 
+	static bool GetActorArousalLocked(RE::Actor* actorRef);
+	static void SetActorArousalLocked(RE::Actor* actorRef, bool locked);
+
 	bool GetActorNaked(RE::Actor* actorRef);
 	void ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked);
 

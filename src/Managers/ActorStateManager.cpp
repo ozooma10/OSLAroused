@@ -2,10 +2,28 @@
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
 #include "Managers/ArousalManager.h"
+#include "PersistedData.h"
 
 bool IsActorNaked(RE::Actor* actorRef)
 {
 	return Utilities::Actor::IsNaked(actorRef);
+}
+
+bool ActorStateManager::GetActorArousalLocked(RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return true;
+	}
+	return PersistedData::IsArousalLockedData::GetSingleton()->GetData(actorRef->formID, false);
+}
+
+void ActorStateManager::SetActorArousalLocked(RE::Actor* actorRef, bool locked)
+{
+	if (!actorRef) {
+		return;
+	}
+	PersistedData::IsArousalLockedData::GetSingleton()->SetData(actorRef->formID, locked);
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal_Locked, locked ? 0 : -2);
 }
 
 bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)

@@ -35,7 +35,14 @@ float CalculateArousal(RE::Actor* actorRef, float gameHoursPassed)
 float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
     if (!actorRef || actorRef->IsChild()) {
-        return -2.f;
+        return 0.f;
+    }
+    logger::trace("OSL GetArousal for {}", actorRef->GetDisplayFullName());
+
+    //If locked, get the stored arousal value (which shouldnt be updated)
+    if (ActorStateManager::GetActorArousalLocked(actorRef))
+    {
+		return ArousalData::GetSingleton()->GetData(actorRef->formID, 0.f);
     }
 
     RE::FormID actorFormId = actorRef->formID;
@@ -49,7 +56,7 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 
     //If set to update state, or we have never checked (last check time is 0), then update the lastchecktime
     if (bUpdateState || lastCheckTime == 0.f) {
-        Utilities::Factions::SetFactionRank(actorRef, "sla_Arousal", newArousal);
+        Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
 
         LastCheckTimeData->SetData(actorFormId, curTime);
         SetArousal(actorRef, newArousal, true);
@@ -67,6 +74,11 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 
 float ArousalSystemOSL::SetArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
+	if (ActorStateManager::GetActorArousalLocked(actorRef))
+	{
+		return ArousalData::GetSingleton()->GetData(actorRef->formID, 0.f);
+	}
+
     value = std::clamp(value, 0.0f, 100.f);
     ArousalData::GetSingleton()->SetData(actorRef->formID, value);
 
