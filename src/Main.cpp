@@ -70,13 +70,14 @@ namespace
 			switch (message->type) {
 			case SKSE::MessagingInterface::kDataLoaded:  // All ESM/ESL/ESP plugins have loaded, main menu is now active
 				RuntimeEvents::OnEquipEvent::RegisterEvent();
-				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 				Config::GetSingleton()->LoadINIs();
 				Utilities::Factions::GetSingleton()->Initialize();
 				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
 				//Distribute Persisted Keywords
 				Utilities::Keywords::DistributeKeywords();
+				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
+
 				break;
 			} }
 		))
