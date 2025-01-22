@@ -17,6 +17,8 @@ bool Papyrus::IsActorNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
 
 void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int sceneId, RE::reference_array<RE::Actor*> actorRefs)
 {
+	logger::trace("RegisterSceneStart: bIsOstim: {} sceneId: {} numACtors: {}.", bIsOstim, sceneId, actorRefs.size());
+
 	SceneManager::SceneData sceneData{
 		bIsOstim ? SceneManager::SceneFramework::kOStim : SceneManager::SceneFramework::kSexLab,
 		sceneId,
