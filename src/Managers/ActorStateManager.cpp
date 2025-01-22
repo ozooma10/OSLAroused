@@ -71,9 +71,12 @@ void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor*> spectators)
 
 	float currentTime = RE::Calendar::GetSingleton()->GetCurrentGameTime();
 	for (const auto spectator : spectators) {
+		bool isNewSpectator = (m_NakedSpectatingMap.find(spectator) == m_NakedSpectatingMap.end());
 		m_NakedSpectatingMap[spectator] = currentTime;
-		if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
-			oslSystem->ActorLibidoModifiersUpdated(spectator);
+		if (isNewSpectator) {
+			if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+				oslSystem->ActorLibidoModifiersUpdated(spectator);
+			}
 		}
 	}
 }
