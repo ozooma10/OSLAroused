@@ -80,8 +80,6 @@ void WorldChecks::ArousalUpdateLoop()
 
 	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime, 0.f, 1.f);
 	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime, 0.f, 1.f);
-	//logger::trace("ArousalUpdateLoop: {} Game Hours have elapsed since last check {} - Nearby Actors: {} {}", elapsedGameTimeSinceLastCheck, curHours, elapsedGameTimeSinceLastNearbyArousalCheck, WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime);
-
 	WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime = curHours;
 
 	if (elapsedGameTimeSinceLastCheck <= 0) {
@@ -89,6 +87,7 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 
 	const auto activeScenes = SceneManager::GetSingleton()->GetAllScenes();
+	logger::trace("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
 	if (activeScenes.size() > 0) {
 		HandleAdultScenes(activeScenes, elapsedGameTimeSinceLastCheck);
 	}
@@ -98,8 +97,9 @@ void WorldChecks::ArousalUpdateLoop()
 		return;
 	}
 
-	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.25 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
+	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.1 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
 	if (performNearbyArousalUpdates) {
+		logger::trace("ArousalUpdateLoop: Performing Nearby Arousal Updates. ElapsedTimeSinceLastArousalCheck: {}", elapsedGameTimeSinceLastNearbyArousalCheck);
 		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
 	}
 
@@ -118,25 +118,34 @@ void WorldChecks::ArousalUpdateLoop()
 		if (!actor) {
 			continue;
 		}
+		logger::trace("ArousalUpdateLoop: Checking Actor {}", actor->GetDisplayFullName());
 		//If the actor is naked, then get nearby spectators to update spectator array
 		if (actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
+			logger::trace("ArousalUpdateLoop: Actor {} is naked", actor->GetDisplayFullName());
 			const auto spectators = GetNearbySpectatingActors(actor, scanDistance);
 			for (const auto spectator : spectators) {
 				spectatingActors.insert(spectator);
+				ArousalManager::GetSingleton()->GetArousalSystem().HandleSpectatingNaked(spectator, actor);
 			}
-		}
-
-		//Get the actors arousal (this will trigger updates to dependent mods. We dont want to do this to frequently, so keep it to once per 0.25 game hours)
-		if (performNearbyArousalUpdates) {
-			Arousal::GetArousal(actor, true);
 		}
 	}
 
 	ActorStateManager::GetSingleton()->UpdateActorsSpectating(spectatingActors);
 
 	if (performNearbyArousalUpdates) {
-		//Also get player value to trigger the update for player
-		Arousal::GetArousal(player, true);
+		for (const auto actorHandle : nearbyActors) {
+			auto actorPtr = actorHandle.get();
+			if (!actorPtr) {
+				continue;
+			}
+			auto actor = actorPtr.get();
+			if (!actor) {
+				continue;
+			}
+			
+			//Get the arousal to trigger an update
+			Arousal::GetArousal(actor, true);
+		}
 
 		//If we are updating all nearby actors, then we want to update the stored nearby actors array, and emit the sla_UpdateComplete event
 		Papyrus::Events::SendUpdateCompleteEvent(static_cast<float>(nearbyActors.size()));
@@ -158,7 +167,7 @@ std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)
 	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
-		if (actor && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+		if (actor && !actor->IsDisabled() && !actor->IsChild() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			nearbyActors.push_back(actor->GetHandle());
 		}
 		return RE::BSContainer::ForEachResult::kContinue;

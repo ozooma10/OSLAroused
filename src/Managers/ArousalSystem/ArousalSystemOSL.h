@@ -36,4 +36,8 @@ private:
 	//Cache of additional Arousal values on top of actors base libido (Resulting in Baseline Arousal)
 	Utilities::LRUCache<RE::Actor*, float> m_LibidoModifierCache;
 
+
+	// Inherited via IArousalSystem
+	void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef) override;
+
 };

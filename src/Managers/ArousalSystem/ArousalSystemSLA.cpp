@@ -215,3 +215,29 @@ float ArousalSystemSLA::GetBaselineArousal(RE::Actor* actorRef)
 {
 	return GetExposure(actorRef);
 }
+
+void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef)
+{
+	//When spectating a naked actor, SLA logic is to create an exposure event
+
+	//First get gender preference
+	int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);
+	if (genderPreference == nakedRef->GetActorBase()->GetSex() || genderPreference == 2)
+	{
+		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 4, nakedRef->GetDisplayFullName());
+		//The main updateloop runs GetArousal so dont need to send an event here
+		ModifyArousal(actorRef, 4, false);
+	}
+	else
+	{
+		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 2, nakedRef->GetDisplayFullName());
+		ModifyArousal(actorRef, 2, false);
+	}
+
+	//If the naked actor is an exhibitionist, then increase its
+	if (PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(nakedRef->formID, false))
+	{
+		logger::trace("Actor {} gaining {} exposure for being an exhibitionist to {}", nakedRef->GetDisplayFullName(), 2, actorRef->GetDisplayFullName());
+		ModifyArousal(actorRef, 2, false);
+	}
+}

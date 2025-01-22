@@ -25,4 +25,6 @@ public:
 	float ModifyArousalMultiplier(RE::Actor* actorRef, float value) override;
 
 	float GetBaselineArousal(RE::Actor* actorRef) override;
+
+	void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef) override;
 };
