@@ -112,7 +112,7 @@ void Utilities::Keywords::DistributeKeywords()
 		logger::info("Trying to find formid {:X}", formId);
 		auto form = RE::TESForm::LookupByID(formId);
 		if (!form) {
-			logger::info("Form is null");
+			logger::warn("Form is null");
 			continue;
 		}
 

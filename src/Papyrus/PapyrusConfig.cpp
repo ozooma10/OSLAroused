@@ -166,20 +166,20 @@ bool PapyrusConfig::IsInOSLMode(RE::StaticFunctionTag* base)
 
 void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
 {
-	logger::info("SetInOSLMode: {}", newVal);
+	logger::trace("SetInOSLMode: {}", newVal);
 	PersistedData::SettingsData::GetSingleton()->SetArousalMode((int)(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA));
 	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
 }
 
 void PapyrusConfig::SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal)
 {
-	logger::info("SetSLATimeRateHalfLife: {}", newVal);
+	logger::trace("SetSLATimeRateHalfLife: {}", newVal);
 	Settings::GetSingleton()->SetTimeRateHalfLife(newVal);
 }
 
 void PapyrusConfig::SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float newVal)
 {
-	logger::info("SetSLADefaultExposureRate: {}", newVal);
+	logger::trace("SetSLADefaultExposureRate: {}", newVal);
 	Settings::GetSingleton()->SetDefaultExposureRate(newVal);
 }
 

@@ -222,7 +222,7 @@ namespace PersistedData
 		logger::info("OSLArousal Load Start");
 
 		while (serializationInterface->GetNextRecordInfo(type, version, length)) {
-			logger::info("Trying Load for {}", DecodeTypeCode(type));
+			logger::trace("Trying Load for {}", DecodeTypeCode(type));
 
 			if (version != kSerializationVersion) {
 				logger::critical("Loaded data has incorrect version. Recieved ({}) - Expected ({}) for Data Key ({})"sv, version, kSerializationVersion, DecodeTypeCode(type));

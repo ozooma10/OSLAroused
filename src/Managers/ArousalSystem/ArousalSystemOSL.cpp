@@ -157,6 +157,7 @@ float ArousalSystemOSL::GetBaselineArousal(RE::Actor* actorRef)
 
 void ArousalSystemOSL::ActorLibidoModifiersUpdated(RE::Actor* actorRef)
 {
+	logger::trace("ActorLibidoModifiersUpdated: {}", actorRef->GetDisplayFullName());
 	m_LibidoModifierCache.PurgeItem(actorRef);
 }
 
@@ -208,6 +209,9 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
             }
         }
     }
+
+	logger::trace("CalculateLibido for Actor: {} Base: {} Naked: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
+		actorRef->GetDisplayFullName(), libidoModifier, isNaked, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef), settings->GetEroticArmorKeyword() ? settings->GetEroticArmorKeyword()->formID : 0);
 
     float deviceGain = DevicesIntegration::GetSingleton()->GetArousalBaselineFromDevices(actorRef);
     libidoModifier += deviceGain;
