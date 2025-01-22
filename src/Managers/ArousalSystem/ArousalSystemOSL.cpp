@@ -156,6 +156,7 @@ float ArousalSystemOSL::GetBaselineArousal(RE::Actor* actorRef)
 
 void ArousalSystemOSL::ActorLibidoModifiersUpdated(RE::Actor* actorRef)
 {
+	logger::trace("ActorLibidoModifiersUpdated for Actor: {}", actorRef->GetDisplayFullName());
 	m_LibidoModifierCache.PurgeItem(actorRef);
 }
 
