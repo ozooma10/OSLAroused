@@ -72,11 +72,11 @@ namespace
 				RuntimeEvents::OnEquipEvent::RegisterEvent();
 				Config::GetSingleton()->LoadINIs();
 				Utilities::Factions::GetSingleton()->Initialize();
+				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
 				//Distribute Persisted Keywords
 				Utilities::Keywords::DistributeKeywords();
-				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 
 				break;
 			} }
