@@ -247,6 +247,9 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 		case FactionType::sla_ExposureRate:
 			faction = m_ExposureRateFaction;
 			break;
+		case FactionType::sla_GenderPreference:
+			faction = m_GenderPreferenceFaction;
+			break;
 	}
 
 	if (!faction) {
@@ -281,6 +284,9 @@ int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType faction
 	case FactionType::sla_ExposureRate:
 		faction = m_ExposureRateFaction;
 		break;
+	case FactionType::sla_GenderPreference:
+		faction = m_GenderPreferenceFaction;
+		break;
 	}
 	if (!faction) {
 		logger::warn("Faction {} not found", (int)factionType);
@@ -301,4 +307,5 @@ void Utilities::Factions::Initialize()
 	m_ExposureFaction = dataHandler->LookupForm<RE::TESFaction>(0x25837, "SexLabAroused.esm");
 	m_TimeRateFaction = dataHandler->LookupForm<RE::TESFaction>(0x7C025, "SexLabAroused.esm");
 	m_ExposureRateFaction = dataHandler->LookupForm < RE::TESFaction>(0x7649B, "SexLabAroused.esm");
+	m_GenderPreferenceFaction = dataHandler->LookupForm < RE::TESFaction>(0x79A72, "SexLabAroused.esm");
 }
