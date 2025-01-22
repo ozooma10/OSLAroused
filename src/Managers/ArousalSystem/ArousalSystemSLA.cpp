@@ -89,6 +89,10 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 
 float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 {
+	if (actorRef->IsChild()) {
+		return 0;
+	}
+
 	float exposure = ArousalData::GetSingleton()->GetData(actorRef->formID, -2.f);
 	
 	//Roll Initial Exposure

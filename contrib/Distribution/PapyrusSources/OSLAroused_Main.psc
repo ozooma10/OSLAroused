@@ -249,9 +249,11 @@ Event OnKeyDown(int keyCode)
 		endif
 		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
 		If (crosshairTarget != none)
-			Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
 			; Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(crosshairTarget) + "    Libido: " + OSLArousedNative.GetLibido(crosshairTarget))
-			OSLAroused_MCM.Get().PuppetActor = crosshairTarget
+			if(!crosshairTarget.IsChild())
+				Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
+				OSLAroused_MCM.Get().PuppetActor = crosshairTarget
+			endif
 		Else
 			OSLAroused_MCM.Get().PuppetActor = PlayerRef
 		EndIf

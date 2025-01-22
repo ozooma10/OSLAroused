@@ -1113,7 +1113,7 @@ endevent
 event OnKeyDown(int keyCode)
     if(!Utility.IsInMenuMode() && keyCode == Main.GetShowArousalKeybind())
         Actor target = Game.GetCurrentCrosshairRef() as Actor
-        if(target != none)
+        if(target != none && !target.IsChild())
             PuppetActor = target
         Else
             PuppetActor = Game.GetPlayer()
