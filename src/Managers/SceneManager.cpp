@@ -9,11 +9,13 @@ void SceneManager::RegisterScene(SceneData scene)
 	m_Scenes.push_back(scene);
 	auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem());
 	for(auto & partcipant : scene.Participants) {
-		m_SceneParticipantMap[partcipant] = true;
+		if (auto actor = partcipant.get()) {
+			m_SceneParticipantMap[partcipant] = true;
 
-		//Only emit update events for OSL mode
-		if (oslSystem) {
-			oslSystem->ActorLibidoModifiersUpdated(partcipant);
+			//Only emit update events for OSL mode
+			if (oslSystem) {
+				oslSystem->ActorLibidoModifiersUpdated(actor.get());
+			}
 		}
 	}
 }
@@ -28,10 +30,12 @@ void SceneManager::RemoveScene(SceneFramework framework, int sceneId)
 		auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem());
 		for (auto it = scenesToRemove; it != m_Scenes.end(); it++) {
 			for (auto& partcipant : (*it).Participants) {
-				m_SceneParticipantMap[partcipant] = false;
-				//Only emit update events for OSL mode
-				if (oslSystem) {
-					oslSystem->ActorLibidoModifiersUpdated(partcipant);
+				if (auto actor = partcipant.get()) {
+					m_SceneParticipantMap[partcipant] = false;
+					//Only emit update events for OSL mode
+					if (oslSystem) {
+						oslSystem->ActorLibidoModifiersUpdated(actor.get());
+					}
 				}
 			}
 		}
@@ -49,12 +53,12 @@ void SceneManager::ClearScenes()
 	m_Scenes.clear();
 }
 
-bool SceneManager::IsActorParticipating(RE::Actor* actorRef)
+bool SceneManager::IsActorParticipating(RE::ActorHandle actorRef)
 {
 	return m_SceneParticipantMap[actorRef];
 }
 
-bool SceneManager::IsActorViewing(RE::Actor* actorRef)
+bool SceneManager::IsActorViewing(RE::ActorHandle actorRef)
 {
 	if (const auto lastViewedGameTime = m_SceneViewingMap[actorRef]) {
 		//TODO: Calculate time based off global update cycle [not just 0.72 game hours]
@@ -65,7 +69,7 @@ bool SceneManager::IsActorViewing(RE::Actor* actorRef)
 	return false;
 }
 
-void SceneManager::UpdateSceneSpectators(std::set<RE::Actor*> spectators)
+void SceneManager::UpdateSceneSpectators(std::set<RE::ActorHandle> spectators)
 {
 	//Remove any old spectators from map who are not in spectators set
 	//Need to do this to purge libido modifier cache
@@ -73,8 +77,8 @@ void SceneManager::UpdateSceneSpectators(std::set<RE::Actor*> spectators)
 	for (auto itr = m_SceneViewingMap.begin(); itr != m_SceneViewingMap.end();) {
 		if (!spectators.contains((*itr).first)) {
 			//Only emit update events for OSL mode
-			if (oslSystem) {
-				oslSystem->ActorLibidoModifiersUpdated((*itr).first);
+			if (auto actor = (*itr).first.get(); oslSystem && actor) {
+				oslSystem->ActorLibidoModifiersUpdated(actor.get());
 			}
 			itr = m_SceneViewingMap.erase(itr);
 		} else {
@@ -84,10 +88,12 @@ void SceneManager::UpdateSceneSpectators(std::set<RE::Actor*> spectators)
 
 	float currentTime = RE::Calendar::GetSingleton()->GetCurrentGameTime();
 	for (const auto spectator : spectators) {
-		m_SceneViewingMap[spectator] = currentTime;
-		//Only emit update events for OSL mode
-		if (oslSystem) {
-			oslSystem->ActorLibidoModifiersUpdated(spectator);
+		if (auto actor = spectator.get()) {
+			m_SceneViewingMap[spectator] = currentTime;
+			//Only emit update events for OSL mode
+			if (oslSystem) {
+				oslSystem->ActorLibidoModifiersUpdated(actor.get());
+			}
 		}
 	}
 }
@@ -98,3 +104,7 @@ std::vector<SceneManager::SceneData> SceneManager::GetAllScenes() const
 	return m_Scenes;
 }
 
+bool RE::operator<(const ActorHandle& lhs, const ActorHandle& rhs)
+{
+	return lhs.native_handle() < rhs.native_handle();
+}

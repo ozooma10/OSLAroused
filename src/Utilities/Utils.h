@@ -85,12 +85,12 @@ namespace Utilities
 
 		inline bool IsParticipatingInScene(RE::Actor* actorRef)
 		{
-			return SceneManager::GetSingleton()->IsActorParticipating(actorRef);
+			return SceneManager::GetSingleton()->IsActorParticipating(actorRef->GetHandle());
 		}
 
 		inline bool IsViewingScene(RE::Actor* actorRef)
 		{
-			return SceneManager::GetSingleton()->IsActorViewing(actorRef);
+			return SceneManager::GetSingleton()->IsActorViewing(actorRef->GetHandle());
 		}
 
 		std::vector<RE::TESForm*> GetWornArmor(RE::Actor* actorRef);

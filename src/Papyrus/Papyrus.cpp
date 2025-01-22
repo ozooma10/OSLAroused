@@ -19,10 +19,18 @@ void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int scen
 {
 	logger::trace("RegisterSceneStart: bIsOstim: {} sceneId: {} numACtors: {}.", bIsOstim, sceneId, actorRefs.size());
 
+	//convert actorRefs to actorHandles
+		// Convert actorRefs to actorHandles
+	std::vector<RE::ActorHandle> actorHandles;
+	actorHandles.reserve(actorRefs.size());
+	for (auto& actorRef : actorRefs) {
+		actorHandles.push_back(actorRef->GetHandle());
+	}
+
 	SceneManager::SceneData sceneData{
 		bIsOstim ? SceneManager::SceneFramework::kOStim : SceneManager::SceneFramework::kSexLab,
 		sceneId,
-		actorRefs
+		actorHandles
 	};
 	SceneManager::GetSingleton()->RegisterScene(sceneData);
 }

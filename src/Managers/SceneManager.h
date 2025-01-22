@@ -4,6 +4,10 @@
 using Lock = std::recursive_mutex;
 using Locker = std::lock_guard<Lock>;
 
+namespace RE {
+	bool operator<(const ActorHandle& lhs, const ActorHandle& rhs);
+}
+
 class SceneManager
 {
 public:
@@ -17,7 +21,7 @@ public:
 	{
 		SceneFramework Framework;
 		int SceneId;
-		std::vector<RE::Actor*> Participants;
+		std::vector<RE::ActorHandle> Participants;
 	};
 
 	static SceneManager* GetSingleton()
@@ -30,20 +34,21 @@ public:
 	void RemoveScene(SceneFramework framework, int sceneId);
 	void ClearScenes();
 
-	bool IsActorParticipating(RE::Actor* actorRef);
-	bool IsActorViewing(RE::Actor* actorRef);
+	bool IsActorParticipating(RE::ActorHandle actorRef);
+	bool IsActorViewing(RE::ActorHandle actorRef);
 
 	//Updates timestamps for spectators in sceneviewingmap. 
-	void UpdateSceneSpectators(std::set<RE::Actor*> spectators);
+	void UpdateSceneSpectators(std::set<RE::ActorHandle> spectators);
 
 	std::vector<SceneData> GetAllScenes() const;
 
 private:
 	std::vector<SceneData> m_Scenes;
 
-	std::map<RE::Actor*, bool> m_SceneParticipantMap;
+	std::map<RE::ActorHandle, bool> m_SceneParticipantMap;
+
 	//ActorId, GameTime last in presence of scene
-	std::map<RE::Actor*, float> m_SceneViewingMap;
+	std::map<RE::ActorHandle, float> m_SceneViewingMap;
 
 	mutable Lock m_Lock;
 };
