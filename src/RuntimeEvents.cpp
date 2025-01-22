@@ -87,7 +87,7 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 
 	const auto activeScenes = SceneManager::GetSingleton()->GetAllScenes();
-	logger::trace("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
+	//logger::trace("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
 	if (activeScenes.size() > 0) {
 		HandleAdultScenes(activeScenes, elapsedGameTimeSinceLastCheck);
 	}

@@ -37,8 +37,7 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
     if (!actorRef || actorRef->IsChild()) {
         return 0.f;
     }
-    logger::trace("OSL GetArousal for {}", actorRef->GetDisplayFullName());
-
+    
     //If locked, get the stored arousal value (which shouldnt be updated)
     if (ActorStateManager::GetActorArousalLocked(actorRef))
     {
@@ -94,7 +93,7 @@ float ArousalSystemOSL::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 float ArousalSystemOSL::ModifyArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
 	float multiplier = PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
-	logger::trace("ModifyArousal: {} * {} = {}", value, multiplier, value * multiplier);
+	logger::trace("[{}] - ModifyArousal: {} * {} = {}", actorRef->GetDisplayFullName(), value, multiplier, value * multiplier);
     value *= multiplier;
     float currentArousal = GetArousal(actorRef, false);
     return SetArousal(actorRef, currentArousal + value, bSendEvent);
@@ -157,7 +156,6 @@ float ArousalSystemOSL::GetBaselineArousal(RE::Actor* actorRef)
 
 void ArousalSystemOSL::ActorLibidoModifiersUpdated(RE::Actor* actorRef)
 {
-	logger::trace("ActorLibidoModifiersUpdated: {}", actorRef->GetDisplayFullName());
 	m_LibidoModifierCache.PurgeItem(actorRef);
 }
 
@@ -215,8 +213,8 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
         }
     }
 
-	logger::trace("CalculateLibido for Actor: {} Base: {} Naked: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
-		actorRef->GetDisplayFullName(), libidoModifier, isNaked, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef), settings->GetEroticArmorKeyword() ? settings->GetEroticArmorKeyword()->formID : 0);
+	/*logger::trace("CalculateLibido for Actor: {} Base: {} Naked: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
+		actorRef->GetDisplayFullName(), libidoModifier, isNaked, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef), settings->GetEroticArmorKeyword() ? settings->GetEroticArmorKeyword()->formID : 0);*/
 
     float deviceGain = DevicesIntegration::GetSingleton()->GetArousalBaselineFromDevices(actorRef);
     libidoModifier += deviceGain;

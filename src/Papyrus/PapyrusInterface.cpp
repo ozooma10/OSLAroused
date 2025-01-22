@@ -371,6 +371,7 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("ModifyActorTimeRate", "OSLArousedNative", ModifyActorTimeRate);
 
 	vm->RegisterFunction("GetDaysSinceLastOrgasm", "OSLArousedNative", GetDaysSinceLastOrgasm);
+
 	vm->RegisterFunction("GetLastScannedActors", "OSLArousedNative", GetLastScannedActors);
 	vm->RegisterFunction("GetMostArousedActorInLocation", "OSLArousedNative", GetMostArousedActorInLocation);
 
