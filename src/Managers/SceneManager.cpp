@@ -45,12 +45,19 @@ void SceneManager::RemoveScene(SceneFramework framework, int sceneId)
 		);
 	}
 	
+	//If there are no more scenes, than clear the maps
+	if (m_Scenes.empty()) {
+		m_SceneParticipantMap.clear();
+		m_SceneViewingMap.clear();
+	}
 }
 
 void SceneManager::ClearScenes()
 {
 	Locker locker(m_Lock);
 	m_Scenes.clear();
+	m_SceneParticipantMap.clear();
+	m_SceneViewingMap.clear();
 }
 
 bool SceneManager::IsActorParticipating(RE::ActorHandle actorRef)
