@@ -14,7 +14,7 @@ float function GetExposure(Actor target) global
 endfunction
 
 float function ModifyArousal(Actor target, float value, string reason = "unknown") global
-    Log("ModifyArousal: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
+    Log("ModifyArousal: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason + " formid: " + target.GetFormID() + " arousal: " + OSLArousedNative.GetArousal(target))
     return OSLArousedNative.ModifyArousal(target, value)
 endfunction
 
@@ -25,6 +25,11 @@ endfunction
 
 function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = "unknown") global
     Log("ModifyArousalMultiple: " + actorArray.Length + " actors modified by val: " + value + " Reason: " + reason)
+    int i = actorArray.Length
+    while i> 0
+        i -= 1
+        Log("ModifyArousalMultiple: " + actorArray[i].GetDisplayName() + " modified by val: " + value + " Reason: " + reason + " - " + actorArray[i].GetFormID())
+    endwhile
     OSLArousedNative.ModifyArousalMultiple(actorArray, value)
 endfunction
 

@@ -26,16 +26,18 @@ int function LoadAdapter()
 		return 0
 	endif
 
-	;OStim and OStimNG Events, Only Player scene events
-	RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
-	RegisterForModEvent("ostim_start", "OStimStart")
-	RegisterForModEvent("ostim_end", "OStimEnd")
 
-	if (OStim.GetAPIVersion() >= 29) ;OStim Standalone NPC only scene Events
+	if (OStim.GetAPIVersion() >= 29) ;OStim Standalone NPC and player scene Events
 		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
 		RegisterForModEvent("ostim_thread_start", "OStimStartThread")
 		RegisterForModEvent("ostim_thread_end", "OStimEndThread")
+		RegisterForModEvent("ostim_thread_scenechanged", "OStimThreadSceneChanged")
 		return 1
+	else
+		;OStim and OStimNG Events, Only Player scene events
+		RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
+		RegisterForModEvent("ostim_start", "OStimStart")
+		RegisterForModEvent("ostim_end", "OStimEnd")
 	endif
 	return 2
 EndFunction
@@ -62,8 +64,11 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	HandleEndScene(0, ActiveSceneActors)
 EndEvent
 
-Event OStimEndThread(String EventName, String Args, Float ThreadID, Form Sender)
-	HandleEndScene(ThreadID as int, OThread.GetActors(ThreadID as int))
+Event OStimEndThread(String EventName, String Json, Float ThreadID, Form Sender)
+	Log("OstimEndThread: " + Json)
+	; the following code only works with API version 7.3.1 or higher
+	Actor[] Actors = OJSON.GetActors(Json)
+	HandleEndScene(ThreadID as int, Actors)
 EndEvent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
@@ -91,10 +96,26 @@ Event OStimOrgasmThread(String EventName, String Args, Float ThreadID, Form Send
 	endif
 EndEvent
 
+;/*
+* * @param: SceneID, the id of the scene the thread changed to
+* * @param: ThreadID, the id of the thread that changed scenes
+*/;
+Event OStimThreadSceneChanged(string EventName, string SceneID, float ThreadID, Form Sender)
+	OSLAroused_Main main = OSLAroused_Main.Get()
+	Log("ThreadSceneChanged: " + SceneID + " ThreadID: " + ThreadID + " Main: " + main.StageChangeArousalGain)
+	If (main.StageChangeArousalGain == 0.0)
+        return
+    EndIf
+
+	Actor[] actors = OThread.GetActors(ThreadID as int)
+	
+	OSLAroused_ModInterface.ModifyArousalMultiple(actors, main.StageChangeArousalGain, "OStim scene change")
+EndEvent
+
 ; ========== SHARED HANDLERS ================
 
 Function HandleStartScene(int threadId, Actor[] threadActors)
-	Log("OStim Scene Started in Thread: " + threadId)
+	Log("OStim Scene Started in Thread: " + threadId + " actors: " + threadActors.Length)
 	CreatePreviousModifiers(ThreadID)
 	CalculateStimMultipliers(ThreadID, threadActors)
 
@@ -103,7 +124,7 @@ Function HandleStartScene(int threadId, Actor[] threadActors)
 EndFunction
 
 Function HandleEndScene(int threadId, Actor[] threadActors)
-	Log("OStim Scene Ended in Thread: " + threadId)
+	Log("OStim Scene Ended in Thread: " + threadId + "Thread Actors: " + threadActors.Length)
 	OSLAroused_Main main = OSLAroused_Main.Get()
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; increase arousal for actors that did not orgasm
