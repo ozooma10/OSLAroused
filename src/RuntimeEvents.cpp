@@ -99,7 +99,6 @@ void WorldChecks::ArousalUpdateLoop()
 
 	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.1 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
 	if (performNearbyArousalUpdates) {
-		logger::trace("ArousalUpdateLoop: Performing Nearby Arousal Updates. ElapsedTimeSinceLastArousalCheck: {}", elapsedGameTimeSinceLastNearbyArousalCheck);
 		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
 	}
 
@@ -118,14 +117,13 @@ void WorldChecks::ArousalUpdateLoop()
 		if (!actor) {
 			continue;
 		}
-		logger::trace("ArousalUpdateLoop: Checking Actor {}", actor->GetDisplayFullName());
 		//If the actor is naked, then get nearby spectators to update spectator array
 		if (actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
 			logger::trace("ArousalUpdateLoop: Actor {} is naked", actor->GetDisplayFullName());
 			const auto spectators = GetNearbySpectatingActors(actor, scanDistance);
 			for (const auto spectator : spectators) {
 				spectatingActors.insert(spectator);
-				ArousalManager::GetSingleton()->GetArousalSystem().HandleSpectatingNaked(spectator, actor);
+				ArousalManager::GetSingleton()->GetArousalSystem().HandleSpectatingNaked(spectator, actor, elapsedGameTimeSinceLastCheck);
 			}
 		}
 	}
@@ -188,7 +186,7 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 	//OAroused algo. Anyone nearer than force distance will have there arousal modified [0.125 is 1/8th]
 	float forceDetectDistance = radius * 0.125f;
 	//Square distances since we check against squared dist
-	forceDetectDistance *= forceDetectDistance; 
+	forceDetectDistance *= forceDetectDistance;
 	radius *= radius;
 
 	const auto sourceLocation = source->GetPosition();

@@ -26,5 +26,5 @@ public:
 
 	float GetBaselineArousal(RE::Actor* actorRef) override;
 
-	void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef) override;
+	void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate) override;
 };

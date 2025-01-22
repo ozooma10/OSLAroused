@@ -257,7 +257,7 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 		return;
 	}
 
-	logger::trace("Setting faction {} to {}", faction->GetFullName(), rank);
+	//logger::trace("Setting faction {} to {}", faction->GetFullName(), rank);
 
 	actorRef->AddToFaction(faction, rank);
 }
@@ -294,7 +294,7 @@ int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType faction
 	}
 
 	int result = actorRef->GetFactionRank(faction, actorRef->IsPlayer());
-	logger::trace("Getting {} from Faction {}", result, faction->GetFullName());
+	//logger::trace("Getting {} from Faction {}", result, faction->GetFullName());
 	return result;
 }
 

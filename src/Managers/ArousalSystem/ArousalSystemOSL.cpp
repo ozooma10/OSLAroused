@@ -175,7 +175,7 @@ float ArousalSystemOSL::UpdateActorLibido(RE::Actor* actorRef, float gameHoursPa
     return SetLibido(actorRef, newVal);
 }
 
-void ArousalSystemOSL::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef)
+void ArousalSystemOSL::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate)
 {
     //NO-OP
 }

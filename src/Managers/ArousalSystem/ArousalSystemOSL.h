@@ -38,6 +38,6 @@ private:
 
 
 	// Inherited via IArousalSystem
-	void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef) override;
+	void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate) override;
 
 };

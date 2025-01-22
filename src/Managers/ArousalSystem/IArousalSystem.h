@@ -31,7 +31,7 @@ public:
 	virtual float GetBaselineArousal(RE::Actor* actorRef) = 0;
 
 	//SLA Mode Specific
-	virtual void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef) = 0;
+	virtual void HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate) = 0;
 
 	virtual ~IArousalSystem() = default;
 

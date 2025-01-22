@@ -18,7 +18,6 @@ float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 
 float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
-	logger::trace("SLA GetArousal for {}", actorRef->GetDisplayFullName());
 	//Check for arousal blocked ignored since internal to sla
 	if (actorRef->IsChild())
 	{
@@ -82,7 +81,7 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
 	}
 
-	logger::debug("ModifyArousal: {} + {} = {}", exposure - modifiedValue, modifiedValue, exposure);
+	logger::debug("ModifyArousal: {} + {} = {} TRHL: {}", exposure - modifiedValue, modifiedValue, exposure, timeRateHalfLife);
 
 	return SetArousal(actorRef, exposure, bSendEvent);
 }
@@ -220,28 +219,32 @@ float ArousalSystemSLA::GetBaselineArousal(RE::Actor* actorRef)
 	return GetExposure(actorRef);
 }
 
-void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef)
+void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate)
 {
 	//When spectating a naked actor, SLA logic is to create an exposure event
+
+	//We scale the exposure add based off the time since last update (since this is called much more frequently than the sla 2 minute interval)
+	float exposureScale = std::min(1.f, elapsedGameTimeSinceLastUpdate * 1.5f);
+	logger::trace("ExposureScale: {}", exposureScale);
 
 	//First get gender preference
 	int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);
 	if (genderPreference == nakedRef->GetActorBase()->GetSex() || genderPreference == 2)
 	{
-		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 4, nakedRef->GetDisplayFullName());
+		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 4 * exposureScale, nakedRef->GetDisplayFullName());
 		//The main updateloop runs GetArousal so dont need to send an event here
-		ModifyArousal(actorRef, 4, false);
+		ModifyArousal(actorRef, 4 * exposureScale, false);
 	}
 	else
 	{
-		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 2, nakedRef->GetDisplayFullName());
-		ModifyArousal(actorRef, 2, false);
+		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 2 * exposureScale, nakedRef->GetDisplayFullName());
+		ModifyArousal(actorRef, 2 * exposureScale, false);
 	}
 
 	//If the naked actor is an exhibitionist, then increase its
 	if (PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(nakedRef->formID, false))
 	{
-		logger::trace("Actor {} gaining {} exposure for being an exhibitionist to {}", nakedRef->GetDisplayFullName(), 2, actorRef->GetDisplayFullName());
-		ModifyArousal(actorRef, 2, false);
+		logger::trace("Actor {} gaining {} exposure for being an exhibitionist to {}", nakedRef->GetDisplayFullName(), 2 * exposureScale, actorRef->GetDisplayFullName());
+		ModifyArousal(actorRef, 2 * exposureScale, false);
 	}
 }
