@@ -175,7 +175,7 @@ float ArousalSystemOSL::UpdateActorLibido(RE::Actor* actorRef, float gameHoursPa
 
 void ArousalSystemOSL::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate)
 {
-    //NO-OP
+    //NO-OP SLA only
 }
 
 
@@ -203,6 +203,9 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
     else if (Utilities::Actor::IsViewingScene(actorRef)) {
         libidoModifier += settings->GetSceneViewingBaseline();
     }
+
+	logger::trace("CalculateActorLibidoModifier for Actor: {} Base: {} Naked: {} viewingNaked: {} InScene: {} SceneView: {} ",
+		actorRef->GetDisplayFullName(), libidoModifier, isNaked, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef));
 
     if (!isNaked) {
         if (const auto eroticKeyword = settings->GetEroticArmorKeyword()) {

@@ -29,11 +29,13 @@ void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int scen
 
 void Papyrus::RemoveScene(RE::StaticFunctionTag*, bool bIsOstim, int sceneId)
 {
+	logger::trace("RemoveScene: bIsOstim: {} sceneId: {}.", bIsOstim, sceneId);
 	SceneManager::GetSingleton()->RemoveScene(bIsOstim ? SceneManager::SceneFramework::kOStim : SceneManager::SceneFramework::kSexLab, sceneId);
 }
 
 void Papyrus::RegisterActorOrgasm(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+	logger::trace("RegisterActorOrgasm: Actor: {}.", actorRef->GetDisplayFullName());
 	PersistedData::LastOrgasmTimeData::GetSingleton()->SetData(actorRef->formID, RE::Calendar::GetSingleton()->GetCurrentGameTime());
 }
 
