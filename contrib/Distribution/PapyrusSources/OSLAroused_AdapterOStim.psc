@@ -121,7 +121,11 @@ EndFunction
 
 Function HandleActorOrgasm(int threadId, Actor targetActor)
 	Log("OStim Actor Orgasm in Thread: " + threadId + " For: " + targetActor)
-	OSLArousedNative.RegisterActorOrgasm(targetActor)
+	if(OSLArousedNativeConfig.IsInOSLMode())
+        OSLArousedNative.RegisterActorOrgasm(targetActor)
+    else
+        SLAModeUpdateActorOrgasmDate(targetActor)
+    endif
 
 	OSLAroused_Main Main = OSLAroused_Main.Get()
 	OSLAroused_ModInterface.ModifyArousal(targetActor, Main.OrgasmArousalChange, "ostim orgasm")
@@ -132,6 +136,16 @@ Function HandleActorOrgasm(int threadId, Actor targetActor)
 		endif
 	endif
 EndFunction
+
+function SLAModeUpdateActorOrgasmDate(Actor akRef)
+    Log("SLAModeUpdateActorOrgasmDate: " + akRef.GetDisplayName())
+    if(akRef == none)
+        return
+    endif
+    OSLAroused_ModInterface.RegisterOrgasm(akRef)
+    ;Update Timerate (which is libido in sla mode)
+    OSLAroused_ModInterface.ModifyLibido(akRef, OSLAroused_Main.Get().SLAOveruseEffect, "SLA Mode Orgasm (OveruseEffect)")
+endfunction
 
 ; ========== THREAD HANDLING ================
 
