@@ -38,7 +38,6 @@ function OnGameLoaded()
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
 
     UnregisterForUpdate()
-	RegisterForSingleUpdate(120)
 endfunction
 
 Int Function GetVersion()
