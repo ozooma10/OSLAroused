@@ -1,6 +1,13 @@
 #pragma once
 #include <Utilities/LRUCache.h>
 
+namespace SLAKeywordFormIds
+{
+	const static RE::FormID SLA_AnalPlug = 0x8F404;
+	const static RE::FormID SLA_AnalPlugTail = 0x8F405;
+	const static RE::FormID SLA_AnalPlugBeads = 0x8F406;
+}
+
 namespace DeviousDeviceKeywordFormIds
 {
 	const static RE::FormID DeviousBelt = 0x3330;
@@ -101,10 +108,15 @@ private:
 	uint32_t m_DDAssetsModIndex;
 	uint32_t m_DDIntegrationModIndex;
 	uint32_t m_ToysModIndex;
+	uint32_t m_SLAModIndex;
 
 	RE::TESForm* equipmentForm;
 
 public:
+	RE::FormID SLA_AnalPlug;
+	RE::FormID SLA_AnalPlugTail;
+	RE::FormID SLA_AnalPlugBeads;
+
 	RE::FormID DDBelt;
 	RE::FormID DDCollar;
 	RE::FormID DDLegCuffs;
