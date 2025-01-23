@@ -31,7 +31,6 @@ int function LoadAdapter()
 		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
 		RegisterForModEvent("ostim_thread_start", "OStimStartThread")
 		RegisterForModEvent("ostim_thread_end", "OStimEndThread")
-		RegisterForModEvent("ostim_thread_scenechanged", "OStimThreadSceneChanged")
 		return 1
 	else
 		;OStim and OStimNG Events, Only Player scene events
@@ -94,22 +93,6 @@ Event OStimOrgasmThread(String EventName, String Args, Float ThreadID, Form Send
 	if sender as Actor
 		HandleActorOrgasm(ThreadID as int, sender as Actor)
 	endif
-EndEvent
-
-;/*
-* * @param: SceneID, the id of the scene the thread changed to
-* * @param: ThreadID, the id of the thread that changed scenes
-*/;
-Event OStimThreadSceneChanged(string EventName, string SceneID, float ThreadID, Form Sender)
-	OSLAroused_Main main = OSLAroused_Main.Get()
-	Log("ThreadSceneChanged: " + SceneID + " ThreadID: " + ThreadID + " Main: " + main.StageChangeArousalGain)
-	If (main.StageChangeArousalGain == 0.0)
-        return
-    EndIf
-
-	Actor[] actors = OThread.GetActors(ThreadID as int)
-	
-	OSLAroused_ModInterface.ModifyArousalMultiple(actors, main.StageChangeArousalGain, "OStim scene change")
 EndEvent
 
 ; ========== SHARED HANDLERS ================
