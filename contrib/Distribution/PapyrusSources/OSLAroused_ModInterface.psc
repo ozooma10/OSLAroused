@@ -1,6 +1,18 @@
 
 scriptname OSLAroused_ModInterface hidden
 
+int function GetVersion() global
+    return 270 ;2.7.0
+endfunction
+
+function SetUseOSLArousalMode(bool val) global
+    Log("SetUseOSLArousalMode: Set to val: " + val)
+    
+    if(OSLArousedNativeConfig.IsInOSLMode() != val)
+        OSLArousedNativeConfig.SetInOSLMode(val)
+    endif
+endfunction
+
 float function GetArousal(Actor target) global
     return OSLArousedNative.GetArousal(target)
 endfunction
