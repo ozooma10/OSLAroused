@@ -174,7 +174,6 @@ EndFunction
 event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
 	
-	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
@@ -209,8 +208,7 @@ function RunDebugLogic()
 		
 
 		; OSLAroused_ModInterface.ModifyArousal(PlayerRef, 2.0, "Debug")
-
-		SlaFrameworkStub.DebugActorState(PlayerRef)
+		; SlaFrameworkStub.DebugActorState(PlayerRef)
 	endif
 endfunction
 
@@ -262,9 +260,9 @@ Event OnKeyDown(int keyCode)
 		ArousalBar.UpdateDisplay()
 	EndIf
 
-	if(keyCode == DebugActionKey)
-		RunDebugLogic()
-	endif
+	; if(keyCode == DebugActionKey)
+	; 	RunDebugLogic()
+	; endif
 EndEvent
 
 Event OnKeyUp(Int KeyCode, Float HoldTime)
@@ -417,7 +415,7 @@ endfunction
 ; ========== DEBUG RELATED ==================
 
 function Log(string msg)
-	If (EnableDebugMode)
-		Debug.Trace("---OSLAroused--- " + msg)
-	EndIf
+	; If (EnableDebugMode)
+	Debug.Trace("---OSLAroused--- " + msg)
+	; EndIf
 endfunction

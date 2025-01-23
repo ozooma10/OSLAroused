@@ -14,7 +14,7 @@ float function GetExposure(Actor target) global
 endfunction
 
 float function ModifyArousal(Actor target, float value, string reason = "unknown") global
-    Log("ModifyArousal: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason + " formid: " + target.GetFormID() + " arousal: " + OSLArousedNative.GetArousal(target))
+    Log("ModifyArousal: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
     return OSLArousedNative.ModifyArousal(target, value)
 endfunction
 
@@ -25,11 +25,6 @@ endfunction
 
 function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = "unknown") global
     Log("ModifyArousalMultiple: " + actorArray.Length + " actors modified by val: " + value + " Reason: " + reason)
-    int i = actorArray.Length
-    while i> 0
-        i -= 1
-        Log("ModifyArousalMultiple: " + actorArray[i].GetDisplayName() + " modified by val: " + value + " Reason: " + reason + " - " + actorArray[i].GetFormID())
-    endwhile
     OSLArousedNative.ModifyArousalMultiple(actorArray, value)
 endfunction
 
@@ -44,7 +39,6 @@ float function ModifyArousalMultiplier(Actor target, float value, string reason 
 endfunction
 
 float function GetLibido(Actor target) global
-    Log("GetLibido: " + target.GetDisplayName())
     return OSLArousedNative.GetLibido(target)
 endfunction
 
@@ -54,6 +48,7 @@ float function ModifyLibido(Actor target, float value, string reason = "unknown"
 endfunction
 
 function RegisterOrgasm(Actor target) global
+    Log("RegisterOrgasm: " + target.GetDisplayName())
     OSLArousedNative.RegisterActorOrgasm(target)
 endfunction
 
@@ -65,6 +60,7 @@ bool Function IsActorArousalLocked(Actor akRef) global
     return OSLArousedNative.IsActorArousalLocked(akRef)
 endfunction
 Function SetActorArousalLocked(Actor akRef, bool val = false) global
+    Log("SetActorArousalLocked: " + akRef.GetDisplayName() + " Set to val: " + val)
     OSLArousedNative.SetActorArousalLocked(akRef, val)
 endfunction
 
@@ -72,6 +68,7 @@ bool Function IsActorExhibitionist(Actor akRef) global
     return OSLArousedNative.IsActorExhibitionist(akRef)
 endfunction
 Function SetActorExhibitionist(Actor akRef, bool val = false) global
+    Log("SetActorExhibitionist: " + akRef.GetDisplayName() + " Set to val: " + val)
     OSLArousedNative.SetActorExhibitionist(akRef, val)
 endfunction
 
@@ -80,5 +77,7 @@ float function GetSLADefaultExposureRate() global
 endfunction
 
 function Log(string msg) global
-    Debug.Trace("---OSLAroused--- [ModInterface] " + msg)
+    if(OSLAroused_Main.Get().EnableDebugMode)
+        Debug.Trace("---OSLAroused--- [ModInterface] " + msg)
+    endif
 endfunction

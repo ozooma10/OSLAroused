@@ -144,7 +144,6 @@ Function HandleActorOrgasm(int threadId, Actor targetActor)
 EndFunction
 
 function SLAModeUpdateActorOrgasmDate(Actor akRef)
-    Log("SLAModeUpdateActorOrgasmDate: " + akRef.GetDisplayName())
     if(akRef == none)
         return
     endif

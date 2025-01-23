@@ -34,10 +34,8 @@ event OnAnimationStart(int tid, bool hasPlayer)
     If (controller.HasTag("OStimLab"))
         return
     EndIf
-    Log("OnAnimationStart: " + tid + " hasPlayer: " + hasPlayer)
     OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
-    ;OArousal mode sends a blast on scene start
     OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, Main.SceneBeginArousalGain, "Sexlab Animation Start")
 endevent
 
@@ -85,7 +83,6 @@ event OnAnimationEnd(int tid, bool hasPlayer)
 endevent
 
 function SLAModeUpdateActorOrgasmDate(Actor akRef)
-    Log("SLAModeUpdateActorOrgasmDate: " + akRef.GetDisplayName())
     if(akRef == none)
         return
     endif
@@ -144,20 +141,12 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
         return
     EndIf
 
-    Log("OnSexLabOrgasm: " + act.GetDisplayName() + " enjoyment: " + enjoyment)
-
     if(OSLArousedNativeConfig.IsInOSLMode())
         OSLArousedNative.RegisterActorOrgasm(act)
     else
         SLAModeUpdateActorOrgasmDate(act)
     endif
 
-
-    ;Update arousal for any victims
-    ;@TODO: Tie this into a lewdness system
-    ; if(controller.Victims.Length > 0)
-    ;     OSLAroused_ModInterface.ModifyArousalMultiple(controller.Victims, -20, "being sexlab victim")
-    ; endif
 
     ;Lower arousal on orgasm
     ;@TODO: Improve this function

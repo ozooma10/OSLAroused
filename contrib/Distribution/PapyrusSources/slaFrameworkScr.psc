@@ -123,31 +123,6 @@ float function UpdateActorExposureRate(Actor akRef, float val)
     return OSLAroused_ModInterface.ModifyArousalMultiplier(akRef, val, "slaframework UpdateActorExposureRate")
 endfunction
 
-function DebugActorState(Actor act)
-    float currentArousal = GetActorArousal(act)
-    int currentExposure = GetActorExposure(act)
-    float currentRate = GetActorExposureRate(act)
-    float currentTimeRate = GetActorTimeRate(act)
-    Log("Initial: " + act.GetDisplayName() + " Arousal: " + currentArousal + " Exposure: " + currentExposure + " ExposureRate: " + currentRate + " TimeRate: " + currentTimeRate)
-
-    ;Test modifying
-    UpdateActorExposure(act, 2)
-
-    float newArousal = GetActorArousal(act)
-    float newExposure = GetActorExposure(act)
-
-    Log("PostMod: " + act.GetDisplayName() + " Arousal: " + newArousal + " Exposure: " + newExposure)
-
-    if(newArousal != currentArousal + (2 * currentRate))
-        Log("Arousal Mod Failed")
-    endif
-    if(newExposure != currentExposure + (2 * currentRate))
-        Log("Exposure Mod Failed")
-    endif
-
-    Log("Factions: Arousal: " + act.GetFactionRank(slaArousalFaction) + " Exposure: " + act.GetFactionRank(slaExposureFaction) + " Naked: " + act.GetFactionRank(slaNakedFaction) + " GenderPref: " + act.GetFactionRank(slaGenderPreference) + " ExposureRate: " + act.GetFactionRank(slaExposureRateFaction) + " TimeRate: " + act.GetFactionRank(slaTimeRateFaction))
-endfunction
-
 function OnActorNakedUpdated(Actor act, bool newNaked)
     if(slaNakedFaction)
         if(newNaked)
@@ -161,7 +136,6 @@ endfunction
 Event ModifyExposure(Form actForm, float val)
     Actor akRef = actForm as Actor
     if(akRef)
-        Log("ModifyExposure Event via Modevent for: " + akRef.GetDisplayName() + " val: " + val)
         OSLAroused_ModInterface.ModifyArousal(akRef, val, "slaframework ModifyExposure")
     endif
 EndEvent
