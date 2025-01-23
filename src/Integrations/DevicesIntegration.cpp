@@ -1,7 +1,8 @@
 #include "DevicesIntegration.h"
 #include "Utilities/Utils.h"
 #include "Settings.h"
-#include <Managers/LibidoManager.h>
+#include <Managers/ArousalManager.h>
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
 
 WornDeviceField GetWornDevices(RE::Actor* actorRef, RE::TESForm* equipmentToIgnore)
 {
@@ -58,7 +59,8 @@ WornDeviceField GetWornDevices(RE::Actor* actorRef, RE::TESForm* equipmentToIgno
 		} else if (keywordFormId == DI->ToysGenital || keywordFormId == DI->DDPiercingsVaginal) {
 			logger::debug("{} PiercingsVaginal", actorRef->GetDisplayFullName());
 			wornDevices.PiercingsVaginal = true;
-		} else if (keywordFormId == DI->ToysAnal || keywordFormId == DI->DDPlugAnal) {
+		} else if (keywordFormId == DI->ToysAnal || keywordFormId == DI->DDPlugAnal || keywordFormId == DI->SLA_AnalPlug
+			|| keywordFormId == DI->SLA_AnalPlugTail || keywordFormId == DI->SLA_AnalPlugBeads) {
 			logger::debug("{} PlugAnal", actorRef->GetDisplayFullName());
 			wornDevices.PlugAnal = true;
 		} else if (keywordFormId == DI->ToysVaginal || keywordFormId == DI->DDPlugVaginal) {
@@ -159,7 +161,10 @@ void DevicesIntegration::ActiveEquipmentChanged(RE::Actor* actorRef, RE::TESForm
 	float updatedVal = GetArousalBaselineFromDevices(actorRef);
 
 	if (existingValue != updatedVal) {
-		LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated(actorRef);
+		//Only emit update events for OSL mode
+		if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+			oslSystem->ActorLibidoModifiersUpdated(actorRef);
+		}
 	}
 }
 
@@ -177,8 +182,17 @@ void DevicesIntegration::Initialize()
 	if (const auto toysInfo = dataHandler->LookupModByName("Toys.esm")) {
 		m_ToysModIndex = toysInfo->GetPartialIndex();
 	}
+	if (const auto slaInfo = dataHandler->LookupModByName("SexLabAroused.esm")) {
+		m_SLAModIndex = slaInfo->GetPartialIndex();
+	}
 
 	using namespace Utilities::Forms;
+
+	using namespace SLAKeywordFormIds;
+	SLA_AnalPlug = ResolveFormId(m_SLAModIndex, SLA_AnalPlug);
+	SLA_AnalPlugTail = ResolveFormId(m_SLAModIndex, SLA_AnalPlugTail);
+	SLA_AnalPlugBeads = ResolveFormId(m_SLAModIndex, SLA_AnalPlugBeads);
+
 	using namespace DeviousDeviceKeywordFormIds;
 
 	DDBelt = ResolveFormId(m_DDAssetsModIndex, DeviousBelt);

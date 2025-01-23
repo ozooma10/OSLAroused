@@ -12,6 +12,10 @@ Faction slaExposureFaction
 Faction slaNakedFaction
 Faction slaGenderPreference
 
+Faction slaExposureRateFaction
+Faction slaTimeRateFaction
+
+
 bool Property IsOSLArousedStub = true Auto
 
 Int Property slaArousalCap = 100 AutoReadOnly
@@ -28,10 +32,15 @@ function OnGameLoaded()
 
     slaGenderPreference = Game.GetFormFromFile(0x79A72, "SexLabAroused.esm") as Faction
 
+    slaExposureRateFaction = Game.GetFormFromFile(0x7649B, "SexLabAroused.esm") as Faction
+    slaTimeRateFaction = Game.GetFormFromFile(0x7C025, "SexLabAroused.esm") as Faction
+    
+    slaMain.OnGameLoaded()
+    slaMain.setUpdateFrequency(OSLArousedNativeConfig.GetUpdateIntervalRealTimeSeconds())
+
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
 
     UnregisterForUpdate()
-	RegisterForSingleUpdate(120)
 endfunction
 
 Int Function GetVersion()
@@ -44,6 +53,10 @@ int Function GetActorArousal(Actor akRef)
     endif
 
     return OSLAroused_ModInterface.GetArousal(akRef) as int
+EndFunction
+
+Actor Function GetMostArousedActorInLocation()
+	Return OSLArousedNative.GetMostArousedActorInLocation()
 EndFunction
 
 int Function GetActorExposure(Actor akRef)
@@ -65,25 +78,23 @@ EndFunction
 Float Function GetActorTimeRate(Actor akRef)
     if(akRef == none)
         return -2.0
-    endif    
-    ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
-    return 10.0
+    endif
+
+    return OSLArousedNative.GetActorTimeRate(akRef)
 EndFunction
 
 Float Function SetActorTimeRate(Actor akRef, Float val)
     if(akRef == none)
         return -2.0
     endif
-    ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
-    return 10.0 
+    return OSLArousedNative.SetActorTimeRate(akRef, val)
 EndFunction
 
 Float Function UpdateActorTimeRate(Actor akRef, Float val)
     if(akRef == none)
         return -2.0
     endif
-    ;NOTE: TimeRate no longer Relevant in OSL Aroused. ArousalChangeRate is similarish but different values so cant be directly referenced
-    return 10.0 
+    return OSLArousedNative.ModifyActorTimeRate(akRef, val)
 EndFunction
 
 ;Additive exposure
@@ -115,16 +126,6 @@ float function UpdateActorExposureRate(Actor akRef, float val)
     return OSLAroused_ModInterface.ModifyArousalMultiplier(akRef, val, "slaframework UpdateActorExposureRate")
 endfunction
 
-function OnActorArousalUpdated(Actor act, float newArousal, float newExposure)
-    ;Update Factions
-    if(slaArousalFaction)
-        act.SetFactionRank(slaArousalFaction, newArousal as int)
-    endif
-    if(slaExposureFaction)
-        act.SetFactionRank(slaExposureFaction, newExposure as int)
-    endif
-endfunction
-
 function OnActorNakedUpdated(Actor act, bool newNaked)
     if(slaNakedFaction)
         if(newNaked)
@@ -138,7 +139,6 @@ endfunction
 Event ModifyExposure(Form actForm, float val)
     Actor akRef = actForm as Actor
     if(akRef)
-        Log("ModifyExposure Event via Modevent for: " + akRef.GetDisplayName() + " val: " + val)
         OSLAroused_ModInterface.ModifyArousal(akRef, val, "slaframework ModifyExposure")
     endif
 EndEvent
@@ -163,30 +163,25 @@ Int Function GetActorHoursSinceLastSex(Actor akRef)
     return (OSLAroused_ModInterface.GetActorDaysSinceLastOrgasm(akRef) * 24) as Int
 EndFunction
 
-;Send an updatecomplete event every 120 seconds
-;Since OSLAroused update cycle occurs outside of Papyrus and not "Heartbeat" based like in sla, nothing really to bind to
-Event OnUpdate()
-    log("OnUpdate")
-	RegisterForSingleUpdate(120) ;Another update in two more minutes
-    SendModEvent("sla_UpdateComplete")
-EndEvent
+bool Function IsActorArousalLocked(Actor akRef)
+    return OSLAroused_ModInterface.IsActorArousalLocked(akRef)
+EndFunction
+function SetActorArousalLocked(Actor akRef, bool val = false)
+    OSLAroused_ModInterface.SetActorArousalLocked(akRef, val)
+endfunction
 
+bool Function IsActorExhibitionist(Actor akRef)
+    return OSLAroused_ModInterface.IsActorExhibitionist(akRef)
+endfunction
+Function SetActorExhibitionist(Actor akRef, bool val = false)
+    OSLAroused_ModInterface.SetActorExhibitionist(akRef, val)
+endfunction
 
 ;==== NOT IMPLEMENTED
-bool Function IsActorArousalLocked(Actor akRef)
-    return false
-EndFunction
-
 bool Function IsActorArousalBlocked(Actor akRef)
     return false
 EndFunction
 
-Function SetActorExhibitionist(Actor akRef, bool val = false)
-    return
-endfunction
-bool Function IsActorExhibitionist(Actor akRef)
-    return false
-endfunction
 
 ; 0 - Male
 ; 1 - Female

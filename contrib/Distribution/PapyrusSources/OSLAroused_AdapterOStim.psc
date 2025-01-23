@@ -26,16 +26,17 @@ int function LoadAdapter()
 		return 0
 	endif
 
-	;OStim and OStimNG Events, Only Player scene events
-	RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
-	RegisterForModEvent("ostim_start", "OStimStart")
-	RegisterForModEvent("ostim_end", "OStimEnd")
 
-	if (OStim.GetAPIVersion() >= 29) ;OStim Standalone NPC only scene Events
+	if (OStim.GetAPIVersion() >= 29) ;OStim Standalone NPC and player scene Events
 		RegisterForModEvent("ostim_actor_orgasm", "OStimOrgasmThread")
 		RegisterForModEvent("ostim_thread_start", "OStimStartThread")
 		RegisterForModEvent("ostim_thread_end", "OStimEndThread")
 		return 1
+	else
+		;OStim and OStimNG Events, Only Player scene events
+		RegisterForModEvent("ostim_orgasm", "OStimOrgasm")
+		RegisterForModEvent("ostim_start", "OStimStart")
+		RegisterForModEvent("ostim_end", "OStimEnd")
 	endif
 	return 2
 EndFunction
@@ -62,8 +63,10 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 	HandleEndScene(0, ActiveSceneActors)
 EndEvent
 
-Event OStimEndThread(String EventName, String Args, Float ThreadID, Form Sender)
-	HandleEndScene(ThreadID as int, OThread.GetActors(ThreadID as int))
+Event OStimEndThread(String EventName, String Json, Float ThreadID, Form Sender)
+	; the following code only works with API version 7.3.1 or higher
+	Actor[] Actors = OJSON.GetActors(Json)
+	HandleEndScene(ThreadID as int, Actors)
 EndEvent
 
 Event OStimOrgasm(String EventName, String Args, Float Nothing, Form Sender)
@@ -94,7 +97,6 @@ EndEvent
 ; ========== SHARED HANDLERS ================
 
 Function HandleStartScene(int threadId, Actor[] threadActors)
-	Log("OStim Scene Started in Thread: " + threadId)
 	CreatePreviousModifiers(ThreadID)
 	CalculateStimMultipliers(ThreadID, threadActors)
 
@@ -103,25 +105,33 @@ Function HandleStartScene(int threadId, Actor[] threadActors)
 EndFunction
 
 Function HandleEndScene(int threadId, Actor[] threadActors)
-	Log("OStim Scene Ended in Thread: " + threadId)
 	OSLAroused_Main main = OSLAroused_Main.Get()
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; increase arousal for actors that did not orgasm
 	int i = threadActors.Length
 	while i > 0
 		i -= 1
-		if OStim.GetTimesOrgasm(threadActors[i]) < 1
-			OSLAroused_ModInterface.ModifyArousal(threadActors[i], main.SceneEndArousalNoOrgasmChange, "OStim end - no orgasm")
-		else
+
+		;TODO: Try and improve orgasm detection. (OStimNG cleans up threads by this point so we cant check if they orgasmed)
+		; Currently Check if this actor orgasmed by getting the last time they orgasmed. Hopefully its towards the end of the scene so its caught here
+		; May get false negatives if actor orgasmed early in scene
+		; 0.06 game time is ~4 minute real time
+		bool bDidOrgasm = OSLArousedNative.GetDaysSinceLastOrgasm(threadActors[i]) < 0.06
+		if bDidOrgasm
 			OSLAroused_ModInterface.ModifyArousal(threadActors[i], main.SceneEndArousalOrgasmChange, "OStim end - orgasm")
+		else
+			OSLAroused_ModInterface.ModifyArousal(threadActors[i], main.SceneEndArousalNoOrgasmChange, "OStim end - no orgasm")
 		endif 
 	endwhile
 	OSLArousedNative.RemoveScene(true, threadId)
 EndFunction
 
 Function HandleActorOrgasm(int threadId, Actor targetActor)
-	Log("OStim Actor Orgasm in Thread: " + threadId + " For: " + targetActor)
-	OSLArousedNative.RegisterActorOrgasm(targetActor)
+	if(OSLArousedNativeConfig.IsInOSLMode())
+        OSLArousedNative.RegisterActorOrgasm(targetActor)
+    else
+        SLAModeUpdateActorOrgasmDate(targetActor)
+    endif
 
 	OSLAroused_Main Main = OSLAroused_Main.Get()
 	OSLAroused_ModInterface.ModifyArousal(targetActor, Main.OrgasmArousalChange, "ostim orgasm")
@@ -132,6 +142,15 @@ Function HandleActorOrgasm(int threadId, Actor targetActor)
 		endif
 	endif
 EndFunction
+
+function SLAModeUpdateActorOrgasmDate(Actor akRef)
+    if(akRef == none)
+        return
+    endif
+    OSLAroused_ModInterface.RegisterOrgasm(akRef)
+    ;Update Timerate (which is libido in sla mode)
+    OSLAroused_ModInterface.ModifyLibido(akRef, OSLAroused_Main.Get().SLAOveruseEffect, "SLA Mode Orgasm (OveruseEffect)")
+endfunction
 
 ; ========== THREAD HANDLING ================
 

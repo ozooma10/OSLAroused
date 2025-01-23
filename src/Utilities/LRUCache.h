@@ -2,6 +2,10 @@
 
 #include <map>
 #include <list>
+#include <unordered_map>
+#include <mutex>
+
+#define LOG(msg) std::cout << msg << std::endl;
 
 namespace Utilities
 {
@@ -12,9 +16,9 @@ namespace Utilities
 		typedef KEY KeyType;
 		typedef VAL ValType;
 		typedef std::list<KeyType> KeyTrackingType;
-		typedef std::map<KeyType, std::pair<ValType, typename KeyTrackingType::iterator>> KeyToValType;
+		typedef std::unordered_map<KeyType, std::pair<ValType, typename KeyTrackingType::iterator>> KeyToValType;
 
-		LRUCache(std::function<ValType(const KeyType&)> onCacheMiss, size_t maxCacheSize) :
+		LRUCache(std::function<ValType(const KeyType&)> onCacheMiss, size_t maxCacheSize) noexcept :
 			m_OnCacheMiss(onCacheMiss),
 			m_MaxCacheSize(maxCacheSize)
 		{
@@ -23,13 +27,16 @@ namespace Utilities
 
 		ValType operator()(const KeyType& key)
 		{
+			std::lock_guard<std::mutex> lock(m_Mutex);
+
 			const auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				//In cache, update tracked by moving key to back
 				m_CacheKeyTracker.splice(m_CacheKeyTracker.end(), m_CacheKeyTracker, (*it).second.second);
 
 				return (*it).second.first;
-			} else {
+			}
+			else {
 				//Cache miss, evaluate function and add new record
 				const ValType val = m_OnCacheMiss(key);
 				AddToCache(key, val);
@@ -40,10 +47,12 @@ namespace Utilities
 
 		void UpdateItem(const KeyType& key, const ValType& val)
 		{
+			std::lock_guard<std::mutex> lock(m_Mutex);
 			auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				(*it).second.first = val;
-			} else {
+			}
+			else {
 				AddToCache(key, val);
 			}
 		}
@@ -51,6 +60,7 @@ namespace Utilities
 		//Remove item from cache so it will be recalculated on next fetch
 		void PurgeItem(const KeyType& key)
 		{
+			std::lock_guard<std::mutex> lock(m_Mutex);
 			const auto it = m_CacheData.find(key);
 			if (it != m_CacheData.end()) {
 				m_CacheKeyTracker.erase((*it).second.second);
@@ -67,10 +77,8 @@ namespace Utilities
 				ClearOldestValue();
 			}
 
-			const auto it = m_CacheKeyTracker.insert(m_CacheKeyTracker.end(), key);
-			m_CacheData.insert(std::make_pair(
-				key,
-				std::make_pair(val, it)));
+			const auto it = m_CacheKeyTracker.emplace(m_CacheKeyTracker.end(), key);
+			m_CacheData.emplace(key, std::make_pair(val, it));
 		}
 
 		void ClearOldestValue()
@@ -90,6 +98,9 @@ namespace Utilities
 
 		KeyTrackingType m_CacheKeyTracker;
 		KeyToValType m_CacheData;
+
+
+		mutable std::mutex m_Mutex;
 	};
 
 }

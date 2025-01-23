@@ -1,7 +1,6 @@
 #include "RuntimeEvents.h"
 #include "Settings.h"
 #include "Managers/ArousalManager.h"
-#include "Managers/LibidoManager.h"
 #include "Managers/SceneManager.h"
 #include "Managers/ActorStateManager.h"
 #include "Papyrus/Papyrus.h"
@@ -42,6 +41,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
             for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
                 if(keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
                     ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+					break;
                 }
             }
         }
@@ -52,7 +52,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 	return RE::BSEventNotifyControl::kContinue;
 }
 
-std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source);
+std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source);
 
 std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radius);
 
@@ -60,16 +60,16 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 {
 	float scanDistance = Settings::GetSingleton()->GetScanDistance();
 	
-	std::set<RE::Actor*> spectatingActors;
+	std::set<RE::ActorHandle> spectatingActors;
 	for (const auto scene : activeScenes) {
 		if (scene.Participants.size() <= 0) {
 			logger::warn("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
 			continue;
 		}
 
-		const auto spectators = GetNearbySpectatingActors(scene.Participants[0], scanDistance);
+		const auto spectators = GetNearbySpectatingActors(scene.Participants[0].get().get(), scanDistance);
 		for (const auto spectator : spectators) {
-			spectatingActors.insert(spectator);
+			spectatingActors.insert(spectator->GetHandle());
 		}
 	}
 	SceneManager::GetSingleton()->UpdateSceneSpectators(spectatingActors);
@@ -81,8 +81,6 @@ void WorldChecks::ArousalUpdateLoop()
 
 	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime, 0.f, 1.f);
 	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime, 0.f, 1.f);
-	//logger::trace("ArousalUpdateLoop: {} Game Hours have elapsed since last check {} - Nearby Actors: {} {}", elapsedGameTimeSinceLastCheck, curHours, elapsedGameTimeSinceLastNearbyArousalCheck, WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime);
-
 	WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime = curHours;
 
 	if (elapsedGameTimeSinceLastCheck <= 0) {
@@ -90,6 +88,7 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 
 	const auto activeScenes = SceneManager::GetSingleton()->GetAllScenes();
+	//logger::trace("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
 	if (activeScenes.size() > 0) {
 		HandleAdultScenes(activeScenes, elapsedGameTimeSinceLastCheck);
 	}
@@ -99,7 +98,7 @@ void WorldChecks::ArousalUpdateLoop()
 		return;
 	}
 
-	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.25 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
+	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.1 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
 	if (performNearbyArousalUpdates) {
 		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
 	}
@@ -110,26 +109,42 @@ void WorldChecks::ArousalUpdateLoop()
 	const auto nearbyActors = GetNearbyActorsInCell(player);
 	const auto actorStateManager = ActorStateManager::GetSingleton();
 
-	for (const auto actor : nearbyActors) {
+	for (const auto actorHandle : nearbyActors) {
+		auto actorPtr = actorHandle.get();
+		if (!actorPtr) {
+			continue;
+		}
+		auto actor = actorPtr.get();
+		if (!actor) {
+			continue;
+		}
 		//If the actor is naked, then get nearby spectators to update spectator array
 		if (actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
+			logger::trace("ArousalUpdateLoop: Actor {} is naked", actor->GetDisplayFullName());
 			const auto spectators = GetNearbySpectatingActors(actor, scanDistance);
 			for (const auto spectator : spectators) {
 				spectatingActors.insert(spectator);
+				ArousalManager::GetSingleton()->GetArousalSystem().HandleSpectatingNaked(spectator, actor, elapsedGameTimeSinceLastCheck);
 			}
-		}
-
-		//Get the actors arousal (this will trigger updates to dependent mods. We dont want to do this to frequently, so keep it to once per 0.25 game hours)
-		if (performNearbyArousalUpdates) {
-			ArousalManager::GetArousal(actor, true);
 		}
 	}
 
 	ActorStateManager::GetSingleton()->UpdateActorsSpectating(spectatingActors);
 
 	if (performNearbyArousalUpdates) {
-		//Also get player value to trigger the update for player
-		ArousalManager::GetArousal(player, true);
+		for (const auto actorHandle : nearbyActors) {
+			auto actorPtr = actorHandle.get();
+			if (!actorPtr) {
+				continue;
+			}
+			auto actor = actorPtr.get();
+			if (!actor) {
+				continue;
+			}
+			
+			//Get the arousal to trigger an update
+			Arousal::GetArousal(actor, true);
+		}
 
 		//If we are updating all nearby actors, then we want to update the stored nearby actors array, and emit the sla_UpdateComplete event
 		Papyrus::Events::SendUpdateCompleteEvent(static_cast<float>(nearbyActors.size()));
@@ -137,9 +152,9 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 }
 
-std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source)
+std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)
 {
-	std::vector<RE::Actor*> nearbyActors;
+	std::vector<RE::ActorHandle> nearbyActors;
 
 	if (!source || !source->parentCell) {
 		logger::warn("GetNearbyActorsInCell - source can not be null");
@@ -151,8 +166,8 @@ std::vector<RE::Actor*> GetNearbyActorsInCell(RE::Actor* source)
 	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
-		if (actor && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
-			nearbyActors.push_back(actor);
+		if (actor && !actor->IsDisabled() && !actor->IsChild() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+			nearbyActors.push_back(actor->GetHandle());
 		}
 		return RE::BSContainer::ForEachResult::kContinue;
 	});
@@ -172,14 +187,14 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 	//OAroused algo. Anyone nearer than force distance will have there arousal modified [0.125 is 1/8th]
 	float forceDetectDistance = radius * 0.125f;
 	//Square distances since we check against squared dist
-	forceDetectDistance *= forceDetectDistance; 
+	forceDetectDistance *= forceDetectDistance;
 	radius *= radius;
 
 	const auto sourceLocation = source->GetPosition();
     Utilities::World::ForEachReferenceInRange(source, radius, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
-		if (actor && actor != source && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+		if (actor && actor != source && !actor->IsDisabled() && !actor->IsChild() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			//If Actor is super close or detects the source, increase arousal
 			if (sourceLocation.GetSquaredDistance(ref.GetPosition()) < forceDetectDistance || (actor->RequestDetectionLevel(source, RE::DETECTION_PRIORITY::kNormal) > 0) || actor->IsPlayer()) {
 				nearbyActors.push_back(actor);

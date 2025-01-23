@@ -3,6 +3,7 @@ ScriptName OSLAroused_AdapterSexLab Extends Quest Hidden
 OSLAroused_Main Main
 
 bool SLSODetected = false
+Keyword DeviousBeltKeyword = None
 
 bool function LoadAdapter()
 	;Looks like Sexlab not Installed
@@ -16,6 +17,8 @@ bool function LoadAdapter()
 	RegisterForModEvent("HookAnimationEnd", "OnAnimationEnd")
 	RegisterForModEvent("HookStageStart", "OnStageStart")
 	RegisterForModEvent("SexLabOrgasm", "OnSexLabOrgasm")
+
+    DeviousBeltKeyword = Game.GetFormFromFile(0x3330, "Devious Devices - Assets.esm") as Keyword
 
     SLSODetected = Game.GetModByName("SLSO.esp") != 255
     return true
@@ -31,10 +34,8 @@ event OnAnimationStart(int tid, bool hasPlayer)
     If (controller.HasTag("OStimLab"))
         return
     EndIf
-    Log("OnAnimationStart")
     OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
-    ;OArousal mode sends a blast on scene start
     OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, Main.SceneBeginArousalGain, "Sexlab Animation Start")
 endevent
 
@@ -53,11 +54,11 @@ event OnAnimationEnd(int tid, bool hasPlayer)
         return
     EndIf
 
+    bool bInOslMode = OSLArousedNativeConfig.IsInOSLMode()
     int i = controller.Positions.Length
     while(i > 0)
         i -= 1
         actor act = controller.Positions[i]
-
 
         if(SLSODetected)
             if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
@@ -66,10 +67,29 @@ event OnAnimationEnd(int tid, bool hasPlayer)
                 OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
             endif
         else
-            OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - no orgasm (no SLSO)")
+            ;TODO: Try and improve vanilla SL orgasm detection. 
+            ; Currently Check if this actor orgasmed by comparing the actors last sex time and their last orgasm time, should be a relatively short amount of game time between them
+            ; May get false negatives if actor orgasmed early in scene
+            ; 0.03 game time is ~2 minute real time
+            bool bDidOrgasm = OSLArousedNative.GetDaysSinceLastOrgasm(act) < 0.03
+
+            if(bDidOrgasm)
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - did orgasm ")
+            elseif(Main.VictimGainsArousal || !controller.IsVictim(act))
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - no orgasm")
+            endif
         endif
     endwhile
 endevent
+
+function SLAModeUpdateActorOrgasmDate(Actor akRef)
+    if(akRef == none)
+        return
+    endif
+    OSLAroused_ModInterface.RegisterOrgasm(akRef)
+    ;Update Timerate (which is libido in sla mode)
+    OSLAroused_ModInterface.ModifyLibido(akRef, Main.SLAOveruseEffect, "SLA Mode Orgasm (OveruseEffect)")
+endfunction
 
 Event OnStageStart(int tid, bool HasPlayer)
     If (Main.StageChangeArousalGain == 0.0)
@@ -116,20 +136,17 @@ Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     if(!controller)
         return
     endif
-
     ;If this event came from ostimlab (ie its a OStim scene, then dont process)
     If (controller.HasTag("OStimLab"))
         return
     EndIf
 
-    Log("OnSexLabOrgasm: " + actorForm + " enjoyment: " + enjoyment)
-    OSLArousedNative.RegisterActorOrgasm(act)
+    if(OSLArousedNativeConfig.IsInOSLMode())
+        OSLArousedNative.RegisterActorOrgasm(act)
+    else
+        SLAModeUpdateActorOrgasmDate(act)
+    endif
 
-    ;Update arousal for any victims
-    ;@TODO: Tie this into a lewdness system
-    ; if(controller.Victims.Length > 0)
-    ;     OSLAroused_ModInterface.ModifyArousalMultiple(controller.Victims, -20, "being sexlab victim")
-    ; endif
 
     ;Lower arousal on orgasm
     ;@TODO: Improve this function

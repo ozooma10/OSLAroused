@@ -17,21 +17,33 @@ bool Papyrus::IsActorNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
 
 void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int sceneId, RE::reference_array<RE::Actor*> actorRefs)
 {
-	SceneManager::SceneData sceneData {
+	logger::trace("RegisterSceneStart: bIsOstim: {} sceneId: {} numActors: {}.", bIsOstim, sceneId, actorRefs.size());
+
+	//convert actorRefs to actorHandles
+		// Convert actorRefs to actorHandles
+	std::vector<RE::ActorHandle> actorHandles;
+	actorHandles.reserve(actorRefs.size());
+	for (auto& actorRef : actorRefs) {
+		actorHandles.push_back(actorRef->GetHandle());
+	}
+
+	SceneManager::SceneData sceneData{
 		bIsOstim ? SceneManager::SceneFramework::kOStim : SceneManager::SceneFramework::kSexLab,
 		sceneId,
-		actorRefs
+		actorHandles
 	};
 	SceneManager::GetSingleton()->RegisterScene(sceneData);
 }
 
 void Papyrus::RemoveScene(RE::StaticFunctionTag*, bool bIsOstim, int sceneId)
 {
+	logger::trace("RemoveScene: bIsOstim: {} sceneId: {}.", bIsOstim, sceneId);
 	SceneManager::GetSingleton()->RemoveScene(bIsOstim ? SceneManager::SceneFramework::kOStim : SceneManager::SceneFramework::kSexLab, sceneId);
 }
 
 void Papyrus::RegisterActorOrgasm(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
+	logger::trace("RegisterActorOrgasm: Actor: {}.", actorRef->GetDisplayFullName());
 	PersistedData::LastOrgasmTimeData::GetSingleton()->SetData(actorRef->formID, RE::Calendar::GetSingleton()->GetCurrentGameTime());
 }
 
@@ -40,7 +52,7 @@ bool Papyrus::AddKeywordToForm(RE::StaticFunctionTag*, RE::TESForm* form, RE::BG
 	if (!form || !keyword) {
 		return false;
 	}
-	
+
 	return Utilities::Keywords::AddKeyword(form, keyword);
 }
 
@@ -55,7 +67,6 @@ bool Papyrus::RemoveKeywordFromForm(RE::StaticFunctionTag*, RE::TESForm* form, R
 
 bool Papyrus::FormHasKeywordString(RE::StaticFunctionTag*, RE::TESForm* form, RE::BSFixedString keyword)
 {
-	logger::error("FormHasKeywordString: {}.", keyword);
 	if (!form) {
 		logger::error("FormHasKeywordString received none obj.");
 		return false;
@@ -68,7 +79,6 @@ bool Papyrus::FormHasKeywordString(RE::StaticFunctionTag*, RE::TESForm* form, RE
 	const char* p1 = keyword.data();
 	for (uint32_t i = 0; i < keywords->numKeywords; ++i) {
 		const char* p2 = keywords->keywords[i]->formEditorID.data();
-		logger::error("Keyword EditorId: {}.", p2);
 		if (strstr(p2, p1) != NULL)
 			return true;
 	}
@@ -119,7 +129,7 @@ bool Papyrus::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	//General State
 
-	
+
 	//Actor State
 	vm->RegisterFunction("IsActorNaked", "OSLArousedNative", IsActorNaked);
 
@@ -134,10 +144,10 @@ bool Papyrus::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("FormHasKeywordString", "OSLArousedNative", FormHasKeywordString);
 	vm->RegisterFunction("GetRegisteredKeywords", "OSLArousedNative", GetRegisteredKeywords);
 	vm->RegisterFunction("RegisterNewKeyword", "OSLArousedNative", RegisterNewKeyword);
-	
+
 	//Utilities
 	vm->RegisterFunction("GenerateRandomFloat", "OSLArousedNative", GenerateRandomFloat);
-	
+
 	//Debug
 	vm->RegisterFunction("DumpArousalData", "OSLArousedNative", DumpArousalData);
 	vm->RegisterFunction("ClearAllArousalData", "OSLArousedNative", ClearAllArousalData);
@@ -160,21 +170,29 @@ void SendModEvent(RE::BSFixedString eventName, float numArg, RE::TESForm* sender
 
 void Papyrus::Events::SendActorArousalUpdatedEvent(RE::Actor* actorRef, float newExposure)
 {
-	SendModEvent("OSLA_ActorArousalUpdated", newExposure, actorRef);
+	SKSE::GetTaskInterface()->AddTask([actorRef, newExposure]() {
+		SendModEvent("OSLA_ActorArousalUpdated", newExposure, actorRef);
+	});
 }
 
 void Papyrus::Events::SendActorLibidoUpdatedEvent(RE::Actor* actorRef, float newLibido)
 {
-	SendModEvent("OSLA_ActorLibidoUpdated", newLibido, actorRef);
+	SKSE::GetTaskInterface()->AddTask([actorRef, newLibido]() {
+		SendModEvent("OSLA_ActorLibidoUpdated", newLibido, actorRef);
+	});
 }
 
 void Papyrus::Events::SendActorNakedUpdatedEvent(RE::Actor* actorRef, bool newNaked)
 {
-	SendModEvent("OSLA_ActorNakedUpdated", newNaked ? 1.f : 0.f, actorRef);
+	SKSE::GetTaskInterface()->AddTask([actorRef, newNaked]() {
+		SendModEvent("OSLA_ActorNakedUpdated", newNaked ? 1.f : 0.f, actorRef);
+	});
 }
 
 void Papyrus::Events::SendUpdateCompleteEvent(float numNearbyActors)
 {
-	//Clamp actor count to 20 (since sla limitation)
-	SendModEvent("sla_UpdateComplete", std::clamp(numNearbyActors, 0.f, 20.f), nullptr);
+	SKSE::GetTaskInterface()->AddTask([numNearbyActors]() {
+		//Clamp actor count to 20 (since sla limitation)
+		SendModEvent("sla_UpdateComplete", std::clamp(numNearbyActors, 0.f, 20.f), nullptr);
+	});
 }

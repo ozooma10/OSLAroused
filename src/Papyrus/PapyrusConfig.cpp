@@ -1,49 +1,60 @@
 #include "PapyrusConfig.h"
 #include "Settings.h"
 #include <Utilities/Utils.h>
+#include "Managers/ArousalManager.h"
+#include "PersistedData.h"
 
 void PapyrusConfig::SetMinLibidoValue(RE::StaticFunctionTag*, bool bPlayerVal, float newVal)
 {
+	logger::trace("SetMinLibidoValue: {} {}", bPlayerVal, newVal);
 	Settings::GetSingleton()->SetMinLibidoValue(bPlayerVal, newVal);
 }
 
 void PapyrusConfig::SetArousalChangeRate(RE::StaticFunctionTag*, float newVal)
 {
+	logger::trace("SetArousalChangeRate: {}", newVal);
 	Settings::GetSingleton()->SetArousalChangeRate(newVal);
 }
 
 void PapyrusConfig::SetLibidoChangeRate(RE::StaticFunctionTag*, float newVal)
 {
+	logger::trace("SetLibidoChangeRate: {}", newVal);
 	Settings::GetSingleton()->SetLibidoChangeRate(newVal);
 }
 
 void PapyrusConfig::SetSceneParticipantBaseline(RE::StaticFunctionTag*, float newVal)
 {
+	logger::trace("SetSceneParticipantBaseline: {}", newVal);
 	Settings::GetSingleton()->SetSceneParticipantBaseline(newVal);
 }
 
 void PapyrusConfig::SetSceneViewingBaseline(RE::StaticFunctionTag*, float newVal)
 {
+	logger::trace("SetSceneViewingBaseline: {}", newVal);
 	Settings::GetSingleton()->SetSceneViewingBaseline(newVal);
 }
 
 void PapyrusConfig::SetSceneVictimGainsArousal(RE::StaticFunctionTag*, bool newVal)
 {
+	logger::trace("SetSceneVictimGainsArousal: {}", newVal);
 	Settings::GetSingleton()->SetSceneVictimGainsArousal(newVal);
 }
 
 void PapyrusConfig::SetBeingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 {
+	logger::trace("SetBeingNudeBaseline: {}", newVal);
 	Settings::GetSingleton()->SetNudeArousalBaseline(newVal);
 }
 
 void PapyrusConfig::SetViewingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 {
+	logger::trace("SetViewingNudeBaseline: {}", newVal);
 	Settings::GetSingleton()->SetNudeViewingBaseline(newVal);
 }
 
 void PapyrusConfig::SetEroticArmorBaseline(RE::StaticFunctionTag*, float newVal, RE::BGSKeyword* keyword)
 {
+	logger::trace("SetEroticArmorBaseline: {} {}", newVal, keyword->formID);
     if (!keyword) {
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return;
@@ -147,6 +158,36 @@ void PapyrusConfig::SetDeviceTypeBaseline(RE::StaticFunctionTag*, int deviceType
 	Settings::GetSingleton()->SetDeviceBaseline(arousalBaselineConfig);
 }
 
+bool PapyrusConfig::IsInOSLMode(RE::StaticFunctionTag* base)
+{
+	auto arousalMode = ArousalManager::GetSingleton()->GetArousalSystem().GetMode();
+	return arousalMode == IArousalSystem::ArousalMode::kOSL;
+}
+
+void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
+{
+	logger::trace("SetInOSLMode: {}", newVal);
+	PersistedData::SettingsData::GetSingleton()->SetArousalMode((int)(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA));
+	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
+}
+
+void PapyrusConfig::SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal)
+{
+	logger::trace("SetSLATimeRateHalfLife: {}", newVal);
+	Settings::GetSingleton()->SetTimeRateHalfLife(newVal);
+}
+
+void PapyrusConfig::SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float newVal)
+{
+	logger::trace("SetSLADefaultExposureRate: {}", newVal);
+	Settings::GetSingleton()->SetDefaultExposureRate(newVal);
+}
+
+float PapyrusConfig::GetUpdateIntervalRealTimeSeconds(RE::StaticFunctionTag* base)
+{
+	return Utilities::GameTimeToRealSeconds(Settings::GetSingleton()->GetArousalUpdateInterval());
+}
+
 bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	vm->RegisterFunction("SetMinLibidoValue", "OSLArousedNativeConfig", SetMinLibidoValue);
@@ -164,6 +205,14 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("SetDeviceTypesBaseline1", "OSLArousedNativeConfig", SetDeviceTypesBaseline1);
 	vm->RegisterFunction("SetDeviceTypesBaseline2", "OSLArousedNativeConfig", SetDeviceTypesBaseline2);
 	vm->RegisterFunction("SetDeviceTypeBaseline", "OSLArousedNativeConfig", SetDeviceTypeBaseline);
+
+	vm->RegisterFunction("SetInOSLMode", "OSLArousedNativeConfig", SetInOSLMode);
+	vm->RegisterFunction("IsInOSLMode", "OSLArousedNativeConfig", IsInOSLMode);
+
+	vm->RegisterFunction("SetSLATimeRateHalfLife", "OSLArousedNativeConfig", SetSLATimeRateHalfLife);
+	vm->RegisterFunction("SetSLADefaultExposureRate", "OSLArousedNativeConfig", SetSLADefaultExposureRate);
+
+	vm->RegisterFunction("GetUpdateIntervalRealTimeSeconds", "OSLArousedNativeConfig", GetUpdateIntervalRealTimeSeconds);
 	
 	return true;
 }

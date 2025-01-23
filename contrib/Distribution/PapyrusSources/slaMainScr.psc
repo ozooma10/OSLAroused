@@ -1,5 +1,12 @@
 Scriptname slaMainScr extends Quest  
 
+slaConfigScr Property slaConfig Auto
+
+function OnGameLoaded()
+    slaConfig = Game.GetFormFromFile(0x1C6E0, "SexLabAroused.esm") as slaConfigScr
+
+EndFunction
+
 bool Function IsActorNaked(Actor akRef)
     ;Naughty naughty, mods shouldnt call this
     return OSLArousedNative.IsActorNaked(akRef)
@@ -26,3 +33,7 @@ endfunction
 function setUpdateFrequency(Float newFreq)
     updateFrequency = newFreq
 endfunction
+
+Function UpdateDesireSpell()
+    OSLAroused_Main.Get().SetArousalEffectsEnabled(slaConfig.IsDesireSpell)
+EndFunction

@@ -196,6 +196,21 @@ namespace PersistedData
 			logger::critical("Failed to save Armor Keyword Data");
 		}
 
+		const auto isArousalLockedData = IsArousalLockedData::GetSingleton();
+		if (!isArousalLockedData->Save(serializationInterface, kIsArousalLockedDataKey, kSerializationVersion)) {
+			logger::critical("Failed to save Is Arousal Locked Data");
+		}
+
+		const auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
+		if (!isActorExhibitionistData->Save(serializationInterface, kIsActorExhibitionistDataKey, kSerializationVersion)) {
+			logger::critical("Failed to save Is Actor Exhibitionist Data");
+		}
+
+		const auto settingsData = SettingsData::GetSingleton();
+		if (!settingsData->Save(serializationInterface, kSettingsDataKey, kSerializationVersion)) {
+			logger::critical("Failed to save Settings Data");
+		}
+
 		logger::info("OSLArousal Data Saved");
 	}
 
@@ -207,7 +222,7 @@ namespace PersistedData
 		logger::info("OSLArousal Load Start");
 
 		while (serializationInterface->GetNextRecordInfo(type, version, length)) {
-			logger::info("Trying Load for {}", DecodeTypeCode(type));
+			logger::trace("Trying Load for {}", DecodeTypeCode(type));
 
 			if (version != kSerializationVersion) {
 				logger::critical("Loaded data has incorrect version. Recieved ({}) - Expected ({}) for Data Key ({})"sv, version, kSerializationVersion, DecodeTypeCode(type));
@@ -263,6 +278,30 @@ namespace PersistedData
 					}
 				}
 				break;
+			case kIsArousalLockedDataKey:
+				{
+					auto isArousalLockedData = IsArousalLockedData::GetSingleton();
+					if (!isArousalLockedData->Load(serializationInterface)) {
+						logger::critical("Failed to Load IsArousalLocked Data"sv);
+					}
+				}
+				break;
+			case kIsActorExhibitionistDataKey:
+				{
+					auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
+					if (!isActorExhibitionistData->Load(serializationInterface)) {
+						logger::critical("Failed to Load IsActorExhibitionist Data"sv);
+					}
+				}
+				break;
+			case kSettingsDataKey:
+				{
+					auto settingsData = SettingsData::GetSingleton();
+					if (!settingsData->Load(serializationInterface)) {
+						logger::critical("Failed to Load Settings Data"sv);
+					}
+				}
+				break;
 			default:
 				logger::critical("Unrecognized Record Type: {}"sv, DecodeTypeCode(type));
 				break;
@@ -286,10 +325,33 @@ namespace PersistedData
 		lastOrgasmData->Clear();
 		auto armorKeywordData = ArmorKeywordData::GetSingleton();
 		armorKeywordData->Clear();
+		auto isArousalLockedData = IsArousalLockedData::GetSingleton();
+		isArousalLockedData->Clear();
+		auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
+		isActorExhibitionistData->Clear();
+		auto settingsData = SettingsData::GetSingleton();
+		settingsData->Clear();
 
 		//End All Scenes as well
 		SceneManager::GetSingleton()->ClearScenes();
 
 		logger::info("Reverting Data State...");
+	}
+
+	void ResetSystemForModeSwitch()
+	{
+		logger::info("Resetting System for Mode Switch...");
+		//Reset relevant data for mode switch
+		auto arousalData = ArousalData::GetSingleton();
+		arousalData->Clear();
+
+		auto baseLibidoData = BaseLibidoData::GetSingleton();
+		baseLibidoData->Clear();
+
+		auto arousalMultiplierData = ArousalMultiplierData::GetSingleton();
+		arousalMultiplierData->Clear();
+
+		auto lastCheckData = LastCheckTimeData::GetSingleton();
+		lastCheckData->Clear();
 	}
 }

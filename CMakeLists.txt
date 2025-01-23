@@ -6,7 +6,7 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 ########################################################################################################################
 project(
         OSLAroused
-        VERSION 2.6.1
+        VERSION 2.7.0
         DESCRIPTION "High-Performance Arousal Framework. Support for both Sexlab and OStim."
         LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
@@ -27,17 +27,31 @@ configure_file(
 file(GLOB sources "src/*.cpp"
         "src/Papyrus/*.cpp"
         "src/Managers/*.cpp"
+        "src/Managers/ArousalSystem/*.cpp"
         "src/Utilities/*.cpp"
         "src/Integrations/*.cpp"
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc
 )
 
 
+set(tests
+        test/test_LRUCache.cpp)
+
+
 source_group(
         TREE ${CMAKE_CURRENT_SOURCE_DIR}
         FILES
         ${headers}
-        ${sources})
+        ${sources}
+        ${tests})
+
+#########################################################################################################################
+### Build options
+#########################################################################################################################
+message("Options:")
+option(BUILD_TESTS "Build unit tests." OFF)
+message("\tTests: ${BUILD_TESTS}")
+
 
 ########################################################################################################################
 ## Configure target DLL
@@ -68,6 +82,37 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/Sample"
 
 install(TARGETS ${PROJECT_NAME}
         DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
+
+
+########################################################################################################################
+## Configure unit tests
+########################################################################################################################
+if(BUILD_TESTS)
+    find_package(Catch2 CONFIG REQUIRED)
+
+    include(CTest)
+    include(Catch)
+
+    add_executable(
+            ${PROJECT_NAME}Tests
+            ${headers}
+            ${tests})
+
+    target_link_libraries(
+            ${PROJECT_NAME}Tests
+            PRIVATE
+            ${PROJECT_NAME}
+            Catch2::Catch2WithMain)
+
+    target_precompile_headers(${PROJECT_NAME}Tests
+            PRIVATE
+            src/PCH.h)
+
+    catch_discover_tests(${PROJECT_NAME}Tests)
+    add_test(NAME ${PROJECT_NAME}Tests COMMAND ${PROJECT_NAME}Tests)
+endif()
+
 
 
 ########################################################################################################################

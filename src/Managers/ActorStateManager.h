@@ -4,7 +4,6 @@
 
 bool IsActorNaked(RE::Actor* actorRef);
 
-
 const static RE::FormID kActorTypeCreatureKeywordFormId = 0x13795;
 const static RE::FormID kActorTypeAnimalKeywordFormId = 0x13798;
 
@@ -23,6 +22,9 @@ public:
 		m_CreatureKeyword((RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId)),
 		m_AnimalKeyword((RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId)) {}
 
+	static bool GetActorArousalLocked(RE::Actor* actorRef);
+	static void SetActorArousalLocked(RE::Actor* actorRef, bool locked);
+
 	bool GetActorNaked(RE::Actor* actorRef);
 	void ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked);
 
@@ -32,6 +34,13 @@ public:
 	//Returns true if actor is non-creature, non-animal npc
 	bool IsHumanoidActor(RE::Actor* actorRef);
 
+	void OnActorArousalUpdated(RE::Actor* actorRef, float newArousal);
+
+	RE::Actor* GetMostArousedActorInLocation();
+
+private:
+	void HandlePlayerArousalUpdated(RE::Actor* actorRef, float newArousal);
+
 private:
 
 	Utilities::LRUCache<RE::Actor*, bool> m_ActorNakedStateCache;
@@ -40,4 +49,13 @@ private:
 
 	RE::BGSKeyword* m_CreatureKeyword;
 	RE::BGSKeyword* m_AnimalKeyword;
+
+	//Player Variables
+	float m_PreviousPlayerArousal = 0.f;
+	float m_LastNotificationTime = 0.f;
+	bool m_WasPlayerDispleased = false;
+
+	//Actor Variables
+	RE::ActorHandle m_MostArousedActor;
+	float m_MostArousedActorArousal = 0.f;
 };

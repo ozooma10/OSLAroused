@@ -112,7 +112,7 @@ void Utilities::Keywords::DistributeKeywords()
 		logger::info("Trying to find formid {:X}", formId);
 		auto form = RE::TESForm::LookupByID(formId);
 		if (!form) {
-			logger::info("Form is null");
+			logger::warn("Form is null");
 			continue;
 		}
 
@@ -223,4 +223,89 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
     } else {
         RE::TES::GetSingleton()->ForEachReference([&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
     }
+}
+
+void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factionType, int rank)
+{
+	RE::TESFaction* faction = nullptr;
+	switch (factionType) {
+		case FactionType::sla_Arousal:
+			faction = m_ArousalFaction;
+			break;
+		case FactionType::sla_Arousal_Locked:
+			faction = m_ArousalLockedFaction;
+			break;
+		case FactionType::sla_Exhibitionist:
+			faction = m_ExhibitionistFaction;
+			break;
+		case FactionType::sla_Exposure:
+			faction = m_ExposureFaction;
+			break;
+		case FactionType::sla_TimeRate:
+			faction = m_TimeRateFaction;
+			break;
+		case FactionType::sla_ExposureRate:
+			faction = m_ExposureRateFaction;
+			break;
+		case FactionType::sla_GenderPreference:
+			faction = m_GenderPreferenceFaction;
+			break;
+	}
+
+	if (!faction) {
+		logger::warn("Faction {} not found", (int)factionType);
+		return;
+	}
+
+	//logger::trace("Setting faction {} to {}", faction->GetFullName(), rank);
+
+	actorRef->AddToFaction(faction, rank);
+}
+
+int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType factionType)
+{
+	RE::TESFaction* faction = nullptr;
+	switch (factionType) {
+	case FactionType::sla_Arousal:
+		faction = m_ArousalFaction;
+		break;
+	case FactionType::sla_Arousal_Locked:
+		faction = m_ArousalLockedFaction;
+		break;
+	case FactionType::sla_Exhibitionist:
+		faction = m_ExhibitionistFaction;
+		break;
+	case FactionType::sla_Exposure:
+		faction = m_ExposureFaction;
+		break;
+	case FactionType::sla_TimeRate:
+		faction = m_TimeRateFaction;
+		break;
+	case FactionType::sla_ExposureRate:
+		faction = m_ExposureRateFaction;
+		break;
+	case FactionType::sla_GenderPreference:
+		faction = m_GenderPreferenceFaction;
+		break;
+	}
+	if (!faction) {
+		logger::warn("Faction {} not found", (int)factionType);
+		return -2;
+	}
+
+	int result = actorRef->GetFactionRank(faction, actorRef->IsPlayer());
+	//logger::trace("Getting {} from Faction {}", result, faction->GetFullName());
+	return result;
+}
+
+void Utilities::Factions::Initialize()
+{
+	const auto dataHandler = RE::TESDataHandler::GetSingleton();
+	m_ArousalFaction = dataHandler->LookupForm<RE::TESFaction>(0x3FC36, "SexLabAroused.esm");
+	m_ArousalLockedFaction = dataHandler->LookupForm<RE::TESFaction>(0x7649C, "SexLabAroused.esm");
+	m_ExhibitionistFaction = dataHandler->LookupForm < RE::TESFaction>(0x713DA, "SexLabAroused.esm");
+	m_ExposureFaction = dataHandler->LookupForm<RE::TESFaction>(0x25837, "SexLabAroused.esm");
+	m_TimeRateFaction = dataHandler->LookupForm<RE::TESFaction>(0x7C025, "SexLabAroused.esm");
+	m_ExposureRateFaction = dataHandler->LookupForm < RE::TESFaction>(0x7649B, "SexLabAroused.esm");
+	m_GenderPreferenceFaction = dataHandler->LookupForm < RE::TESFaction>(0x79A72, "SexLabAroused.esm");
 }

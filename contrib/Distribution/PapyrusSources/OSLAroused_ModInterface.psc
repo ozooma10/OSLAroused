@@ -1,16 +1,28 @@
 
 scriptname OSLAroused_ModInterface hidden
 
+int function GetVersion() global
+    return 270 ;2.7.0
+endfunction
+
+function SetUseOSLArousalMode(bool val) global
+    Log("SetUseOSLArousalMode: Set to val: " + val)
+    
+    if(OSLArousedNativeConfig.IsInOSLMode() != val)
+        OSLArousedNativeConfig.SetInOSLMode(val)
+    endif
+endfunction
+
 float function GetArousal(Actor target) global
     return OSLArousedNative.GetArousal(target)
 endfunction
 
 float function GetArousalMultiplier(Actor target) global
-    return 1.0
+    return OSLArousedNative.GetArousalMultiplier(target)
 endfunction
 
 float function GetExposure(Actor target) global
-    return OSLArousedNative.GetArousal(target)
+    return OSLArousedNative.GetExposure(target)
 endfunction
 
 float function ModifyArousal(Actor target, float value, string reason = "unknown") global
@@ -29,16 +41,26 @@ function ModifyArousalMultiple(Actor[] actorArray, float value, string reason = 
 endfunction
 
 float function SetArousalMultiplier(Actor target, float value, string reason = "unknown") global
-    Log("SetArousalMultiplier: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
-    return 1.0
+    Log("SetArousalMultiplier: " + target.GetDisplayName() + " Set to val: " + value + " Reason: " + reason)
+    return OSLArousedNative.SetArousalMultiplier(target, value)
 endfunction
 
 float function ModifyArousalMultiplier(Actor target, float value, string reason = "unknown") global
-    Log("ModifyArousalMultiplier: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
+    Log("ModifyArousalMultiplier: " + target.GetDisplayName() + " set to val: " + value + " Reason: " + reason)
     return OSLArousedNative.ModifyArousalMultiplier(target, value)
 endfunction
 
+float function GetLibido(Actor target) global
+    return OSLArousedNative.GetLibido(target)
+endfunction
+
+float function ModifyLibido(Actor target, float value, string reason = "unknown") global
+    Log("ModifyLibido: " + target.GetDisplayName() + " modified by val: " + value + " Reason: " + reason)
+    return OSLArousedNative.ModifyLibido(target, value)
+endfunction
+
 function RegisterOrgasm(Actor target) global
+    Log("RegisterOrgasm: " + target.GetDisplayName())
     OSLArousedNative.RegisterActorOrgasm(target)
 endfunction
 
@@ -46,6 +68,28 @@ float function GetActorDaysSinceLastOrgasm(Actor target) global
     return OSLArousedNative.GetDaysSinceLastOrgasm(target)
 endfunction
 
+bool Function IsActorArousalLocked(Actor akRef) global
+    return OSLArousedNative.IsActorArousalLocked(akRef)
+endfunction
+Function SetActorArousalLocked(Actor akRef, bool val = false) global
+    Log("SetActorArousalLocked: " + akRef.GetDisplayName() + " Set to val: " + val)
+    OSLArousedNative.SetActorArousalLocked(akRef, val)
+endfunction
+
+bool Function IsActorExhibitionist(Actor akRef) global
+    return OSLArousedNative.IsActorExhibitionist(akRef)
+endfunction
+Function SetActorExhibitionist(Actor akRef, bool val = false) global
+    Log("SetActorExhibitionist: " + akRef.GetDisplayName() + " Set to val: " + val)
+    OSLArousedNative.SetActorExhibitionist(akRef, val)
+endfunction
+
+float function GetSLADefaultExposureRate() global
+    return OSLAroused_Main.Get().SLADefaultExposureRate
+endfunction
+
 function Log(string msg) global
-    Debug.Trace("---OSLAroused--- [ModInterface] " + msg)
+    if(OSLAroused_Main.Get().EnableDebugMode)
+        Debug.Trace("---OSLAroused--- [ModInterface] " + msg)
+    endif
 endfunction

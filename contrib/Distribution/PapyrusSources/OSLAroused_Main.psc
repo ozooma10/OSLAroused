@@ -30,7 +30,7 @@ bool property OArousedStubLoaded = false Auto Hidden
 ; ============ SETTINGS ============
 int CheckArousalKey = 157
 int ToggleArousalBarKey = 157
-int ShowDebugKey = 34
+int DebugActionKey = 34
 
 ;Do not directly set these settings. Use the associated Set function (so that dll is updated)
 ;Percentage of Difference from Arousal to Baseline closed after 1 in game hour. (ex. 50 = Arousal 0, Baseline 50, Arousal is 25 after 1 hour, 37.5 after 2 hours, etc...)
@@ -52,8 +52,13 @@ float Property EroticArmorBaselineIncrease = 20.0 Auto
 float Property SceneBeginArousalGain = 10.0 Auto
 float Property StageChangeArousalGain = 3.0 Auto
 float Property OrgasmArousalChange = -50.0 Auto
-float Property SceneEndArousalNoOrgasmChange = -40.0 Auto
+float Property SceneEndArousalNoOrgasmChange = 20.0 Auto
 float Property SceneEndArousalOrgasmChange = 0.0 Auto
+
+;SLA Settings
+float Property SLATimeRateHalfLife = 2.0 Auto
+float Property SLADefaultExposureRate = 2.0 Auto
+int property SLAOveruseEffect = 5 Auto Hidden
 
 bool Property EnableArousalStatBuffs = true Auto
 bool Property EnableSOSIntegration = true Auto 
@@ -128,7 +133,7 @@ Function OnGameLoaded()
 
 	RegisterForKey(CheckArousalKey)
 	RegisterForKey(ToggleArousalBarKey)
-	; RegisterForKey(ShowDebugKey)
+	RegisterForKey(DebugActionKey)
 
 	; Bootstrap settings
 	; Need to notify skse dll whether to check for player nudity
@@ -145,6 +150,9 @@ Function OnGameLoaded()
 
 	OSLArousedNativeConfig.SetDeviceTypesBaseline1(DeviceBaselineModifications[0], DeviceBaselineModifications[1], DeviceBaselineModifications[2], DeviceBaselineModifications[3], DeviceBaselineModifications[4], DeviceBaselineModifications[5], DeviceBaselineModifications[6], DeviceBaselineModifications[7], DeviceBaselineModifications[8], DeviceBaselineModifications[9])
 	OSLArousedNativeConfig.SetDeviceTypesBaseline2(DeviceBaselineModifications[10], DeviceBaselineModifications[11], DeviceBaselineModifications[12], DeviceBaselineModifications[13], DeviceBaselineModifications[14], DeviceBaselineModifications[15], DeviceBaselineModifications[16], DeviceBaselineModifications[17], DeviceBaselineModifications[18])
+
+	OSLArousedNativeConfig.SetSLADefaultExposureRate(SLADefaultExposureRate)
+	OSLArousedNativeConfig.SetSLATimeRateHalfLife(SLATimeRateHalfLife)
 
 	RemoveAllArousalSpells()
 	if(EnableArousalStatBuffs)
@@ -166,7 +174,6 @@ EndFunction
 event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
 	
-	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
 
@@ -181,10 +188,6 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 	endif
 
 	UpdateSOSPosition(act, newArousal)
-
-	if(SlaFrameworkStub)
-		SlaFrameworkStub.OnActorArousalUpdated(act, newArousal, newArousal)
-	endif
 endevent
 
 event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat, Form sender)
@@ -197,9 +200,21 @@ event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat
 	endif
 endevent
 
+function RunDebugLogic()
+	Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
+	if(crosshairTarget != none)
+		OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
+	else
+		
+
+		; OSLAroused_ModInterface.ModifyArousal(PlayerRef, 2.0, "Debug")
+		; SlaFrameworkStub.DebugActorState(PlayerRef)
+	endif
+endfunction
 
 ; ========== AROUSAL EFFECTS ===========
 function SetArousalEffectsEnabled(bool enabled)
+	Log("SetArousalEffectsEnabled: " + enabled)
 	EnableArousalStatBuffs = enabled
 	if EnableArousalStatBuffs
 		ApplyArousedEffects()
@@ -225,15 +240,19 @@ Event OnKeyDown(int keyCode)
 	endif
 	if keyCode == CheckArousalKey
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
-		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
+		if(OSLArousedNativeConfig.IsInOSLMode())
+			Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
+		endif
 		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
 			ArousalBar.UpdateDisplay()
 		endif
 		Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
 		If (crosshairTarget != none)
-			Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
 			; Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(crosshairTarget) + "    Libido: " + OSLArousedNative.GetLibido(crosshairTarget))
-			OSLAroused_MCM.Get().PuppetActor = crosshairTarget
+			if(!crosshairTarget.IsChild())
+				Debug.Notification(crosshairTarget.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(crosshairTarget))
+				OSLAroused_MCM.Get().PuppetActor = crosshairTarget
+			endif
 		Else
 			OSLAroused_MCM.Get().PuppetActor = PlayerRef
 		EndIf
@@ -242,13 +261,8 @@ Event OnKeyDown(int keyCode)
 		ArousalBar.UpdateDisplay()
 	EndIf
 
-	; if(keyCode == ShowDebugKey)
-	; 	Actor crosshairTarget = Game.GetCurrentCrosshairRef() as Actor
-	; 	if(crosshairTarget != none)
-	; 		OSLArousedNative.ModifyArousal(crosshairTarget, 1.0)
-	; 	else
-	; 		OSLAroused_Debug.ShowDebugStatusMenu(Game.GetPlayer())
-	; 	endif
+	; if(keyCode == DebugActionKey)
+	; 	RunDebugLogic()
 	; endif
 EndEvent
 
@@ -364,6 +378,16 @@ function SetToggleArousalBarKeybind(int newKey)
 	RegisterForKey(newKey)
 endfunction
 
+Function SetSLATimeRateHalfLife(float newVal)
+	SLATimeRateHalfLife = newVal
+	OSLArousedNativeConfig.SetSLATimeRateHalfLife(newVal)
+EndFunction
+
+Function SetSLADefaultExposureRate(float newVal)
+	SLADefaultExposureRate = newVal
+	OSLArousedNativeConfig.SetSLADefaultExposureRate(newVal)
+EndFunction
+
 function InitializeDeviceSettings(bool forceInit = false)
 	if(DeviceBaselineModifications.Length < 19 || forceInit)
 		DeviceBaselineModifications = new float[19]
@@ -392,7 +416,7 @@ endfunction
 ; ========== DEBUG RELATED ==================
 
 function Log(string msg)
-	If (EnableDebugMode)
-		Debug.Trace("---OSLAroused--- " + msg)
-	EndIf
+	; If (EnableDebugMode)
+	Debug.Trace("---OSLAroused--- " + msg)
+	; EndIf
 endfunction

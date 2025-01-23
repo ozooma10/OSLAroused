@@ -1,11 +1,30 @@
 #include "ActorStateManager.h"
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
-#include "Managers/LibidoManager.h"
+#include "PersistedData.h"
+#include "Managers/ArousalManager.h"
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
 
 bool IsActorNaked(RE::Actor* actorRef)
 {
 	return Utilities::Actor::IsNaked(actorRef);
+}
+
+bool ActorStateManager::GetActorArousalLocked(RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return true;
+	}
+	return PersistedData::IsArousalLockedData::GetSingleton()->GetData(actorRef->formID, false);
+}
+
+void ActorStateManager::SetActorArousalLocked(RE::Actor* actorRef, bool locked)
+{
+	if (!actorRef) {
+		return;
+	}
+	PersistedData::IsArousalLockedData::GetSingleton()->SetData(actorRef->formID, locked);
+	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal_Locked, locked ? 0 : -2);
 }
 
 bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)
@@ -15,17 +34,20 @@ bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)
 
 void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked)
 {
+	logger::trace("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
 	m_ActorNakedStateCache.UpdateItem(actorRef, newNaked);
 	Papyrus::Events::SendActorNakedUpdatedEvent(actorRef, newNaked);
 	
 	//Actor Naked updated so remove libido cache entry to force refresh on next fetch
-	LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated(actorRef);
+			//Only emit update events for OSL mode
+	if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+		oslSystem->ActorLibidoModifiersUpdated(actorRef);
+	}
 }
 
 bool ActorStateManager::GetActorSpectatingNaked(RE::Actor* actorRef)
 {
 	if (const auto lastViewedGameTime = m_NakedSpectatingMap[actorRef]) {
-		//@TODO: Calculate time based off global update cycle [not just 0.72 game hours]
 		if (RE::Calendar::GetSingleton()->GetCurrentGameTime() - lastViewedGameTime < 0.1f) {
 			return true;
 		}
@@ -39,7 +61,9 @@ void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor*> spectators)
 	//Need to do this to purge libido modifier cache
 	for (auto itr = m_NakedSpectatingMap.begin(); itr != m_NakedSpectatingMap.end();) {
 		if (!spectators.contains((*itr).first)) {
-			LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated((*itr).first);
+			if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+				oslSystem->ActorLibidoModifiersUpdated((*itr).first);
+			}
 			itr = m_NakedSpectatingMap.erase(itr);
 		} else {
 			itr++;
@@ -48,8 +72,13 @@ void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor*> spectators)
 
 	float currentTime = RE::Calendar::GetSingleton()->GetCurrentGameTime();
 	for (const auto spectator : spectators) {
+		bool isNewSpectator = (m_NakedSpectatingMap.find(spectator) == m_NakedSpectatingMap.end());
 		m_NakedSpectatingMap[spectator] = currentTime;
-		LibidoManager::GetSingleton()->ActorLibidoModifiersUpdated(spectator);
+		if (isNewSpectator) {
+			if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+				oslSystem->ActorLibidoModifiersUpdated(spectator);
+			}
+		}
 	}
 }
 
@@ -68,3 +97,83 @@ bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
 
 	return false;
 }
+
+void ActorStateManager::HandlePlayerArousalUpdated(RE::Actor* actorRef, float newArousal)
+{
+	//Notif logic from sla
+	if (newArousal <= 20 && (m_PreviousPlayerArousal > 20 || m_LastNotificationTime + 0.5 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
+	{
+		if (m_WasPlayerDispleased)
+		{
+			RE::DebugNotification("$OSL_NotificationArousal20Displeased");
+			m_WasPlayerDispleased = false;
+		}
+		else
+		{
+			RE::DebugNotification("$OSL_NotificationArousal20");
+		}
+		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
+	}
+	else if (newArousal >= 90 && (m_PreviousPlayerArousal < 90 || m_LastNotificationTime + 0.2 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
+	{
+		RE::DebugNotification("$OSL_NotificationArousal90");
+		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
+	}
+	else if (newArousal >= 70 && (m_PreviousPlayerArousal < 70 || m_LastNotificationTime + 0.3 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
+	{
+		RE::DebugNotification("$OSL_NotificationArousal70");
+		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
+	}
+	else if (newArousal >= 50 && (m_PreviousPlayerArousal < 50 || m_LastNotificationTime + 0.4 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
+	{
+		RE::DebugNotification("$OSL_NotificationArousal50");
+		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
+	}
+
+	m_PreviousPlayerArousal = newArousal;
+}
+
+void ActorStateManager::OnActorArousalUpdated(RE::Actor* actorRef, float newArousal)
+{
+	if (actorRef->IsPlayer()) {
+		HandlePlayerArousalUpdated(actorRef, newArousal);
+	}
+	else {
+		RE::Actor* mostArousedActor = nullptr;
+		if (m_MostArousedActor.get()) {
+			mostArousedActor = m_MostArousedActor.get().get();
+		}
+
+		if (mostArousedActor && mostArousedActor != actorRef)
+		{
+			if (mostArousedActor->GetCurrentLocation() == actorRef->GetCurrentLocation())
+			{
+				if (m_MostArousedActorArousal <= newArousal)
+				{
+					m_MostArousedActor = actorRef;
+					m_MostArousedActorArousal = newArousal;
+				}
+			}
+			else
+			{
+				m_MostArousedActor = actorRef;
+				m_MostArousedActorArousal = newArousal;
+			}
+		}
+		else
+		{
+			m_MostArousedActor = actorRef;
+			m_MostArousedActorArousal = newArousal;
+		}
+	}
+}
+
+RE::Actor* ActorStateManager::GetMostArousedActorInLocation()
+{
+	if (m_MostArousedActor.get()) {
+		return m_MostArousedActor.get().get();
+	}
+	return nullptr;
+}
+
+

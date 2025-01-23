@@ -41,6 +41,6 @@ namespace WorldChecks
 
 		float LastNearbyArousalUpdateGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
 
-		std::vector<RE::Actor*> LastScannedActors;
+		std::vector<RE::ActorHandle> LastScannedActors;
 	};
 }

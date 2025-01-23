@@ -4,6 +4,17 @@
 #include "Managers/SceneManager.h"
 #include "Managers/ActorStateManager.h"
 
+enum class FactionType
+{
+	sla_Arousal,
+	sla_Arousal_Locked,
+	sla_Exhibitionist,
+	sla_Exposure,
+	sla_TimeRate,
+	sla_ExposureRate,
+	sla_GenderPreference
+};
+
 namespace Utilities
 {
     void logInvalidArgsVerbose(const char* fnName);
@@ -16,10 +27,40 @@ namespace Utilities
 		return dis(mt);
 	}
 
+	inline float GameTimeToRealSeconds(float gameHours)
+	{
+		//const float gameToRealTimeRatio = 20.0f / 1.0f; // 20 minutes game time to 1 minute real time
+		return (gameHours * 60) / 20 * 60.0f; // Convert to seconds
+	}
+
 	namespace Forms
 	{
 		RE::FormID ResolveFormId(uint32_t modIndex, RE::FormID rawFormId);
 	}
+
+	class Factions
+	{
+	public:
+		static Factions* GetSingleton()
+		{
+			static Factions singleton;
+			return &singleton;
+		}
+		void Initialize();
+
+
+		void SetFactionRank(RE::Actor* actorRef, FactionType factionType, int rank);
+		int GetFactionRank(RE::Actor* actorRef, FactionType factionType);
+	private:
+
+		RE::TESFaction* m_ArousalFaction;
+		RE::TESFaction* m_ArousalLockedFaction;
+		RE::TESFaction* m_ExhibitionistFaction;
+		RE::TESFaction* m_ExposureFaction;
+		RE::TESFaction* m_TimeRateFaction;
+		RE::TESFaction* m_ExposureRateFaction;
+		RE::TESFaction* m_GenderPreferenceFaction;
+	};
 
 	//Keyword logic based off powerof3's CommonLibSSE implementation
 	namespace Keywords
@@ -50,12 +91,12 @@ namespace Utilities
 
 		inline bool IsParticipatingInScene(RE::Actor* actorRef)
 		{
-			return SceneManager::GetSingleton()->IsActorParticipating(actorRef);
+			return SceneManager::GetSingleton()->IsActorParticipating(actorRef->GetHandle());
 		}
 
 		inline bool IsViewingScene(RE::Actor* actorRef)
 		{
-			return SceneManager::GetSingleton()->IsActorViewing(actorRef);
+			return SceneManager::GetSingleton()->IsActorViewing(actorRef->GetHandle());
 		}
 
 		std::vector<RE::TESForm*> GetWornArmor(RE::Actor* actorRef);

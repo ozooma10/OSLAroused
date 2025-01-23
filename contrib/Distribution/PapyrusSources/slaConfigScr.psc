@@ -2,16 +2,26 @@ Scriptname slaConfigScr extends Quest
 
 Float Property DefaultExposureRate
     Float Function Get()
-        Return 1.0
+        Return OSLAroused_Main.Get().SLADefaultExposureRate
     EndFunction
 EndProperty
 
-;NOTE: Currently used in native dll but not configurable, so until then hardcode
-Float Property TimeRateHalfLife = 2.0 Auto
+
+Float Property TimeRateHalfLife
+    Float Function Get()
+        Return OSLAroused_Main.Get().SLATimeRateHalfLife
+    EndFunction
+EndProperty
 
 ;NOTE: Currently Not Used
-Int Property SexOveruseEffect = 5 Auto hidden
+Int Property SexOveruseEffect
+    Int Function Get()
+        Return OSLAroused_Main.Get().SLAOveruseEffect
+    EndFunction
+EndProperty
 
 Int Function GetVersion()
 	return 28
 EndFunction
+
+Bool Property IsDesireSpell Auto

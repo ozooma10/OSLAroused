@@ -39,7 +39,33 @@ namespace PersistedData
 		mutable Lock m_Lock;
 	};
 
+	class BaseFormInt : public BaseData<int>
+	{
+	public:
+		virtual void DumpToLog() override
+		{
+			Locker locker(m_Lock);
+			for (const auto& [formId, value] : m_Data) {
+				logger::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+			}
+			logger::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+		}
+	};
+
 	class BaseFormFloat : public BaseData<float>
+	{
+	public:
+		virtual void DumpToLog() override
+		{
+			Locker locker(m_Lock);
+			for (const auto& [formId, value] : m_Data) {
+				logger::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+			}
+			logger::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+		}
+	};
+
+	class BaseFormBool : public BaseData<bool>
 	{
 	public:
 		virtual void DumpToLog() override
@@ -84,6 +110,36 @@ namespace PersistedData
 		{
 			logger::info("{} Rows Not Dumped For List Type {}", m_Data.size(), GetType());
 		}
+	};
+
+	class SettingsData final : public BaseFormInt
+	{
+	public:
+		enum Setting {
+			ArousalMode,
+		};
+
+		static SettingsData* GetSingleton()
+		{
+			static SettingsData singleton;
+			return &singleton;
+		}
+
+		int GetArousalMode()
+		{
+			//0 = osl mode
+			return GetData(Setting::ArousalMode, 0);
+		}
+
+		void SetArousalMode(int mode)
+		{
+			SetData(Setting::ArousalMode, (int)mode);
+		}
+
+		const char* GetType() override
+		{
+			return "Settings";
+		};
 	};
 
 	class ArousalData final : public BaseFormFloat
@@ -177,6 +233,34 @@ namespace PersistedData
 		}
 	};
 
+	class IsArousalLockedData final : public BaseFormBool
+	{
+	public:
+		static IsArousalLockedData* GetSingleton()
+		{
+			static IsArousalLockedData singleton;
+			return &singleton;
+		}
+		const char* GetType() override
+		{
+			return "IsArousalLocked";
+		}
+	};
+
+	class IsActorExhibitionistData final : public BaseFormBool
+	{
+	public:
+		static IsActorExhibitionistData* GetSingleton()
+		{
+			static IsActorExhibitionistData singleton;
+			return &singleton;
+		}
+		const char* GetType() override
+		{
+			return "IsActorExhibitionist";
+		}
+	};
+
 	constexpr std::uint32_t kSerializationVersion = 1;
 	constexpr std::uint32_t kArousalDataKey = 'OSLA';
 	constexpr std::uint32_t kBaseLibidoDataKey = 'OSLB';
@@ -184,10 +268,15 @@ namespace PersistedData
 	constexpr std::uint32_t kLastCheckTimeDataKey = 'OSLC';
 	constexpr std::uint32_t kLastOrgasmTimeDataKey = 'OSLO';
 	constexpr std::uint32_t kArmorKeywordDataKey = 'OSLK';
+	constexpr std::uint32_t kIsArousalLockedDataKey = 'OSLL';
+	constexpr std::uint32_t kIsActorExhibitionistDataKey = 'OSLE';
+	constexpr std::uint32_t kSettingsDataKey = 'OSLS';
 
 	std::string DecodeTypeCode(std::uint32_t typeCode);
 
 	void SaveCallback(SKSE::SerializationInterface* serializationInterface);
 	void LoadCallback(SKSE::SerializationInterface* serializationInterface);
 	void RevertCallback(SKSE::SerializationInterface* serializationInterface);
+
+	void ResetSystemForModeSwitch();
 };

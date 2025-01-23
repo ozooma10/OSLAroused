@@ -31,3 +31,12 @@ function SetEroticArmorBaseline(float newVal, Keyword eroticKeyword) global nati
 function SetDeviceTypesBaseline1(float belt, float collar, float legCuffs, float armCuffs, float bra, float gag, float piercingsNipple, float piercingsVaginal, float blindfold, float harness) global native
 function SetDeviceTypesBaseline2(float plugVag, float plugAnal, float corset, float boots, float gloves, float hood, float suit, float heavyBondage, float bondageMittens) global native
 function SetDeviceTypeBaseline(int deviceTypeId, float newVal) global native
+
+bool function IsInOSLMode() global native
+function SetInOSLMode(bool newVal) global native
+
+;SLA Mode Settings
+function SetSLATimeRateHalfLife(float newVal) global native
+function SetSLADefaultExposureRate(float newVal) global native
+
+float function GetUpdateIntervalRealTimeSeconds() global native
