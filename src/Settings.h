@@ -212,7 +212,13 @@ public:
 		m_DefaultExposureRate = newVal;
 	}
 
+	float GetArousalUpdateInterval() {
+		return m_ArousalUpdateInterval;
+	}
+
 private:
+
+	float m_ArousalUpdateInterval = 0.1f;
 
 	float m_PlayerMinLibidoValue = 30.f;
 	float m_NPCMinLibidoValue = 80.f;

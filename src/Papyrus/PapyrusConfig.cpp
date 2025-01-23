@@ -183,6 +183,11 @@ void PapyrusConfig::SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float
 	Settings::GetSingleton()->SetDefaultExposureRate(newVal);
 }
 
+float PapyrusConfig::GetUpdateIntervalRealTimeSeconds(RE::StaticFunctionTag* base)
+{
+	return Utilities::GameTimeToRealSeconds(Settings::GetSingleton()->GetArousalUpdateInterval());
+}
+
 bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	vm->RegisterFunction("SetMinLibidoValue", "OSLArousedNativeConfig", SetMinLibidoValue);
@@ -206,6 +211,8 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("SetSLATimeRateHalfLife", "OSLArousedNativeConfig", SetSLATimeRateHalfLife);
 	vm->RegisterFunction("SetSLADefaultExposureRate", "OSLArousedNativeConfig", SetSLADefaultExposureRate);
+
+	vm->RegisterFunction("GetUpdateIntervalRealTimeSeconds", "OSLArousedNativeConfig", GetUpdateIntervalRealTimeSeconds);
 	
 	return true;
 }

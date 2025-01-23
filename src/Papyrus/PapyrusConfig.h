@@ -26,5 +26,7 @@ namespace PapyrusConfig
 	void SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal);
 	void SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float newVal);
 
+	float GetUpdateIntervalRealTimeSeconds(RE::StaticFunctionTag* base);
+
 	bool RegisterFunctions(RE::BSScript::IVirtualMachine* vm);
 }

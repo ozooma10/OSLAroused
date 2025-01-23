@@ -27,6 +27,12 @@ namespace Utilities
 		return dis(mt);
 	}
 
+	inline float GameTimeToRealSeconds(float gameHours)
+	{
+		//const float gameToRealTimeRatio = 20.0f / 1.0f; // 20 minutes game time to 1 minute real time
+		return (gameHours * 60) / 20 * 60.0f; // Convert to seconds
+	}
+
 	namespace Forms
 	{
 		RE::FormID ResolveFormId(uint32_t modIndex, RE::FormID rawFormId);
