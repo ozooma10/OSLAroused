@@ -52,7 +52,9 @@ void SceneManager::RemoveScene(SceneFramework framework, int sceneId)
 			//Update libido modifiers for all m_sceneviewingmap actors
 			for (auto& actor : m_SceneViewingMap) {
 				if (auto actorPtr = actor.first.get()) {
-					oslSystem->ActorLibidoModifiersUpdated(actorPtr.get());
+					if (oslSystem) {
+						oslSystem->ActorLibidoModifiersUpdated(actorPtr.get());
+					}
 				}
 			}
 			m_SceneViewingMap.clear();
