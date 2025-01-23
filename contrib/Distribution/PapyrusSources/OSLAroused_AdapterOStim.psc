@@ -64,7 +64,6 @@ Event OStimEnd(String EventName, String Args, Float Nothing, Form Sender)
 EndEvent
 
 Event OStimEndThread(String EventName, String Json, Float ThreadID, Form Sender)
-	Log("OstimEndThread: " + Json)
 	; the following code only works with API version 7.3.1 or higher
 	Actor[] Actors = OJSON.GetActors(Json)
 	HandleEndScene(ThreadID as int, Actors)
@@ -98,7 +97,6 @@ EndEvent
 ; ========== SHARED HANDLERS ================
 
 Function HandleStartScene(int threadId, Actor[] threadActors)
-	Log("OStim Scene Started in Thread: " + threadId + " actors: " + threadActors.Length)
 	CreatePreviousModifiers(ThreadID)
 	CalculateStimMultipliers(ThreadID, threadActors)
 
@@ -107,24 +105,28 @@ Function HandleStartScene(int threadId, Actor[] threadActors)
 EndFunction
 
 Function HandleEndScene(int threadId, Actor[] threadActors)
-	Log("OStim Scene Ended in Thread: " + threadId + "Thread Actors: " + threadActors.Length)
 	OSLAroused_Main main = OSLAroused_Main.Get()
 	OSexIntegrationMain OStim = OUtils.GetOStim()
 	; increase arousal for actors that did not orgasm
 	int i = threadActors.Length
 	while i > 0
 		i -= 1
-		if OStim.GetTimesOrgasm(threadActors[i]) < 1
-			OSLAroused_ModInterface.ModifyArousal(threadActors[i], main.SceneEndArousalNoOrgasmChange, "OStim end - no orgasm")
-		else
+
+		;TODO: Try and improve orgasm detection. (OStimNG cleans up threads by this point so we cant check if they orgasmed)
+		; Currently Check if this actor orgasmed by getting the last time they orgasmed. Hopefully its towards the end of the scene so its caught here
+		; May get false negatives if actor orgasmed early in scene
+		; 0.06 game time is ~4 minute real time
+		bool bDidOrgasm = OSLArousedNative.GetDaysSinceLastOrgasm(threadActors[i]) < 0.06
+		if bDidOrgasm
 			OSLAroused_ModInterface.ModifyArousal(threadActors[i], main.SceneEndArousalOrgasmChange, "OStim end - orgasm")
+		else
+			OSLAroused_ModInterface.ModifyArousal(threadActors[i], main.SceneEndArousalNoOrgasmChange, "OStim end - no orgasm")
 		endif 
 	endwhile
 	OSLArousedNative.RemoveScene(true, threadId)
 EndFunction
 
 Function HandleActorOrgasm(int threadId, Actor targetActor)
-	Log("OStim Actor Orgasm in Thread: " + threadId + " For: " + targetActor)
 	if(OSLArousedNativeConfig.IsInOSLMode())
         OSLArousedNative.RegisterActorOrgasm(targetActor)
     else
