@@ -32,9 +32,26 @@ bool Config::LoadINI(std::string fileName)
     ini.GetAllValues("RegisteredKeywords", "KeywordEditorId", keywords);
 
     // Get the log level from the System section
-    const char* logLevelStr = ini.GetValue("System", "LogLevel", "1");
+    const char* logLevelStr = ini.GetValue("System", "LogLevel", "0");
     m_LogLevel = std::stoi(logLevelStr);
-	logger::info("Log Level: {}", m_LogLevel);
+    //Log loglevel name
+    switch (m_LogLevel) {
+	case 0:
+		SKSE::log::info("Log Level: Trace");
+		break;
+	case 1:
+		SKSE::log::info("Log Level: Debug");
+		break;
+	case 2:
+		SKSE::log::info("Log Level: Info");
+		break;
+	case 3:
+		SKSE::log::info("Log Level: Warn");
+		break;
+	default:
+		SKSE::log::info("Log Level: Error");
+		break;
+    }
 	spdlog::default_logger()->set_level(static_cast<spdlog::level::level_enum>(m_LogLevel));
 
 
