@@ -34,6 +34,9 @@ function OnGameLoaded()
 
     slaExposureRateFaction = Game.GetFormFromFile(0x7649B, "SexLabAroused.esm") as Faction
     slaTimeRateFaction = Game.GetFormFromFile(0x7C025, "SexLabAroused.esm") as Faction
+    
+    slaMain.OnGameLoaded()
+    slaMain.setUpdateFrequency(OSLArousedNativeConfig.GetUpdateIntervalRealTimeSeconds())
 
     RegisterForModEvent("slaUpdateExposure", "ModifyExposure")
 

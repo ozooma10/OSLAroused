@@ -23,3 +23,5 @@ EndProperty
 Int Function GetVersion()
 	return 28
 EndFunction
+
+Bool Property IsDesireSpell Auto
