@@ -214,6 +214,7 @@ endfunction
 
 ; ========== AROUSAL EFFECTS ===========
 function SetArousalEffectsEnabled(bool enabled)
+	Log("SetArousalEffectsEnabled: " + enabled)
 	EnableArousalStatBuffs = enabled
 	if EnableArousalStatBuffs
 		ApplyArousedEffects()
