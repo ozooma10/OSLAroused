@@ -34,6 +34,7 @@ bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)
 
 void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked)
 {
+	logger::trace("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
 	m_ActorNakedStateCache.UpdateItem(actorRef, newNaked);
 	Papyrus::Events::SendActorNakedUpdatedEvent(actorRef, newNaked);
 	

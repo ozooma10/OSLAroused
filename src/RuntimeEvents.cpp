@@ -41,6 +41,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
             for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
                 if(keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
                     ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+					break;
                 }
             }
         }
