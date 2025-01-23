@@ -34,4 +34,5 @@ private:
     bool m_ConfigLoaded;
 
     std::vector<KeywordEntry> m_RegisteredKeywordEditorIds;
+    int m_LogLevel = 1;
 };

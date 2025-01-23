@@ -31,6 +31,13 @@ bool Config::LoadINI(std::string fileName)
     CSimpleIniA::TNamesDepend keywords;
     ini.GetAllValues("RegisteredKeywords", "KeywordEditorId", keywords);
 
+    // Get the log level from the System section
+    const char* logLevelStr = ini.GetValue("System", "LogLevel", "1");
+    m_LogLevel = std::stoi(logLevelStr);
+	logger::info("Log Level: {}", m_LogLevel);
+	spdlog::default_logger()->set_level(static_cast<spdlog::level::level_enum>(m_LogLevel));
+
+
     SKSE::log::info("Trying to Register {} Keywords", keywords.size());
     // Iterate and log each section name
     for (auto &keyword : keywords)

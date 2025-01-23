@@ -81,7 +81,7 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
 	}
 
-	logger::debug("ModifyArousal: {} + {} = {} TRHL: {}", exposure - modifiedValue, modifiedValue, exposure, timeRateHalfLife);
+	logger::trace("[{}] - ModifyArousal: {} + {} = {}", actorRef->GetDisplayFullName(), exposure - modifiedValue, modifiedValue, exposure);
 
 	return SetArousal(actorRef, exposure, bSendEvent);
 }
@@ -141,6 +141,7 @@ float ArousalSystemSLA::SetLibido(RE::Actor* actorRef, float value)
 
 float ArousalSystemSLA::ModifyLibido(RE::Actor* actorRef, float value)
 {
+	logger::trace("[{}] - ModifyLibido: {} + {} = {}", actorRef->GetDisplayFullName(), GetLibido(actorRef), value, GetLibido(actorRef) + value);
 	float val = GetLibido(actorRef) + value;
 	return SetLibido(actorRef, val);
 }
@@ -225,7 +226,6 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 
 	//We scale the exposure add based off the time since last update (since this is called much more frequently than the sla 2 minute interval)
 	float exposureScale = std::min(1.f, elapsedGameTimeSinceLastUpdate * 1.5f);
-	logger::trace("ExposureScale: {}", exposureScale);
 
 	//First get gender preference
 	int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);

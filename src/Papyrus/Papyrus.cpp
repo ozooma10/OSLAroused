@@ -17,7 +17,7 @@ bool Papyrus::IsActorNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
 
 void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int sceneId, RE::reference_array<RE::Actor*> actorRefs)
 {
-	logger::trace("RegisterSceneStart: bIsOstim: {} sceneId: {} numACtors: {}.", bIsOstim, sceneId, actorRefs.size());
+	logger::trace("RegisterSceneStart: bIsOstim: {} sceneId: {} numActors: {}.", bIsOstim, sceneId, actorRefs.size());
 
 	//convert actorRefs to actorHandles
 		// Convert actorRefs to actorHandles
@@ -67,7 +67,6 @@ bool Papyrus::RemoveKeywordFromForm(RE::StaticFunctionTag*, RE::TESForm* form, R
 
 bool Papyrus::FormHasKeywordString(RE::StaticFunctionTag*, RE::TESForm* form, RE::BSFixedString keyword)
 {
-	logger::error("FormHasKeywordString: {}.", keyword);
 	if (!form) {
 		logger::error("FormHasKeywordString received none obj.");
 		return false;
@@ -80,7 +79,6 @@ bool Papyrus::FormHasKeywordString(RE::StaticFunctionTag*, RE::TESForm* form, RE
 	const char* p1 = keyword.data();
 	for (uint32_t i = 0; i < keywords->numKeywords; ++i) {
 		const char* p2 = keywords->keywords[i]->formEditorID.data();
-		logger::error("Keyword EditorId: {}.", p2);
 		if (strstr(p2, p1) != NULL)
 			return true;
 	}

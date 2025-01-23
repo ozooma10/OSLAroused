@@ -52,7 +52,7 @@ void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode)
     //If we are changing modes, we need to Reset arousal data
     PersistedData::ResetSystemForModeSwitch();
 
-    logger::trace("ArosualManager::Setting Arousal System to {}", (int)newMode);
+    logger::info("ArosualManager::Setting Arousal System to {}", (int)newMode);
     if (newMode == IArousalSystem::ArousalMode::kOSL)
     {
         m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
@@ -66,7 +66,7 @@ void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode)
 ArousalManager::ArousalManager()
 {
     auto arousalMode = (IArousalSystem::ArousalMode)PersistedData::SettingsData::GetSingleton()->GetArousalMode();
-	logger::trace("ArousalManager::ArousalManager Initializing with {}", (int)arousalMode);
+	logger::info("ArousalManager::ArousalManager Initializing with {}", (int)arousalMode);
     if (arousalMode == IArousalSystem::ArousalMode::kOSL)
     {
         m_pArousalSystem = std::make_unique<ArousalSystemOSL>();

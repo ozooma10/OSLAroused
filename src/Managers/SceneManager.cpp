@@ -93,7 +93,7 @@ bool SceneManager::IsActorViewing(RE::ActorHandle actorRef)
 void SceneManager::UpdateSceneSpectators(std::set<RE::ActorHandle> spectators)
 {
 	Locker locker(m_Lock);
-	logger::trace("Updating Scene Spectators {}", spectators.size());
+	logger::trace("Updating Scene Spectators: {} spectators", spectators.size());
 
 	//Remove any old spectators from map who are not in spectators set
 	//Need to do this to purge libido modifier cache

@@ -156,7 +156,6 @@ float ArousalSystemOSL::GetBaselineArousal(RE::Actor* actorRef)
 
 void ArousalSystemOSL::ActorLibidoModifiersUpdated(RE::Actor* actorRef)
 {
-	logger::trace("ActorLibidoModifiersUpdated for Actor: {}", actorRef->GetDisplayFullName());
 	m_LibidoModifierCache.PurgeItem(actorRef);
 }
 
@@ -204,9 +203,6 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
     else if (Utilities::Actor::IsViewingScene(actorRef)) {
         libidoModifier += settings->GetSceneViewingBaseline();
     }
-
-	logger::trace("CalculateActorLibidoModifier for Actor: {} Base: {} Naked: {} viewingNaked: {} InScene: {} SceneView: {} ",
-		actorRef->GetDisplayFullName(), libidoModifier, isNaked, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef));
 
     if (!isNaked) {
         if (const auto eroticKeyword = settings->GetEroticArmorKeyword()) {
