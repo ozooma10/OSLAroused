@@ -34,11 +34,24 @@ file(GLOB sources "src/*.cpp"
 )
 
 
+set(tests
+        test/test_LRUCache.cpp)
+
+
 source_group(
         TREE ${CMAKE_CURRENT_SOURCE_DIR}
         FILES
         ${headers}
-        ${sources})
+        ${sources}
+        ${tests})
+
+#########################################################################################################################
+### Build options
+#########################################################################################################################
+message("Options:")
+option(BUILD_TESTS "Build unit tests." OFF)
+message("\tTests: ${BUILD_TESTS}")
+
 
 ########################################################################################################################
 ## Configure target DLL
@@ -69,6 +82,37 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/Sample"
 
 install(TARGETS ${PROJECT_NAME}
         DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+
+
+
+########################################################################################################################
+## Configure unit tests
+########################################################################################################################
+if(BUILD_TESTS)
+    find_package(Catch2 CONFIG REQUIRED)
+
+    include(CTest)
+    include(Catch)
+
+    add_executable(
+            ${PROJECT_NAME}Tests
+            ${headers}
+            ${tests})
+
+    target_link_libraries(
+            ${PROJECT_NAME}Tests
+            PRIVATE
+            ${PROJECT_NAME}
+            Catch2::Catch2WithMain)
+
+    target_precompile_headers(${PROJECT_NAME}Tests
+            PRIVATE
+            src/PCH.h)
+
+    catch_discover_tests(${PROJECT_NAME}Tests)
+    add_test(NAME ${PROJECT_NAME}Tests COMMAND ${PROJECT_NAME}Tests)
+endif()
+
 
 
 ########################################################################################################################
