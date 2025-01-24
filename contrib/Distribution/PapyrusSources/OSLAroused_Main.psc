@@ -103,7 +103,7 @@ Function OnGameLoaded()
 	SlaFrameworkStub = none
     if (Game.GetModByName("SexLabAroused.esm") != 255)
 		SlaFrameworkStub = Game.GetFormFromFile(0x4290F, "SexLabAroused.esm") as slaFrameworkScr
-		if(SlaFrameworkStub && SlaFrameworkStub.IsOSLArousedStub)
+		if(SlaFrameworkStub && SlaFrameworkStub.GetVersion() == 20140124 && SlaFrameworkStub.IsOSLArousedStub)
 			SlaStubLoaded = true
 			SlaFrameworkStub.OnGameLoaded()
 		else
