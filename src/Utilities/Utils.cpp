@@ -253,7 +253,7 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 	}
 
 	if (!faction) {
-		logger::warn("Faction {} not found", (int)factionType);
+		//logger::warn("Faction {} not found", (int)factionType);
 		return;
 	}
 

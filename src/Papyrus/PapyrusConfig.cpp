@@ -54,11 +54,12 @@ void PapyrusConfig::SetViewingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 
 void PapyrusConfig::SetEroticArmorBaseline(RE::StaticFunctionTag*, float newVal, RE::BGSKeyword* keyword)
 {
-	logger::trace("SetEroticArmorBaseline: {} {}", newVal, keyword->formID);
     if (!keyword) {
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return;
     }
+	logger::trace("SetEroticArmorBaseline: {} {}", newVal, keyword->formID);
+
 	Settings::GetSingleton()->SetEroticArmorBaseline(newVal, keyword);
 }
 
