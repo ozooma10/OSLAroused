@@ -9,7 +9,7 @@
     Final="true">
     <Imports>
         <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
-        <Import>C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Source\Scripts</Import>
+        <Import>X:\Skyrim Special Edition\Data\Source\Scripts</Import>
         <Import>C:\Modding\PapyrusScripts</Import>
     </Imports>
     <Folders>

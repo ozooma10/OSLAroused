@@ -41,8 +41,10 @@ namespace Arousal
     }
 }
 
-void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode)
+void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode, bool bResetData)
 {
+    logger::info("ArosualManager::Setting Arousal System to {} bResetData: {}", (int)newMode, bResetData);
+
     auto curMode = m_pArousalSystem->GetMode();
     if (curMode == newMode)
     {
@@ -50,14 +52,15 @@ void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode)
     }
 
     //If we are changing modes, we need to Reset arousal data
-    PersistedData::ResetSystemForModeSwitch();
+    if (bResetData) {
+        PersistedData::ResetSystemForModeSwitch();
+    }
 
-    logger::info("ArosualManager::Setting Arousal System to {}", (int)newMode);
     if (newMode == IArousalSystem::ArousalMode::kOSL)
     {
         m_pArousalSystem = std::make_unique<ArousalSystemOSL>();
     }
-    else
+	else if (newMode == IArousalSystem::ArousalMode::kSLA)
     {
         m_pArousalSystem = std::make_unique<ArousalSystemSLA>();
     }

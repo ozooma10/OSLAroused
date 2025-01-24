@@ -116,7 +116,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 270 ; 2.7.0
+    return OSLAroused_ModInterface.GetVersion()
 endfunction
 
 Event OnConfigInit()

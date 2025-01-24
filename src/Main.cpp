@@ -8,6 +8,7 @@
 #include "RuntimeEvents.h"
 #include "Utilities/Utils.h"
 #include "Config.h"
+#include "Managers/ArousalManager.h"
 
 using namespace RE::BSScript;
 using namespace SKSE::log;
@@ -74,10 +75,17 @@ namespace
 				Utilities::Factions::GetSingleton()->Initialize();
 				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 				break;
+			case SKSE::MessagingInterface::kNewGame:
+				//On new game, reset arousal manager
+				ArousalManager::GetSingleton()->SetArousalSystem(IArousalSystem::ArousalMode::kOSL, false);
+				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
 				//Distribute Persisted Keywords
 				Utilities::Keywords::DistributeKeywords();
 
+				//Loaded game so update arousal mode based off saved data
+				auto arousalMode = (IArousalSystem::ArousalMode)PersistedData::SettingsData::GetSingleton()->GetArousalMode();
+				ArousalManager::GetSingleton()->SetArousalSystem(arousalMode, false);
 				break;
 			} }
 		))

@@ -15,7 +15,7 @@ public:
 		return &singleton;
 	};
 
-	void SetArousalSystem(IArousalSystem::ArousalMode newMode);
+	void SetArousalSystem(IArousalSystem::ArousalMode newMode, bool bResetData = true);
 
 	IArousalSystem& GetArousalSystem() const
 	{

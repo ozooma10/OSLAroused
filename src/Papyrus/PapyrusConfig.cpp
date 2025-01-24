@@ -168,7 +168,7 @@ void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
 {
 	logger::trace("SetInOSLMode: {}", newVal);
 	PersistedData::SettingsData::GetSingleton()->SetArousalMode((int)(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA));
-	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA);
+	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA, true);
 }
 
 void PapyrusConfig::SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal)
