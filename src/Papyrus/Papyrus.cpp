@@ -170,22 +170,31 @@ void SendModEvent(RE::BSFixedString eventName, float numArg, RE::TESForm* sender
 
 void Papyrus::Events::SendActorArousalUpdatedEvent(RE::Actor* actorRef, float newExposure)
 {
-	SKSE::GetTaskInterface()->AddTask([actorRef, newExposure]() {
-		SendModEvent("OSLA_ActorArousalUpdated", newExposure, actorRef);
+    auto actorHandle = actorRef->GetHandle();
+	SKSE::GetTaskInterface()->AddTask([actorHandle, newExposure]() {
+        if (actorHandle.get() != nullptr) {
+            SendModEvent("OSLA_ActorArousalUpdated", newExposure, actorHandle.get().get());
+        }
 	});
 }
 
 void Papyrus::Events::SendActorLibidoUpdatedEvent(RE::Actor* actorRef, float newLibido)
 {
-	SKSE::GetTaskInterface()->AddTask([actorRef, newLibido]() {
-		SendModEvent("OSLA_ActorLibidoUpdated", newLibido, actorRef);
+    auto actorHandle = actorRef->GetHandle();
+	SKSE::GetTaskInterface()->AddTask([actorHandle, newLibido]() {
+        if (actorHandle.get() != nullptr) {
+            SendModEvent("OSLA_ActorLibidoUpdated", newLibido, actorHandle.get().get());
+        }
 	});
 }
 
 void Papyrus::Events::SendActorNakedUpdatedEvent(RE::Actor* actorRef, bool newNaked)
 {
-	SKSE::GetTaskInterface()->AddTask([actorRef, newNaked]() {
-		SendModEvent("OSLA_ActorNakedUpdated", newNaked ? 1.f : 0.f, actorRef);
+    auto actorHandle = actorRef->GetHandle();
+	SKSE::GetTaskInterface()->AddTask([actorHandle, newNaked]() {
+        if (actorHandle.get() != nullptr) {
+            SendModEvent("OSLA_ActorNakedUpdated", newNaked ? 1.f : 0.f, actorHandle.get().get());
+        }
 	});
 }
 
