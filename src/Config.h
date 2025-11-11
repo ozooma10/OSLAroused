@@ -31,7 +31,7 @@ public:
 
 private:
     bool LoadINI(std::string filename);
-    bool m_ConfigLoaded;
+    bool m_ConfigLoaded = false;
 
     std::vector<KeywordEntry> m_RegisteredKeywordEditorIds;
     int m_LogLevel = 0;
