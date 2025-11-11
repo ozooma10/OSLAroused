@@ -245,6 +245,6 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 	if (PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(nakedRef->formID, false))
 	{
 		logger::trace("Actor {} gaining {} exposure for being an exhibitionist to {}", nakedRef->GetDisplayFullName(), 2 * exposureScale, actorRef->GetDisplayFullName());
-		ModifyArousal(actorRef, 2 * exposureScale, false);
+		ModifyArousal(nakedRef, 2 * exposureScale, false);
 	}
 }
