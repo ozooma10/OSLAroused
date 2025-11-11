@@ -34,10 +34,15 @@ bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)
 
 void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked)
 {
+	if (!actorRef) {
+		logger::warn("ActorNakedStateChanged called with null actor");
+		return;
+	}
+
 	logger::trace("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
 	m_ActorNakedStateCache.UpdateItem(actorRef, newNaked);
 	Papyrus::Events::SendActorNakedUpdatedEvent(actorRef, newNaked);
-	
+
 	//Actor Naked updated so remove libido cache entry to force refresh on next fetch
 			//Only emit update events for OSL mode
 	if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
