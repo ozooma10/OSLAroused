@@ -89,18 +89,30 @@ void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor*> spectators)
 
 bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
 {
+	if (!actorRef) {
+		return false;
+	}
+
 	if (!m_CreatureKeyword) {
 		m_CreatureKeyword = (RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId);
+		if (!m_CreatureKeyword) {
+			logger::error("Failed to load ActorTypeCreature keyword (FormID: {:X})", kActorTypeCreatureKeywordFormId);
+		}
 	}
 	if (!m_AnimalKeyword) {
 		m_AnimalKeyword = (RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId);
+		if (!m_AnimalKeyword) {
+			logger::error("Failed to load ActorTypeAnimal keyword (FormID: {:X})", kActorTypeAnimalKeywordFormId);
+		}
 	}
 
 	if (m_CreatureKeyword && m_AnimalKeyword) {
 		return !actorRef->HasKeyword(m_CreatureKeyword) && !actorRef->HasKeyword(m_AnimalKeyword);
 	}
 
-	return false;
+	// If keywords failed to load, log warning and assume humanoid to prevent blocking all functionality
+	logger::warn("IsHumanoidActor: Keywords not loaded, defaulting to humanoid for actor {}", actorRef->GetDisplayFullName());
+	return true;
 }
 
 void ActorStateManager::HandlePlayerArousalUpdated(RE::Actor* actorRef, float newArousal)
