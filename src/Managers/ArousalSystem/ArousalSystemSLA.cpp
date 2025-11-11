@@ -187,13 +187,19 @@ float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 	if (exposureRate < 0)
 	{
 		float defaultExposureRate = Settings::GetSingleton()->GetDefaultExposureRate();
-		auto voiceType = actorRef->GetActorBase()->GetVoiceType();
-		if (voiceType) {
-			if (std::find(kArousedVoiceTypes.begin(), kArousedVoiceTypes.end(), voiceType->formID) != kArousedVoiceTypes.end()) {
-				exposureRate = defaultExposureRate + 1.f;
-			}
-			else if (std::find(kUnarousedVoiceTypes.begin(), kUnarousedVoiceTypes.end(), voiceType->formID) != kUnarousedVoiceTypes.end()) {
-				exposureRate = defaultExposureRate - 1.f;
+		auto actorBase = actorRef->GetActorBase();
+		if (actorBase) {
+			auto voiceType = actorBase->GetVoiceType();
+			if (voiceType) {
+				if (std::find(kArousedVoiceTypes.begin(), kArousedVoiceTypes.end(), voiceType->formID) != kArousedVoiceTypes.end()) {
+					exposureRate = defaultExposureRate + 1.f;
+				}
+				else if (std::find(kUnarousedVoiceTypes.begin(), kUnarousedVoiceTypes.end(), voiceType->formID) != kUnarousedVoiceTypes.end()) {
+					exposureRate = defaultExposureRate - 1.f;
+				}
+				else {
+					exposureRate = defaultExposureRate;
+				}
 			}
 			else {
 				exposureRate = defaultExposureRate;
