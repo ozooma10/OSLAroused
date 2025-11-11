@@ -218,18 +218,9 @@ float ArousalSystemSLA::SetArousalMultiplier(RE::Actor* actorRef, float value)
 {
 	if(!actorRef) { return 0.f; }
 
-	float res = value * 10;
-	if (value < 0) {
-		value = 0;
-		res = 0;
-	}
-	else if (value > 10)
-	{
-		value = 10.f;
-		res = 100.f;
-	}
+	value = std::clamp(value, 0.f, 10.f);
 
-	//TODO: SetFactionRank slaExposureRate
+	//TODO: SetFactionRank slaExposureRate (value * 10 for 0-100 scale)
 	ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, value);
 	return value;
 }
@@ -259,7 +250,8 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 
 	//First get gender preference
 	int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);
-	if (genderPreference == nakedRef->GetActorBase()->GetSex() || genderPreference == 2)
+	auto nakedBase = nakedRef->GetActorBase();
+	if (nakedBase && (genderPreference == nakedBase->GetSex() || genderPreference == 2))
 	{
 		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 4 * exposureScale, nakedRef->GetDisplayFullName());
 		//The main updateloop runs GetArousal so dont need to send an event here
