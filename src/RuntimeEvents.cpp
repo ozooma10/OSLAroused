@@ -33,18 +33,20 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 	if (equipActor->IsPlayer() || player->GetPosition().GetSquaredDistance(equipActor->GetPosition()) < (guardDist * guardDist)) {
 		const auto armor = equipmentForm->As<RE::TESObjectARMO>();
 
-		if (armor && armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kBody)) {
-			//This is body armor so send Change of naked state based on if equipped or not
-			ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
-		} else if (const auto keywordForm = armor->As<RE::BGSKeywordForm>()) {
-            //Check for ArmorCuirass keyword as a backup
-            for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-                if(keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
-                    ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
-					break;
-                }
-            }
-        }
+		if (armor) {
+			if (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kBody)) {
+				//This is body armor so send Change of naked state based on if equipped or not
+				ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+			} else if (const auto keywordForm = armor->As<RE::BGSKeywordForm>()) {
+				//Check for ArmorCuirass keyword as a backup
+				for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
+					if (keywordForm->keywords[i] && keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
+						ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+						break;
+					}
+				}
+			}
+		}
 
 		//Changed equipped armor so update devices
 		DevicesIntegration::GetSingleton()->ActiveEquipmentChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), equipmentForm, equipEvent->equipped);
