@@ -166,7 +166,7 @@ float ArousalSystemOSL::UpdateActorLibido(RE::Actor* actorRef, float gameHoursPa
     float currentVal = GetLibido(actorRef);
 
     //After 1 game hour, distance from curent to target is 10% closer 
-    float t = 1.f - pow(epsilon, gameHoursPassed);
+    float t = 1.f - std::pow(epsilon, gameHoursPassed);
     float newVal = std::lerp(currentVal, targetLibido, t);
     //logger::trace("UpdateActorLibido: Lerped MOd from {} to {} DIFF: {}  t: {}", currentVal, newVal, newVal - currentVal, t);
 
