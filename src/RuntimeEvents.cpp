@@ -67,6 +67,10 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 			continue;
 		}
 
+		if(!scene.Participants[0].get()) {
+			logger::warn("HandleAdultScenes: Skipping sceneid: {} first participant is null", scene.SceneId);
+			continue;
+		}
 		const auto spectators = GetNearbySpectatingActors(scene.Participants[0].get().get(), scanDistance);
 		for (const auto spectator : spectators) {
 			spectatingActors.insert(spectator->GetHandle());
