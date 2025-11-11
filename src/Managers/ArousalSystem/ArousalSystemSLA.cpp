@@ -8,7 +8,9 @@ using namespace PersistedData;
 
 float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 {
-	 float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
+	if(!actorRef) { return 0.f; }
+
+	float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
 	if (lastOrgasmTime < 0) {
 		lastOrgasmTime = 0;
 	}
@@ -18,6 +20,8 @@ float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 
 float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
+	if(!actorRef) { return 0.f; }
+
 	//Check for arousal blocked ignored since internal to sla
 	if (actorRef->IsChild())
 	{
@@ -53,6 +57,8 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 //SetArousal is actually "SetExposure" (since arousal is calculated)
 float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
+	if(!actorRef) { return 0.f; }
+
 	value = std::clamp(value, 0.0f, 100.f);
 	//TODO: Update Faction Rank
 	ArousalData::GetSingleton()->SetData(actorRef->formID, value);
@@ -70,6 +76,8 @@ float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 //Arousal = Exposure
 float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
+	if(!actorRef) { return 0.f; }
+
 	//TODO: If arousal Locked, abort
 
 	float modifiedValue = value * GetArousalMultiplier(actorRef);
@@ -88,6 +96,8 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 
 float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
+
 	if (actorRef->IsChild()) {
 		return 0;
 	}
@@ -117,6 +127,8 @@ float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 //In SLA, Libido is "TimeRate" 
 float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
+
 	float timeRateHalfLife = Settings::GetSingleton()->GetTimeRateHalfLife();
 	if (timeRateHalfLife <= 0.1)
 	{
@@ -134,6 +146,8 @@ float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 
 float ArousalSystemSLA::SetLibido(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
+
 	value = std::clamp(value, 0.0f, 100.f);
 	BaseLibidoData::GetSingleton()->SetData(actorRef->formID, value);
 	return value;
@@ -141,6 +155,8 @@ float ArousalSystemSLA::SetLibido(RE::Actor* actorRef, float value)
 
 float ArousalSystemSLA::ModifyLibido(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
+
 	logger::trace("[{}] - ModifyLibido: {} + {} = {}", actorRef->GetDisplayFullName(), GetLibido(actorRef), value, GetLibido(actorRef) + value);
 	float val = GetLibido(actorRef) + value;
 	return SetLibido(actorRef, val);
@@ -164,6 +180,7 @@ const std::vector<RE::FormID> kUnarousedVoiceTypes = { kVoiceTypeFemaleOldGrumpy
 //In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
 	float exposureRate = ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, -1.f);
 
 	//If not set, roll initial value
@@ -193,6 +210,8 @@ float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 //In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::SetArousalMultiplier(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
+
 	float res = value * 10;
 	if (value < 0) {
 		value = 0;
@@ -211,17 +230,22 @@ float ArousalSystemSLA::SetArousalMultiplier(RE::Actor* actorRef, float value)
 
 float ArousalSystemSLA::ModifyArousalMultiplier(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
 	float res = GetArousalMultiplier(actorRef) + value;
 	return SetArousalMultiplier(actorRef, res);
 }
 
 float ArousalSystemSLA::GetBaselineArousal(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
 	return GetExposure(actorRef);
 }
 
 void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate)
 {
+	if(!actorRef) { return; }
+	if(!nakedRef) { return; }
+
 	//When spectating a naked actor, SLA logic is to create an exposure event
 
 	//We scale the exposure add based off the time since last update (since this is called much more frequently than the sla 2 minute interval)
