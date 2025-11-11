@@ -24,7 +24,11 @@ void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int scen
 	std::vector<RE::ActorHandle> actorHandles;
 	actorHandles.reserve(actorRefs.size());
 	for (auto& actorRef : actorRefs) {
-		actorHandles.push_back(actorRef->GetHandle());
+		if (actorRef) {
+			actorHandles.push_back(actorRef->GetHandle());
+		} else {
+			logger::warn("RegisterSceneStart: Null actor in scene participants list");
+		}
 	}
 
 	SceneManager::SceneData sceneData{
