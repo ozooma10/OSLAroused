@@ -301,7 +301,7 @@ float PapyrusInterface::ModifyActorTimeRate(RE::StaticFunctionTag* base, RE::Act
 	//SLA mode libido = timerate
 	if (arousalMode == IArousalSystem::ArousalMode::kSLA)
 	{
-		return ArousalManager::GetSingleton()->GetArousalSystem().SetLibido(actorRef, timeRate);
+		return ArousalManager::GetSingleton()->GetArousalSystem().ModifyLibido(actorRef, timeRate);
 	}
 
 	//OSL Mode just return a "sane" value (sla default)
