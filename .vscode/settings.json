@@ -1,4 +1,18 @@
 {
     "cmake.configureOnOpen": false,
-    "editor.insertSpaces": false
+    "editor.insertSpaces": false,
+    "files.associations": {
+        "cmath": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "functional": "cpp",
+        "optional": "cpp",
+        "regex": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp"
+    },
+    "C_Cpp.default.compilerPath": "cl.exe"
 }
