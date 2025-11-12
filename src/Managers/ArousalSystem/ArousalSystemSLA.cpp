@@ -246,7 +246,9 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 	//When spectating a naked actor, SLA logic is to create an exposure event
 
 	//We scale the exposure add based off the time since last update (since this is called much more frequently than the sla 2 minute interval)
-	float exposureScale = std::min(1.f, elapsedGameTimeSinceLastUpdate * 1.5f);
+	// Scale reaches 1.0 at the configured update interval (0.1 game hours by default)
+	float updateInterval = Settings::GetSingleton()->GetArousalUpdateInterval();
+	float exposureScale = std::min(1.f, elapsedGameTimeSinceLastUpdate / updateInterval);
 
 	//First get gender preference
 	int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);
