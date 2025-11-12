@@ -1,4 +1,6 @@
 #pragma once
+#include "PCH.h"
+
 namespace PersistedData
 {
 	template <typename T>
@@ -6,7 +8,7 @@ namespace PersistedData
 	class BaseData
 	{
 	public:
-		float GetData(RE::FormID formId, T missing)
+		T GetData(RE::FormID formId, T missing)
 		{
 			Locker locker(m_Lock);
 			auto it = m_Data.find(formId);

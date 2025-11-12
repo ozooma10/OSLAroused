@@ -104,7 +104,8 @@ void WorldChecks::ArousalUpdateLoop()
 		return;
 	}
 
-	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.1 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
+	// Perform nearby arousal updates if 0.1 game hours (6 minutes at default timescale) have passed
+	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > Settings::GetSingleton()->GetArousalUpdateInterval();
 	if (performNearbyArousalUpdates) {
 		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
 	}

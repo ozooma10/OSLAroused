@@ -86,7 +86,7 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 	if (timeRateHalfLife > 0.1)
 	{
 		float timeSinceUpdate = RE::Calendar::GetSingleton()->GetCurrentGameTime() - LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
-		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
+		exposure = exposure * std::pow(Settings::kSLADecayBase, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
 	}
 
 	logger::trace("[{}] - ModifyArousal: {} + {} = {}", actorRef->GetDisplayFullName(), exposure - modifiedValue, modifiedValue, exposure);
@@ -115,7 +115,7 @@ float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 	if (timeRateHalfLife > 0.1)
 	{
 		float timeSinceUpdate = RE::Calendar::GetSingleton()->GetCurrentGameTime() - LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
-		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife);
+		exposure = exposure * std::pow(Settings::kSLADecayBase, -timeSinceUpdate / timeRateHalfLife);
 	}
 
 
@@ -138,7 +138,7 @@ float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 	float timeRate = BaseLibidoData::GetSingleton()->GetData(actorRef->formID, 10.f);
 	float daysSinceLastOrgasm = GetDaysSinceLastOrgasm(actorRef);
 
-	timeRate = timeRate * std::pow(1.5, -daysSinceLastOrgasm / timeRateHalfLife);
+	timeRate = timeRate * std::pow(Settings::kSLADecayBase, -daysSinceLastOrgasm / timeRateHalfLife);
 
 	//TODO: Update TimeRate Faction
 	return timeRate;
