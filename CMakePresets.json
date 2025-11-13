@@ -51,7 +51,7 @@
       "name": "msvc",
       "hidden": true,
       "environment": {
-        "COMMONLIBSSE_COMPILER": "/permissive- /Zc:preprocessor /EHsc $penv{CXXFLAGS}"
+        "COMMONLIBSSE_COMPILER": "/permissive- /Zc:preprocessor /EHsc /external:I\"${sourceDir}/build/debug-msvc/vcpkg_installed\" /external:I\"${sourceDir}/build/release-msvc/vcpkg_installed\" $penv{CXXFLAGS}"
       },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -72,7 +72,8 @@
         "CMAKE_BUILD_TYPE": {
           "type": "STRING",
           "value": "Debug"
-        }
+        },
+        "CMAKE_CXX_FLAGS_DEBUG": "/MDd /Zi /Ob0 /Od /RTC1 /external:anglebrackets /external:W0 /external:templates- /wd4251 /wd4275 /wd4267 /wd4244 /wd4996 /D_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS"
       }
     },
     {
@@ -86,7 +87,8 @@
         "CMAKE_BUILD_TYPE": {
           "type": "STRING",
           "value": "Release"
-        }
+        },
+        "CMAKE_CXX_FLAGS_RELEASE": "/MD /O2 /Ob2 /DNDEBUG /external:anglebrackets /external:W0 /external:templates- /wd4251 /wd4275 /wd4267 /wd4244 /wd4996 /D_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS"
       }
     }
   ],
@@ -95,13 +97,15 @@
       "name": "release-msvc",
       "displayName": "Release (MSVC)",
       "configurePreset": "build-release-msvc",
-      "description": "Optimized release build."
+      "description": "Optimized release build.",
+      "verbose": false
     },
     {
       "name": "debug-msvc",
       "displayName": "Debug (MSVC)",
       "configurePreset": "build-debug-msvc",
-      "description": "Debug build for testing."
+      "description": "Debug build for testing.",
+      "verbose": false
     }
   ],
   "testPresets": [

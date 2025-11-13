@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(if exist builddebug-msvc rmdir /s /q builddebug-msvc)",
-      "Bash(cmd /c \"if exist build\\debug-msvc rmdir /s /q build\\debug-msvc\")"
+      "Bash(cmd /c \"if exist build\\debug-msvc rmdir /s /q build\\debug-msvc\")",
+      "Bash(cmake:*)"
     ],
     "deny": [],
     "ask": []
