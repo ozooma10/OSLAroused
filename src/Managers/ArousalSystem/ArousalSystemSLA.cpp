@@ -8,7 +8,9 @@ using namespace PersistedData;
 
 float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 {
-	 float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
+	if(!actorRef) { return 0.f; }
+
+	float lastOrgasmTime = PersistedData::LastOrgasmTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
 	if (lastOrgasmTime < 0) {
 		lastOrgasmTime = 0;
 	}
@@ -18,6 +20,8 @@ float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 
 float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 {
+	if(!actorRef) { return 0.f; }
+
 	//Check for arousal blocked ignored since internal to sla
 	if (actorRef->IsChild())
 	{
@@ -53,6 +57,8 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 //SetArousal is actually "SetExposure" (since arousal is calculated)
 float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
+	if(!actorRef) { return 0.f; }
+
 	value = std::clamp(value, 0.0f, 100.f);
 	//TODO: Update Faction Rank
 	ArousalData::GetSingleton()->SetData(actorRef->formID, value);
@@ -70,6 +76,8 @@ float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 //Arousal = Exposure
 float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSendEvent)
 {
+	if(!actorRef) { return 0.f; }
+
 	//TODO: If arousal Locked, abort
 
 	float modifiedValue = value * GetArousalMultiplier(actorRef);
@@ -78,7 +86,7 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 	if (timeRateHalfLife > 0.1)
 	{
 		float timeSinceUpdate = RE::Calendar::GetSingleton()->GetCurrentGameTime() - LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
-		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
+		exposure = exposure * std::pow(Settings::kSLADecayBase, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
 	}
 
 	logger::trace("[{}] - ModifyArousal: {} + {} = {}", actorRef->GetDisplayFullName(), exposure - modifiedValue, modifiedValue, exposure);
@@ -88,6 +96,8 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 
 float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
+
 	if (actorRef->IsChild()) {
 		return 0;
 	}
@@ -105,7 +115,7 @@ float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 	if (timeRateHalfLife > 0.1)
 	{
 		float timeSinceUpdate = RE::Calendar::GetSingleton()->GetCurrentGameTime() - LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f);
-		exposure = exposure * std::pow(1.5, -timeSinceUpdate / timeRateHalfLife);
+		exposure = exposure * std::pow(Settings::kSLADecayBase, -timeSinceUpdate / timeRateHalfLife);
 	}
 
 
@@ -117,6 +127,8 @@ float ArousalSystemSLA::GetExposure(RE::Actor* actorRef)
 //In SLA, Libido is "TimeRate" 
 float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
+
 	float timeRateHalfLife = Settings::GetSingleton()->GetTimeRateHalfLife();
 	if (timeRateHalfLife <= 0.1)
 	{
@@ -126,7 +138,7 @@ float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 	float timeRate = BaseLibidoData::GetSingleton()->GetData(actorRef->formID, 10.f);
 	float daysSinceLastOrgasm = GetDaysSinceLastOrgasm(actorRef);
 
-	timeRate = timeRate * std::pow(1.5, -daysSinceLastOrgasm / timeRateHalfLife);
+	timeRate = timeRate * std::pow(Settings::kSLADecayBase, -daysSinceLastOrgasm / timeRateHalfLife);
 
 	//TODO: Update TimeRate Faction
 	return timeRate;
@@ -134,6 +146,8 @@ float ArousalSystemSLA::GetLibido(RE::Actor* actorRef)
 
 float ArousalSystemSLA::SetLibido(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
+
 	value = std::clamp(value, 0.0f, 100.f);
 	BaseLibidoData::GetSingleton()->SetData(actorRef->formID, value);
 	return value;
@@ -141,6 +155,8 @@ float ArousalSystemSLA::SetLibido(RE::Actor* actorRef, float value)
 
 float ArousalSystemSLA::ModifyLibido(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
+
 	logger::trace("[{}] - ModifyLibido: {} + {} = {}", actorRef->GetDisplayFullName(), GetLibido(actorRef), value, GetLibido(actorRef) + value);
 	float val = GetLibido(actorRef) + value;
 	return SetLibido(actorRef, val);
@@ -164,19 +180,26 @@ const std::vector<RE::FormID> kUnarousedVoiceTypes = { kVoiceTypeFemaleOldGrumpy
 //In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
 	float exposureRate = ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, -1.f);
 
 	//If not set, roll initial value
 	if (exposureRate < 0)
 	{
 		float defaultExposureRate = Settings::GetSingleton()->GetDefaultExposureRate();
-		auto voiceType = actorRef->GetActorBase()->GetVoiceType();
-		if (voiceType) {
-			if (std::find(kArousedVoiceTypes.begin(), kArousedVoiceTypes.end(), voiceType->formID) != kArousedVoiceTypes.end()) {
-				exposureRate = defaultExposureRate + 1.f;
-			}
-			else if (std::find(kUnarousedVoiceTypes.begin(), kUnarousedVoiceTypes.end(), voiceType->formID) != kUnarousedVoiceTypes.end()) {
-				exposureRate = defaultExposureRate - 1.f;
+		auto actorBase = actorRef->GetActorBase();
+		if (actorBase) {
+			auto voiceType = actorBase->GetVoiceType();
+			if (voiceType) {
+				if (std::find(kArousedVoiceTypes.begin(), kArousedVoiceTypes.end(), voiceType->formID) != kArousedVoiceTypes.end()) {
+					exposureRate = defaultExposureRate + 1.f;
+				}
+				else if (std::find(kUnarousedVoiceTypes.begin(), kUnarousedVoiceTypes.end(), voiceType->formID) != kUnarousedVoiceTypes.end()) {
+					exposureRate = defaultExposureRate - 1.f;
+				}
+				else {
+					exposureRate = defaultExposureRate;
+				}
 			}
 			else {
 				exposureRate = defaultExposureRate;
@@ -193,43 +216,44 @@ float ArousalSystemSLA::GetArousalMultiplier(RE::Actor* actorRef)
 //In SLA, ArousalMultiplier is "ExposureRate"
 float ArousalSystemSLA::SetArousalMultiplier(RE::Actor* actorRef, float value)
 {
-	float res = value * 10;
-	if (value < 0) {
-		value = 0;
-		res = 0;
-	}
-	else if (value > 10)
-	{
-		value = 10.f;
-		res = 100.f;
-	}
+	if(!actorRef) { return 0.f; }
 
-	//TODO: SetFactionRank slaExposureRate
+	value = std::clamp(value, 0.f, 10.f);
+
+	//TODO: SetFactionRank slaExposureRate (value * 10 for 0-100 scale)
 	ArousalMultiplierData::GetSingleton()->SetData(actorRef->formID, value);
 	return value;
 }
 
 float ArousalSystemSLA::ModifyArousalMultiplier(RE::Actor* actorRef, float value)
 {
+	if(!actorRef) { return 0.f; }
 	float res = GetArousalMultiplier(actorRef) + value;
 	return SetArousalMultiplier(actorRef, res);
 }
 
 float ArousalSystemSLA::GetBaselineArousal(RE::Actor* actorRef)
 {
+	if(!actorRef) { return 0.f; }
 	return GetExposure(actorRef);
 }
 
 void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate)
 {
+	if(!actorRef) { return; }
+	if(!nakedRef) { return; }
+
 	//When spectating a naked actor, SLA logic is to create an exposure event
 
 	//We scale the exposure add based off the time since last update (since this is called much more frequently than the sla 2 minute interval)
-	float exposureScale = std::min(1.f, elapsedGameTimeSinceLastUpdate * 1.5f);
+	// Scale reaches 1.0 at the configured update interval (0.1 game hours by default)
+	float updateInterval = Settings::GetSingleton()->GetArousalUpdateInterval();
+	float exposureScale = std::min(1.f, elapsedGameTimeSinceLastUpdate / updateInterval);
 
 	//First get gender preference
 	int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);
-	if (genderPreference == nakedRef->GetActorBase()->GetSex() || genderPreference == 2)
+	auto nakedBase = nakedRef->GetActorBase();
+	if (nakedBase && (genderPreference == nakedBase->GetSex() || genderPreference == 2))
 	{
 		logger::trace("Actor {} gaining {} exposure for seeing {} naked", actorRef->GetDisplayFullName(), 4 * exposureScale, nakedRef->GetDisplayFullName());
 		//The main updateloop runs GetArousal so dont need to send an event here
@@ -245,6 +269,6 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 	if (PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(nakedRef->formID, false))
 	{
 		logger::trace("Actor {} gaining {} exposure for being an exhibitionist to {}", nakedRef->GetDisplayFullName(), 2 * exposureScale, actorRef->GetDisplayFullName());
-		ModifyArousal(actorRef, 2 * exposureScale, false);
+		ModifyArousal(nakedRef, 2 * exposureScale, false);
 	}
 }

@@ -25,7 +25,7 @@ bool Utilities::Keywords::AddKeyword(RE::TESForm* form, RE::BGSKeyword* newKeywo
 	//If already exists return false
 	if (keywordForm->keywords) {
 		for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-			if (keywordForm->keywords[i]->formID == newKeyword->formID) {
+			if (keywordForm->keywords[i] && keywordForm->keywords[i]->formID == newKeyword->formID) {
 				return false;
 			}
 		}
@@ -66,7 +66,7 @@ bool Utilities::Keywords::RemoveKeyword(RE::TESForm* form, RE::BGSKeyword* keywo
 	int keywordIndex = -1;
 	if (keywordForm->keywords) {
 		for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-			if (keywordForm->keywords[i]->formID == keyword->formID) {
+			if (keywordForm->keywords[i] && keywordForm->keywords[i]->formID == keyword->formID) {
 				keywordIndex = i;
 			}
 		}
@@ -170,7 +170,9 @@ std::set<RE::FormID> Utilities::Actor::GetWornArmorKeywords(RE::Actor* actorRef,
 		if (count > 0 && entry->IsWorn() && (!armorToIgnore || item->formID != armorToIgnore->formID)) {
 			if (const auto keywordForm = item->As<RE::BGSKeywordForm>()) {
 				for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-					wornArmorKeywordIds.insert(keywordForm->keywords[i]->formID);
+					if (keywordForm->keywords[i]) {
+						wornArmorKeywordIds.insert(keywordForm->keywords[i]->formID);
+					}
 				}
 			}
 		}

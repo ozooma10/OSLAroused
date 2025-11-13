@@ -33,18 +33,20 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 	if (equipActor->IsPlayer() || player->GetPosition().GetSquaredDistance(equipActor->GetPosition()) < (guardDist * guardDist)) {
 		const auto armor = equipmentForm->As<RE::TESObjectARMO>();
 
-		if (armor && armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kBody)) {
-			//This is body armor so send Change of naked state based on if equipped or not
-			ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
-		} else if (const auto keywordForm = armor->As<RE::BGSKeywordForm>()) {
-            //Check for ArmorCuirass keyword as a backup
-            for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
-                if(keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
-                    ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
-					break;
-                }
-            }
-        }
+		if (armor) {
+			if (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kBody)) {
+				//This is body armor so send Change of naked state based on if equipped or not
+				ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+			} else if (const auto keywordForm = armor->As<RE::BGSKeywordForm>()) {
+				//Check for ArmorCuirass keyword as a backup
+				for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
+					if (keywordForm->keywords[i] && keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
+						ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+						break;
+					}
+				}
+			}
+		}
 
 		//Changed equipped armor so update devices
 		DevicesIntegration::GetSingleton()->ActiveEquipmentChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), equipmentForm, equipEvent->equipped);
@@ -67,6 +69,10 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 			continue;
 		}
 
+		if(!scene.Participants[0].get()) {
+			logger::warn("HandleAdultScenes: Skipping sceneid: {} first participant is null", scene.SceneId);
+			continue;
+		}
 		const auto spectators = GetNearbySpectatingActors(scene.Participants[0].get().get(), scanDistance);
 		for (const auto spectator : spectators) {
 			spectatingActors.insert(spectator->GetHandle());
@@ -79,8 +85,9 @@ void WorldChecks::ArousalUpdateLoop()
 {
 	float curHours = RE::Calendar::GetSingleton()->GetHoursPassed();
 
-	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime, 0.f, 1.f);
-	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime, 0.f, 1.f);
+	// Clamp to 24 hours (1 full day) to allow proper convergence while preventing extreme jumps
+	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime, 0.f, 24.f);
+	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime, 0.f, 24.f);
 	WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime = curHours;
 
 	if (elapsedGameTimeSinceLastCheck <= 0) {
@@ -98,7 +105,8 @@ void WorldChecks::ArousalUpdateLoop()
 		return;
 	}
 
-	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > 0.1 || WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime > curHours;
+	// Perform nearby arousal updates if 0.1 game hours (6 minutes at default timescale) have passed
+	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > Settings::GetSingleton()->GetArousalUpdateInterval();
 	if (performNearbyArousalUpdates) {
 		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
 	}

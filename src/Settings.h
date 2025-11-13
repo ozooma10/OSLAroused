@@ -52,6 +52,11 @@ struct DeviceArousalBaselineChange
 class Settings
 {
 public:
+	// SLA decay base for exponential decay calculations
+	// Used in formula: exposure * pow(kSLADecayBase, -time/halfLife)
+	// Value 1.5 means exposure reduces by factor of 1.5^(-1) = 0.667 per half-life
+	static constexpr float kSLADecayBase = 1.5f;
+
 	static Settings* GetSingleton()
 	{
 		static Settings singleton;
@@ -204,6 +209,7 @@ public:
 		Locker locker(m_Lock);
 		return m_DefaultExposureRate;
 	}
+
 
 	void SetDefaultExposureRate(float newVal)
 	{

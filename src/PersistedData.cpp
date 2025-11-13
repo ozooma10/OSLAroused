@@ -65,7 +65,7 @@ namespace PersistedData
 			}
 
 			serializationInterface->ReadRecordData(value);
-			m_Data[formId] = value;
+			m_Data[fixedId] = value;
 		}
 		return true;
 	}
