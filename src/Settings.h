@@ -192,6 +192,29 @@ public:
 		return m_EroticArmorKeyword;
 	}
 
+	// A.N.D. Integration Settings
+	void SetUseANDIntegration(bool newVal)
+	{
+		Locker locker(m_Lock);
+		m_UseANDIntegration = newVal;
+	}
+	bool GetUseANDIntegration() const
+	{
+		Locker locker(m_Lock);
+		return m_UseANDIntegration;
+	}
+
+	void SetANDNudityMultiplier(float newVal)
+	{
+		Locker locker(m_Lock);
+		m_ANDNudityMultiplier = std::clamp(newVal, 0.0f, 2.0f);
+	}
+	float GetANDNudityMultiplier() const
+	{
+		Locker locker(m_Lock);
+		return m_ANDNudityMultiplier;
+	}
+
 	float GetTimeRateHalfLife() const
 	{
 		Locker locker(m_Lock);
@@ -245,6 +268,9 @@ private:
 	float m_EroticArmorBaseline = 20.f;
 	RE::BGSKeyword* m_EroticArmorKeyword = nullptr;
 
+	// A.N.D. Integration settings
+	bool m_UseANDIntegration = true;  // Default true if A.N.D. is present
+	float m_ANDNudityMultiplier = 1.0f;  // Default multiplier (50 * 1 = 30 baseline)
 
 	//SLA property
 	float m_TimeRateHalfLife = 2.f;
