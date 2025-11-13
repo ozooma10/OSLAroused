@@ -4,6 +4,7 @@
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
 #include "Integrations/DevicesIntegration.h"
+#include "Integrations/ANDIntegration.h"
 #include "Managers/ArousalManager.h"
 
 using namespace PersistedData;
@@ -188,12 +189,13 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
     const auto settings = Settings::GetSingleton();
 
     float libidoModifier = 0.f;
-    bool isNaked = Utilities::Actor::IsNakedCached(actorRef);
-    if (isNaked)
-    {
-        libidoModifier += settings->GetNudeArousalBaseline();
-    }
-    else if (Utilities::Actor::IsViewingNaked(actorRef)) {
+
+    // Use A.N.D. Integration for nudity-based arousal if available
+    // This handles both A.N.D. nudity detection and legacy fallback (even if AND not available)
+    float nudityModifier = Integrations::ANDIntegration::GetSingleton()->GetNudityBaselineModifier(actorRef);
+    libidoModifier += nudityModifier;
+
+    if (Utilities::Actor::IsViewingNaked(actorRef)) {
         libidoModifier += settings->GetNudeViewingBaseline();
     }
 
@@ -204,17 +206,8 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
         libidoModifier += settings->GetSceneViewingBaseline();
     }
 
-    if (!isNaked) {
-        if (const auto eroticKeyword = settings->GetEroticArmorKeyword()) {
-            const auto wornKeywords = Utilities::Actor::GetWornArmorKeywords(actorRef);
-            if (wornKeywords.contains(eroticKeyword->formID)) {
-                libidoModifier += settings->GetEroticArmorBaseline();
-            }
-        }
-    }
-
-	/*logger::trace("CalculateLibido for Actor: {} Base: {} Naked: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
-		actorRef->GetDisplayFullName(), libidoModifier, isNaked, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef), settings->GetEroticArmorKeyword() ? settings->GetEroticArmorKeyword()->formID : 0);*/
+	// logger::trace("CalculateLibido for Actor: {} Base: {} nudityModifier: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
+		// actorRef->GetDisplayFullName(), libidoModifier, nudityModifier, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef), settings->GetEroticArmorKeyword() ? settings->GetEroticArmorKeyword()->formID : 0);
 
     float deviceGain = DevicesIntegration::GetSingleton()->GetArousalBaselineFromDevices(actorRef);
     libidoModifier += deviceGain;

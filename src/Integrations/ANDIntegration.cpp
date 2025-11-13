@@ -205,16 +205,7 @@ namespace Integrations
         // Check for erotic armor as secondary fallback
         if (IsActorWearingEroticArmorLegacy(actor)) {
             // Get erotic armor baseline - Settings already has this functionality
-            float eroticBaseline = 0.0f;
-            const auto wornArmorKeywords = Utilities::Actor::GetWornArmorKeywords(actor);
-
-            for (const auto keywordFormId : wornArmorKeywords) {
-                float keywordBaseline = settings->GetEroticArmorBaseline(keywordFormId);
-                if (keywordBaseline > eroticBaseline) {
-                    eroticBaseline = keywordBaseline;  // Use highest value
-                }
-            }
-
+            float eroticBaseline = settings->GetEroticArmorBaseline();
             if (eroticBaseline > 0.0f) {
                 logger::trace("Actor {:08X} using erotic armor baseline: {}", actor->formID, eroticBaseline);
                 return eroticBaseline;
@@ -263,7 +254,7 @@ namespace Integrations
         }
 
         // Use existing utility function for legacy nude check
-        return Utilities::Actor::IsNaked(actor);
+        return Utilities::Actor::IsNakedCached(actor);
     }
 
     bool ANDIntegration::IsActorWearingEroticArmorLegacy(RE::Actor* actor) const
@@ -274,12 +265,14 @@ namespace Integrations
 
         // Check if actor is wearing any armor with erotic keywords
         const auto settings = Settings::GetSingleton();
-        const auto wornArmorKeywords = Utilities::Actor::GetWornArmorKeywords(actor);
 
-        for (const auto keywordFormId : wornArmorKeywords) {
-            if (settings->GetEroticArmorBaseline(keywordFormId) > 0.0f) {
-                return true;  // Found at least one erotic armor keyword
-            }
+        const auto eroticKeyword = settings->GetEroticArmorKeyword();
+        if(!eroticKeyword) {
+            return false;  // No erotic armor keyword configured
+        }
+        const auto wornArmorKeywords = Utilities::Actor::GetWornArmorKeywords(actor);
+        if(wornArmorKeywords.contains(eroticKeyword->formID)) {
+            return true;  // Direct match found
         }
 
         return false;

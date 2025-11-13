@@ -181,15 +181,17 @@ public:
 		m_EroticArmorBaseline = newVal;
 		m_EroticArmorKeyword = keyword;
 	}
-	float GetEroticArmorBaseline() const
-	{
-		Locker locker(m_Lock);
-		return m_EroticArmorBaseline;
-	}
 	RE::BGSKeyword* GetEroticArmorKeyword() const
 	{
 		Locker locker(m_Lock);
 		return m_EroticArmorKeyword;
+	}
+
+	// Extended method for getting erotic armor baseline by keyword FormID
+	float GetEroticArmorBaseline() const
+	{
+		Locker locker(m_Lock);
+		return m_EroticArmorBaseline;
 	}
 
 	// A.N.D. Integration Settings
