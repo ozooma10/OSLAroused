@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "oslaroused",
-  "version-string": "2.7.1",
+  "version-string": "2.8.0",
   "port-version": 0,
   "description": "High-Performance Arousal Framework. Support for both Sexlab and OStim.",
   "homepage": "https://www.nexusmods.com/skyrimspecialedition/mods/65454",
