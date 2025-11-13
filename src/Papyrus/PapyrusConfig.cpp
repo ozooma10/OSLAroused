@@ -3,6 +3,7 @@
 #include <Utilities/Utils.h>
 #include "Managers/ArousalManager.h"
 #include "PersistedData.h"
+#include "Integrations/ANDIntegration.h"
 
 void PapyrusConfig::SetMinLibidoValue(RE::StaticFunctionTag*, bool bPlayerVal, float newVal)
 {
@@ -61,6 +62,40 @@ void PapyrusConfig::SetEroticArmorBaseline(RE::StaticFunctionTag*, float newVal,
 	logger::trace("SetEroticArmorBaseline: {} {}", newVal, keyword->formID);
 
 	Settings::GetSingleton()->SetEroticArmorBaseline(newVal, keyword);
+}
+
+// A.N.D. Integration functions
+void PapyrusConfig::SetUseANDIntegration(RE::StaticFunctionTag*, bool enabled)
+{
+	logger::trace("SetUseANDIntegration: {}", enabled);
+	Settings::GetSingleton()->SetUseANDIntegration(enabled);
+}
+
+bool PapyrusConfig::GetUseANDIntegration(RE::StaticFunctionTag*)
+{
+	bool result = Settings::GetSingleton()->GetUseANDIntegration();
+	logger::trace("GetUseANDIntegration: {}", result);
+	return result;
+}
+
+void PapyrusConfig::SetANDNudityMultiplier(RE::StaticFunctionTag*, float multiplier)
+{
+	logger::trace("SetANDNudityMultiplier: {}", multiplier);
+	Settings::GetSingleton()->SetANDNudityMultiplier(multiplier);
+}
+
+float PapyrusConfig::GetANDNudityMultiplier(RE::StaticFunctionTag*)
+{
+	float result = Settings::GetSingleton()->GetANDNudityMultiplier();
+	logger::trace("GetANDNudityMultiplier: {}", result);
+	return result;
+}
+
+bool PapyrusConfig::IsANDIntegrationAvailable(RE::StaticFunctionTag*)
+{
+	bool result = Integrations::ANDIntegration::GetSingleton()->IsAvailable();
+	logger::trace("IsANDIntegrationAvailable: {}", result);
+	return result;
 }
 
 void PapyrusConfig::SetDeviceTypesBaseline1(RE::StaticFunctionTag*, float belt, float collar, float legCuffs, float armCuffs, float bra, float gag, float piercingsNipple, float piercingsVaginal, float blindfold, float harness)
@@ -202,6 +237,13 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("SetViewingNudeBaseline", "OSLArousedNativeConfig", SetViewingNudeBaseline);
 
 	vm->RegisterFunction("SetEroticArmorBaseline", "OSLArousedNativeConfig", SetEroticArmorBaseline);
+
+	// Register A.N.D. Integration functions
+	vm->RegisterFunction("SetUseANDIntegration", "OSLArousedNativeConfig", SetUseANDIntegration);
+	vm->RegisterFunction("GetUseANDIntegration", "OSLArousedNativeConfig", GetUseANDIntegration);
+	vm->RegisterFunction("SetANDNudityMultiplier", "OSLArousedNativeConfig", SetANDNudityMultiplier);
+	vm->RegisterFunction("GetANDNudityMultiplier", "OSLArousedNativeConfig", GetANDNudityMultiplier);
+	vm->RegisterFunction("IsANDIntegrationAvailable", "OSLArousedNativeConfig", IsANDIntegrationAvailable);
 
 	vm->RegisterFunction("SetDeviceTypesBaseline1", "OSLArousedNativeConfig", SetDeviceTypesBaseline1);
 	vm->RegisterFunction("SetDeviceTypesBaseline2", "OSLArousedNativeConfig", SetDeviceTypesBaseline2);

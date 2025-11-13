@@ -5,6 +5,7 @@
 #include "Utilities/Utils.h"
 #include <Settings.h>
 #include <Integrations/DevicesIntegration.h>
+#include <Integrations/ANDIntegration.h>
 #include "RuntimeEvents.h"
 
 float PapyrusInterface::GetArousal(RE::StaticFunctionTag*, RE::Actor* actorRef)
@@ -217,6 +218,16 @@ bool PapyrusInterface::IsWearingEroticArmor(RE::StaticFunctionTag*, RE::Actor* a
 	return false;
 }
 
+float PapyrusInterface::GetANDNudityScore(RE::StaticFunctionTag*, RE::Actor* actorRef)
+{
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return 0.0f;
+    }
+
+    return Integrations::ANDIntegration::GetSingleton()->GetANDNudityScore(actorRef);
+}
+
 bool PapyrusInterface::IsActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef)
 {
 	if (!actorRef) {
@@ -381,6 +392,7 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("IsInScene", "OSLArousedNative", IsInScene);
 	vm->RegisterFunction("IsViewingScene", "OSLArousedNative", IsViewingScene);
 	vm->RegisterFunction("IsWearingEroticArmor", "OSLArousedNative", IsWearingEroticArmor);
+	vm->RegisterFunction("GetANDNudityScore", "OSLArousedNative", GetANDNudityScore);
 	vm->RegisterFunction("WornDeviceBaselineGain", "OSLArousedNative", WornDeviceBaselineGain);
 
 	return true;

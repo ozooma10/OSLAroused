@@ -39,6 +39,9 @@ namespace PapyrusInterface
 	bool IsViewingScene(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	bool IsWearingEroticArmor(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 
+	// A.N.D. Integration debug function
+	float GetANDNudityScore(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+
 	bool IsActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	void SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool exhibitionist);
 
