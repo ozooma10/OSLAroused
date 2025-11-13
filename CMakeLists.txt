@@ -36,7 +36,9 @@ file(GLOB sources "src/*.cpp"
 
 set(tests
         test/test_LRUCache.cpp
-        test/test_SLAExposure.cpp)
+        test/test_SLAExposure.cpp
+        test/test_OSLArousal.cpp
+        test/test_PersistedData.cpp)
 
 
 source_group(
