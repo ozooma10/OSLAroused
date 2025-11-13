@@ -9,14 +9,20 @@ Build system uses https://gitlab.com/colorglass/commonlibsse-sample-plugin
 **Configure and build (Debug):**
 ```bash
 cmake --preset build-debug-msvc
+cmake --preset build-debug-msvc -DBUILD_TESTS=ON
+
 cmake --build build/debug-msvc --preset debug-msvc
 ```
 
 **Configure and build (Release):**
 ```bash
 cmake --preset build-release-msvc
+cmake --preset build-release-msvc -DBUILD_TESTS=ON
+
 cmake --build build/release-msvc --preset release-msvc
 ```
+
+
 
 **Run tests:**
 ```bash
