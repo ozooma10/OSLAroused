@@ -9,6 +9,7 @@
 #include "Utilities/Utils.h"
 #include "Config.h"
 #include "Managers/ArousalManager.h"
+#include "Integrations/ANDIntegration.h"
 
 using namespace RE::BSScript;
 using namespace SKSE::log;
@@ -73,6 +74,8 @@ namespace
 				RuntimeEvents::OnEquipEvent::RegisterEvent();
 				Config::GetSingleton()->LoadINIs();
 				Utilities::Factions::GetSingleton()->Initialize();
+				// Initialize A.N.D. Integration after config is loaded
+				Integrations::ANDIntegration::GetSingleton()->Initialize();
 				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 				break;
 			case SKSE::MessagingInterface::kNewGame:
