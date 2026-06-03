@@ -47,18 +47,18 @@ namespace
 
 	void InitializeSerialization()
 	{
-		SKSE::log::trace("Initializing cosave serialization...");
+		REX::TRACE("Initializing cosave serialization...");
 		auto* serialization = SKSE::GetSerializationInterface();
 		serialization->SetUniqueID(PersistedData::kArousalDataKey);
 		serialization->SetSaveCallback(PersistedData::SaveCallback);
 		serialization->SetRevertCallback(PersistedData::RevertCallback);
 		serialization->SetLoadCallback(PersistedData::LoadCallback);
-		SKSE::log::trace("Cosave serialization initialized.");
+		REX::TRACE("Cosave serialization initialized.");
 	}
 
 	void InitializePapyrus()
 	{
-		SKSE::log::trace("Initializing Papyrus binding...");
+		REX::TRACE("Initializing Papyrus binding...");
 		const auto papyrus = SKSE::GetPapyrusInterface();
 		papyrus->Register(Papyrus::RegisterFunctions);
 		papyrus->Register(PapyrusInterface::RegisterFunctions);
@@ -105,7 +105,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
 	const auto* plugin = SKSE::PluginVersionData::GetSingleton();
 	const auto version = plugin->GetPluginVersion();
-	SKSE::log::info("{} {} is loading...", plugin->GetPluginName(), version.string());
+	REX::INFO("{} {} is loading...", plugin->GetPluginName(), version.string());
 
 	SKSE::Init(skse);
 
@@ -113,6 +113,6 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 	InitializeSerialization();
 	InitializePapyrus();
 
-	SKSE::log::info("{} has finished loading.", plugin->GetPluginName());
+	REX::INFO("{} has finished loading.", plugin->GetPluginName());
 	return true;
 }

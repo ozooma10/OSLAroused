@@ -164,15 +164,15 @@ void Utilities::Keywords::DistributeKeywords()
 {
 	const auto keywordData = PersistedData::ArmorKeywordData::GetSingleton()->GetData();
 
-	logger::info("Trying To Distribute {} Keywords", keywordData.size());
+	REX::INFO("Trying To Distribute {} Keywords", keywordData.size());
 
 	std::map<RE::FormID, RE::BGSKeyword*> subFormCache;
 
 	for (const auto& [formId, subForms] : keywordData) {
-		logger::info("Trying to find formid {:X}", formId);
+		REX::INFO("Trying to find formid {:X}", formId);
 		auto form = RE::TESForm::LookupByID(formId);
 		if (!form) {
-			logger::warn("Form is null");
+			REX::WARN("Form is null");
 			continue;
 		}
 
@@ -243,7 +243,7 @@ std::set<RE::FormID> Utilities::Actor::GetWornArmorKeywords(RE::Actor* actorRef,
 }
 
 void Utilities::logInvalidArgsVerbose(const char* fnName) {
-	SKSE::log::error("{} was called with invalid arguments!", fnName);
+	REX::ERROR("{} was called with invalid arguments!", fnName);
 }
 
 void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float radius,
@@ -317,11 +317,11 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 	}
 
 	if (!faction) {
-		//logger::warn("Faction {} not found", (int)factionType);
+		//REX::WARN("Faction {} not found", (int)factionType);
 		return;
 	}
 
-	//logger::trace("Setting faction {} to {}", faction->GetFullName(), rank);
+	//REX::TRACE("Setting faction {} to {}", faction->GetFullName(), rank);
 
 	actorRef->AddToFaction(faction, rank);
 }
@@ -353,12 +353,12 @@ int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType faction
 		break;
 	}
 	if (!faction) {
-		logger::warn("Faction {} not found", (int)factionType);
+		REX::WARN("Faction {} not found", (int)factionType);
 		return -2;
 	}
 
 	int result = actorRef->GetFactionRank(faction, actorRef->IsPlayer());
-	//logger::trace("Getting {} from Faction {}", result, faction->GetFullName());
+	//REX::TRACE("Getting {} from Faction {}", result, faction->GetFullName());
 	return result;
 }
 

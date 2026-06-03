@@ -9,7 +9,7 @@ void Settings::SetANDFactionBaseline(int index, float value)
 
     // Validate index first
     if (!IsValidIndex(index)) {
-        logger::warn("SetANDFactionBaseline: Invalid faction index {} (valid range: 0-{})",
+        REX::WARN("SetANDFactionBaseline: Invalid faction index {} (valid range: 0-{})",
                      index, COUNT - 1);
         return;
     }
@@ -17,7 +17,7 @@ void Settings::SetANDFactionBaseline(int index, float value)
     // Clamp value to valid range
     const float clampedValue = std::clamp(value, 0.0f, 100.0f);
     if (value != clampedValue) {
-        logger::debug("SetANDFactionBaseline: Clamping {} value from {} to {}",
+        REX::DEBUG("SetANDFactionBaseline: Clamping {} value from {} to {}",
                       GetFactionName(index), value, clampedValue);
     }
 
@@ -37,6 +37,6 @@ void Settings::SetANDFactionBaseline(int index, float value)
 
     // Save to INI file
     Config::GetSingleton()->SaveANDFactionBaseline(index, clampedValue);
-    logger::debug("SetANDFactionBaseline: {} baseline set to {}",
+    REX::DEBUG("SetANDFactionBaseline: {} baseline set to {}",
                   GetFactionName(index), clampedValue);
 }

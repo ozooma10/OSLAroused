@@ -43,7 +43,7 @@ namespace Arousal
 
 void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode, bool bResetData)
 {
-    logger::trace("ArosualManager::Setting Arousal System to {} bResetData: {}", (int)newMode, bResetData);
+    REX::TRACE("ArosualManager::Setting Arousal System to {} bResetData: {}", (int)newMode, bResetData);
 
     auto curMode = m_pArousalSystem->GetMode();
     if (curMode == newMode)
@@ -69,7 +69,7 @@ void ArousalManager::SetArousalSystem(IArousalSystem::ArousalMode newMode, bool 
 ArousalManager::ArousalManager()
 {
     auto arousalMode = (IArousalSystem::ArousalMode)PersistedData::SettingsData::GetSingleton()->GetArousalMode();
-	logger::trace("ArousalManager::ArousalManager Initializing with {}", (int)arousalMode);
+	REX::TRACE("ArousalManager::ArousalManager Initializing with {}", (int)arousalMode);
     if (arousalMode == IArousalSystem::ArousalMode::kOSL)
     {
         m_pArousalSystem = std::make_unique<ArousalSystemOSL>();

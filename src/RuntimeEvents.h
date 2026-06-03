@@ -28,7 +28,7 @@ namespace RuntimeEvents
 			static OnModCallbackEvent g_ModCallbackEventHandler;
 			auto modCallbackEventSource = SKSE::GetModCallbackEventSource();
 			if(!modCallbackEventSource) {
-				logger::error("Failed to get ModCallbackEventSource for OnModCallbackEvent registration");
+				REX::ERROR("Failed to get ModCallbackEventSource for OnModCallbackEvent registration");
 				return false;
 			}
 

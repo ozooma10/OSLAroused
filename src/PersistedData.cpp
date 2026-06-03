@@ -8,7 +8,7 @@ namespace PersistedData
 	bool BaseData<T>::Save(SKSE::SerializationInterface* serializationInterface, std::uint32_t type, std::uint32_t version)
 	{
 		if (!serializationInterface->OpenRecord(type, version)) {
-			logger::error("Failed to open record for Data Serialization!");
+			REX::ERROR("Failed to open record for Data Serialization!");
 			return false;
 		}
 
@@ -23,18 +23,18 @@ namespace PersistedData
 
 		const auto numRecords = m_Data.size();
 		if (!serializationInterface->WriteRecordData(numRecords)) {
-			logger::error("Failed to save {} data records", numRecords);
+			REX::ERROR("Failed to save {} data records", numRecords);
 			return false;
 		}
 
 		for (const auto& [formId, value] : m_Data) {
 			if (!serializationInterface->WriteRecordData(formId)) {
-				logger::error("Failed to save data for FormID: ({:X})", formId);
+				REX::ERROR("Failed to save data for FormID: ({:X})", formId);
 				return false;
 			}
 
 			if (!serializationInterface->WriteRecordData(value)) {
-				logger::error("Failed to save value data for form: {}", formId);
+				REX::ERROR("Failed to save value data for form: {}", formId);
 				return false;
 			}
 		}
@@ -60,7 +60,7 @@ namespace PersistedData
 			//Ensure form still exists
 			RE::FormID fixedId;
 			if (!serializationInterface->ResolveFormID(formId, fixedId)) {
-				logger::error("Failed to resolve formID {} {}"sv, formId, fixedId);
+				REX::ERROR("Failed to resolve formID {} {}"sv, formId, fixedId);
 				continue;
 			}
 
@@ -80,7 +80,7 @@ namespace PersistedData
 	bool BaseFormArrayData::Save(SKSE::SerializationInterface* serializationInterface, std::uint32_t type, std::uint32_t version)
 	{
 		if (!serializationInterface->OpenRecord(type, version)) {
-			logger::error("Failed to open record for Data Serialization!");
+			REX::ERROR("Failed to open record for Data Serialization!");
 			return false;
 		}
 
@@ -94,25 +94,25 @@ namespace PersistedData
 
 		const auto numRecords = m_Data.size();
 		if (!serializationInterface->WriteRecordData(numRecords)) {
-			logger::error("Failed to save {} data records", numRecords);
+			REX::ERROR("Failed to save {} data records", numRecords);
 			return false;
 		}
 
 		for (const auto& [formId, formList] : m_Data) {
 			if (!serializationInterface->WriteRecordData(formId)) {
-				logger::error("Failed to save data for FormID: ({:X})", formId);
+				REX::ERROR("Failed to save data for FormID: ({:X})", formId);
 				return false;
 			}
 
 			const auto numForms = formList.size();
 			if (!serializationInterface->WriteRecordData(numForms)) {
-				logger::error("Failed to save {} sub form list records", numForms);
+				REX::ERROR("Failed to save {} sub form list records", numForms);
 				return false;
 			}
 
 			for (const auto& subFormId : formList) {
 				if (!serializationInterface->WriteRecordData(subFormId)) {
-					logger::error("Failed to save data for sub FormID: ({})", subFormId);
+					REX::ERROR("Failed to save data for sub FormID: ({})", subFormId);
 					return false;
 				}
 			}
@@ -139,7 +139,7 @@ namespace PersistedData
 			//Ensure form still exists
 			RE::FormID fixedId;
 			if (!serializationInterface->ResolveFormID(formId, fixedId)) {
-				logger::error("Failed to resolve formID {} {}"sv, formId, fixedId);
+				REX::ERROR("Failed to resolve formID {} {}"sv, formId, fixedId);
 				continue;
 			}
 
@@ -168,50 +168,50 @@ namespace PersistedData
 	{
 		const auto arousalData = ArousalData::GetSingleton();
 		if (!arousalData->Save(serializationInterface, kArousalDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Arousal Data");
+			REX::CRITICAL("Failed to save Arousal Data");
 		}
 
 		const auto baseLibidoData = BaseLibidoData::GetSingleton();
 		if (!baseLibidoData->Save(serializationInterface, kBaseLibidoDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Base Libido Data");
+			REX::CRITICAL("Failed to save Base Libido Data");
 		}
 
 		const auto arousalMultiplierData = ArousalMultiplierData::GetSingleton();
 		if (!arousalMultiplierData->Save(serializationInterface, kAroualMultiplierDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Arousal Multiplier Data");
+			REX::CRITICAL("Failed to save Arousal Multiplier Data");
 		}
 
 		const auto lastCheckData = LastCheckTimeData::GetSingleton();
 		if (!lastCheckData->Save(serializationInterface, kLastCheckTimeDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Arousal Last Check Time Data");
+			REX::CRITICAL("Failed to save Arousal Last Check Time Data");
 		}
 
 		const auto lastOrgasmData = LastOrgasmTimeData::GetSingleton();
 		if (!lastOrgasmData->Save(serializationInterface, kLastOrgasmTimeDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Last Orgasm Time Data");
+			REX::CRITICAL("Failed to save Last Orgasm Time Data");
 		}
 
 		const auto armorKeywordData = ArmorKeywordData::GetSingleton();
 		if (!armorKeywordData->Save(serializationInterface, kArmorKeywordDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Armor Keyword Data");
+			REX::CRITICAL("Failed to save Armor Keyword Data");
 		}
 
 		const auto isArousalLockedData = IsArousalLockedData::GetSingleton();
 		if (!isArousalLockedData->Save(serializationInterface, kIsArousalLockedDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Is Arousal Locked Data");
+			REX::CRITICAL("Failed to save Is Arousal Locked Data");
 		}
 
 		const auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
 		if (!isActorExhibitionistData->Save(serializationInterface, kIsActorExhibitionistDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Is Actor Exhibitionist Data");
+			REX::CRITICAL("Failed to save Is Actor Exhibitionist Data");
 		}
 
 		const auto settingsData = SettingsData::GetSingleton();
 		if (!settingsData->Save(serializationInterface, kSettingsDataKey, kSerializationVersion)) {
-			logger::critical("Failed to save Settings Data");
+			REX::CRITICAL("Failed to save Settings Data");
 		}
 
-		logger::trace("OSLArousal Data Saved");
+		REX::TRACE("OSLArousal Data Saved");
 	}
 
 	void LoadCallback(SKSE::SerializationInterface* serializationInterface)
@@ -219,13 +219,13 @@ namespace PersistedData
 		std::uint32_t type;
 		std::uint32_t version;
 		std::uint32_t length;
-		logger::trace("OSLArousal Load Start");
+		REX::TRACE("OSLArousal Load Start");
 
 		while (serializationInterface->GetNextRecordInfo(type, version, length)) {
-			logger::trace("Trying Load for {}", DecodeTypeCode(type));
+			REX::TRACE("Trying Load for {}", DecodeTypeCode(type));
 
 			if (version != kSerializationVersion) {
-				logger::critical("Loaded data has incorrect version. Recieved ({}) - Expected ({}) for Data Key ({})"sv, version, kSerializationVersion, DecodeTypeCode(type));
+				REX::CRITICAL("Loaded data has incorrect version. Recieved ({}) - Expected ({}) for Data Key ({})"sv, version, kSerializationVersion, DecodeTypeCode(type));
 				continue;
 			}
 
@@ -234,7 +234,7 @@ namespace PersistedData
 				{
 					auto arousalData = ArousalData::GetSingleton();
 					if (!arousalData->Load(serializationInterface)) {
-						logger::critical("Failed to Load Arousal Data"sv);
+						REX::CRITICAL("Failed to Load Arousal Data"sv);
 					}
 				}
 				break;
@@ -242,7 +242,7 @@ namespace PersistedData
 				{
 					auto baseLibidoData = BaseLibidoData::GetSingleton();
 					if (!baseLibidoData->Load(serializationInterface)) {
-						logger::critical("Failed to Load Base Libido Data"sv);
+						REX::CRITICAL("Failed to Load Base Libido Data"sv);
 					}
 				}
 				break;
@@ -250,7 +250,7 @@ namespace PersistedData
 				{
 					auto arousalMultiplierData = ArousalMultiplierData::GetSingleton();
 					if (!arousalMultiplierData->Load(serializationInterface)) {
-						logger::critical("Failed to Load Arousal Multiplier Data"sv);
+						REX::CRITICAL("Failed to Load Arousal Multiplier Data"sv);
 					}
 				}
 				break;
@@ -258,7 +258,7 @@ namespace PersistedData
 				{
 					auto lastCheckData = LastCheckTimeData::GetSingleton();
 					if (!lastCheckData->Load(serializationInterface)) {
-						logger::critical("Failed to Load LastCheckTime Data"sv);
+						REX::CRITICAL("Failed to Load LastCheckTime Data"sv);
 					}
 				}
 				break;
@@ -266,7 +266,7 @@ namespace PersistedData
 				{
 					auto lastOrgasmData = LastOrgasmTimeData::GetSingleton();
 					if (!lastOrgasmData->Load(serializationInterface)) {
-						logger::critical("Failed to Load LastOrgasm Data"sv);
+						REX::CRITICAL("Failed to Load LastOrgasm Data"sv);
 					}
 				}
 				break;
@@ -274,7 +274,7 @@ namespace PersistedData
 				{
 					auto armorKeywordData = ArmorKeywordData::GetSingleton();
 					if (!armorKeywordData->Load(serializationInterface)) {
-						logger::critical("Failed to Load armorKeywordData Data"sv);
+						REX::CRITICAL("Failed to Load armorKeywordData Data"sv);
 					}
 				}
 				break;
@@ -282,7 +282,7 @@ namespace PersistedData
 				{
 					auto isArousalLockedData = IsArousalLockedData::GetSingleton();
 					if (!isArousalLockedData->Load(serializationInterface)) {
-						logger::critical("Failed to Load IsArousalLocked Data"sv);
+						REX::CRITICAL("Failed to Load IsArousalLocked Data"sv);
 					}
 				}
 				break;
@@ -290,7 +290,7 @@ namespace PersistedData
 				{
 					auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
 					if (!isActorExhibitionistData->Load(serializationInterface)) {
-						logger::critical("Failed to Load IsActorExhibitionist Data"sv);
+						REX::CRITICAL("Failed to Load IsActorExhibitionist Data"sv);
 					}
 				}
 				break;
@@ -298,17 +298,17 @@ namespace PersistedData
 				{
 					auto settingsData = SettingsData::GetSingleton();
 					if (!settingsData->Load(serializationInterface)) {
-						logger::critical("Failed to Load Settings Data"sv);
+						REX::CRITICAL("Failed to Load Settings Data"sv);
 					}
 				}
 				break;
 			default:
-				logger::critical("Unrecognized Record Type: {}"sv, DecodeTypeCode(type));
+				REX::CRITICAL("Unrecognized Record Type: {}"sv, DecodeTypeCode(type));
 				break;
 			}
 		}
 
-		logger::trace("OSLArousal Data loaded");
+		REX::TRACE("OSLArousal Data loaded");
 	}
 
 	void RevertCallback(SKSE::SerializationInterface*)
@@ -335,12 +335,12 @@ namespace PersistedData
 		//End All Scenes as well
 		SceneManager::GetSingleton()->ClearScenes();
 
-		logger::trace("Reverting Data State...");
+		REX::TRACE("Reverting Data State...");
 	}
 
 	void ResetSystemForModeSwitch()
 	{
-		logger::info("Resetting System for Mode Switch...");
+		REX::INFO("Resetting System for Mode Switch...");
 		//Reset relevant data for mode switch
 		auto arousalData = ArousalData::GetSingleton();
 		arousalData->Clear();

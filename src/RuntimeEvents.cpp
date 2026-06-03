@@ -69,12 +69,12 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 	std::set<RE::ActorHandle> spectatingActors;
 	for (const auto scene : activeScenes) {
 		if (scene.Participants.size() <= 0) {
-			logger::warn("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
+			REX::WARN("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
 			continue;
 		}
 
 		if(!scene.Participants[0].get()) {
-			logger::warn("HandleAdultScenes: Skipping sceneid: {} first participant is null", scene.SceneId);
+			REX::WARN("HandleAdultScenes: Skipping sceneid: {} first participant is null", scene.SceneId);
 			continue;
 		}
 		const auto spectators = GetNearbySpectatingActors(scene.Participants[0].get().get(), scanDistance);
@@ -99,7 +99,7 @@ void WorldChecks::ArousalUpdateLoop()
 	}
 
 	const auto activeScenes = SceneManager::GetSingleton()->GetAllScenes();
-	//logger::trace("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
+	//REX::TRACE("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
 	if (activeScenes.size() > 0) {
 		HandleAdultScenes(activeScenes, elapsedGameTimeSinceLastCheck);
 	}
@@ -147,7 +147,7 @@ void WorldChecks::ArousalUpdateLoop()
 			nudityScore = Integrations::ANDIntegration::GetSingleton()->GetANDNudityScore(actor);
 			isNakedOrPartiallyNude = (nudityScore > 0.0f);
 			if (isNakedOrPartiallyNude) {
-				logger::trace("ArousalUpdateLoop: Actor {} has AND nudity score {}",
+				REX::TRACE("ArousalUpdateLoop: Actor {} has AND nudity score {}",
 				             actor->GetDisplayFullName(), nudityScore);
 			}
 		} else {
@@ -156,7 +156,7 @@ void WorldChecks::ArousalUpdateLoop()
 			if (isNakedOrPartiallyNude) {
 				// For legacy mode, treat as full nudity (use configured Nude baseline)
 				nudityScore = Settings::GetSingleton()->GetANDFactionBaseline(Integrations::ANDFactionIndex::NUDE);
-				logger::trace("ArousalUpdateLoop: Actor {} is naked (legacy check)",
+				REX::TRACE("ArousalUpdateLoop: Actor {} is naked (legacy check)",
 				             actor->GetDisplayFullName());
 			}
 		}
@@ -207,7 +207,7 @@ std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)
 	std::vector<RE::ActorHandle> nearbyActors;
 
 	if (!source || !source->parentCell) {
-		logger::warn("GetNearbyActorsInCell - source can not be null");
+		REX::WARN("GetNearbyActorsInCell - source can not be null");
 		return nearbyActors;
 	}
 
@@ -230,7 +230,7 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 	std::vector<RE::Actor*> nearbyActors;
 
 	if (!source || !source->parentCell) {
-		logger::warn("GetNearbySpectatingActors - source can not be null");
+		REX::WARN("GetNearbySpectatingActors - source can not be null");
 		return nearbyActors;
 	}
 
@@ -269,11 +269,11 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	logger::debug("OnModCallbackEvent: Received ModCallbackEvent: EventName: {}", eventName);
+	REX::DEBUG("OnModCallbackEvent: Received ModCallbackEvent: EventName: {}", eventName);
 
 	// Check if AND integration is enabled
 	if (Settings::GetSingleton()->GetUseANDIntegration() && Integrations::ANDIntegration::GetSingleton()->IsAvailable()) {
-		logger::debug("Processing OSLA_ANDUpdate: AND factions recalculated, triggering arousal recalculation");
+		REX::DEBUG("Processing OSLA_ANDUpdate: AND factions recalculated, triggering arousal recalculation");
 
 		// Get the arousal system (only OSL mode supports libido modifier cache)
 		auto& arousalSystem = ArousalManager::GetSingleton()->GetArousalSystem();
@@ -286,7 +286,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 				// Update player's libido cache
 				oslSystem->ActorLibidoModifiersUpdated(player);
 				float newBaseline = oslSystem->GetBaselineArousal(player); // Force baseline recalculation
-				logger::trace("OSLA_ANDUpdate: Updated player libido cache, new baseline arousal: {}", newBaseline);
+				REX::TRACE("OSLA_ANDUpdate: Updated player libido cache, new baseline arousal: {}", newBaseline);
 
 				// Update all nearby actors' libido cache
 				const auto nearbyActors = GetNearbyActorsInCell(player);
@@ -300,7 +300,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 					}
 				}
 
-				logger::debug("OSLA_ANDUpdate: Updated libido cache for {} nearby actors", nearbyActors.size());
+				REX::DEBUG("OSLA_ANDUpdate: Updated libido cache for {} nearby actors", nearbyActors.size());
 			}
 		}
 	}

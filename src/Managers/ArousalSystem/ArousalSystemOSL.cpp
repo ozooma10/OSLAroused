@@ -17,19 +17,19 @@ float CalculateArousal(RE::Actor* actorRef, float gameHoursPassed)
     //If never calculated, regen
     if (currentArousal < -1) {
         currentArousal = Utilities::GenerateRandomFloat(10.f, 50.f);
-        //logger::debug("Random Arousal: {} Val: {}", actorRef->GetDisplayFullName(), currentArousal);
+        //REX::DEBUG("Random Arousal: {} Val: {}", actorRef->GetDisplayFullName(), currentArousal);
         return currentArousal;
     }
 
     float currentArousalBaseline = ArousalManager::GetSingleton()->GetArousalSystem().GetBaselineArousal(actorRef);
 
     float epsilon = Settings::GetSingleton()->GetArousalChangeRate();
-    //logger::trace("CalculateArousal: epsilon: {}", epsilon);
+    //REX::TRACE("CalculateArousal: epsilon: {}", epsilon);
 
 
     float t = 1.f - std::pow(epsilon, gameHoursPassed);
     float newArousal = std::lerp(currentArousal, currentArousalBaseline, t);
-    //logger::trace("CalculateArousal: {} from: {} newArousal {} Diff: {}  t: {}", actorRef->GetDisplayFullName(), currentArousal, newArousal, newArousal - currentArousal, t);
+    //REX::TRACE("CalculateArousal: {} from: {} newArousal {} Diff: {}  t: {}", actorRef->GetDisplayFullName(), currentArousal, newArousal, newArousal - currentArousal, t);
 
     return newArousal;
 }
@@ -74,7 +74,7 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
     ActorStateManager::GetSingleton()->OnActorArousalUpdated(actorRef, newArousal);
 
 
-    //logger::debug("Got Arousal for {} val: {}", actorRef->GetDisplayFullName(), newArousal);
+    //REX::DEBUG("Got Arousal for {} val: {}", actorRef->GetDisplayFullName(), newArousal);
     return newArousal;
 }
 
@@ -110,7 +110,7 @@ float ArousalSystemOSL::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 	}
 
 	float multiplier = PersistedData::ArousalMultiplierData::GetSingleton()->GetData(actorRef->formID, 1.f);
-	logger::trace("[{}] - ModifyArousal: {} * {} = {}", actorRef->GetDisplayFullName(), value, multiplier, value * multiplier);
+	REX::TRACE("[{}] - ModifyArousal: {} * {} = {}", actorRef->GetDisplayFullName(), value, multiplier, value * multiplier);
     value *= multiplier;
     float currentArousal = GetArousal(actorRef, false);
     return SetArousal(actorRef, currentArousal + value, bSendEvent);
@@ -178,7 +178,7 @@ void ArousalSystemOSL::ActorLibidoModifiersUpdated(RE::Actor* actorRef)
 
 void ArousalSystemOSL::ClearAllLibidoModifiers()
 {
-	logger::debug("OSL: Clearing all libido modifier caches (settings changed)");
+	REX::DEBUG("OSL: Clearing all libido modifier caches (settings changed)");
 	m_LibidoModifierCache.ClearAll();
 }
 
@@ -191,7 +191,7 @@ float ArousalSystemOSL::UpdateActorLibido(RE::Actor* actorRef, float gameHoursPa
     //After 1 game hour, distance from curent to target is 10% closer 
     float t = 1.f - std::pow(epsilon, gameHoursPassed);
     float newVal = std::lerp(currentVal, targetLibido, t);
-    //logger::trace("UpdateActorLibido: Lerped MOd from {} to {} DIFF: {}  t: {}", currentVal, newVal, newVal - currentVal, t);
+    //REX::TRACE("UpdateActorLibido: Lerped MOd from {} to {} DIFF: {}  t: {}", currentVal, newVal, newVal - currentVal, t);
 
     return SetLibido(actorRef, newVal);
 }
@@ -228,7 +228,7 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
                 float maxNudeScore = settings->GetANDFactionBaseline(Integrations::ANDFactionIndex::NUDE);
                 float nudityScale = maxNudeScore > 0.0f ? std::min(1.0f, maxNudityScore / maxNudeScore) : 0.0f;
                 nudeViewingBaseline *= nudityScale;
-                logger::trace("OSL: Actor {} viewing nudity scaled baseline: {} (score: {}, max: {}, scale: {})",
+                REX::TRACE("OSL: Actor {} viewing nudity scaled baseline: {} (score: {}, max: {}, scale: {})",
                              actorRef->GetDisplayFullName(), nudeViewingBaseline, maxNudityScore, maxNudeScore, nudityScale);
             }
         }
@@ -243,7 +243,7 @@ float CalculateActorLibidoModifier(RE::Actor* actorRef)
         libidoModifier += settings->GetSceneViewingBaseline();
     }
 
-	// logger::trace("CalculateLibido for Actor: {} Base: {} nudityModifier: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
+	// REX::TRACE("CalculateLibido for Actor: {} Base: {} nudityModifier: {} viewingNaked: {} Scene: {} SceneView: {} Erotic: {}",
 		// actorRef->GetDisplayFullName(), libidoModifier, nudityModifier, Utilities::Actor::IsViewingNaked(actorRef), Utilities::Actor::IsParticipatingInScene(actorRef), Utilities::Actor::IsViewingScene(actorRef), settings->GetEroticArmorKeyword() ? settings->GetEroticArmorKeyword()->formID : 0);
 
     float deviceGain = DevicesIntegration::GetSingleton()->GetArousalBaselineFromDevices(actorRef);

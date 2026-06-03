@@ -35,11 +35,11 @@ bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)
 void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked)
 {
 	if (!actorRef) {
-		logger::warn("ActorNakedStateChanged called with null actor");
+		REX::WARN("ActorNakedStateChanged called with null actor");
 		return;
 	}
 
-	logger::trace("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
+	REX::TRACE("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
 	m_ActorNakedStateCache.UpdateItem(actorRef, newNaked);
 	Papyrus::Events::SendActorNakedUpdatedEvent(actorRef, newNaked);
 
@@ -135,13 +135,13 @@ bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
 	if (!m_CreatureKeyword) {
 		m_CreatureKeyword = (RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId);
 		if (!m_CreatureKeyword) {
-			logger::error("Failed to load ActorTypeCreature keyword (FormID: {:X})", kActorTypeCreatureKeywordFormId);
+			REX::ERROR("Failed to load ActorTypeCreature keyword (FormID: {:X})", kActorTypeCreatureKeywordFormId);
 		}
 	}
 	if (!m_AnimalKeyword) {
 		m_AnimalKeyword = (RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId);
 		if (!m_AnimalKeyword) {
-			logger::error("Failed to load ActorTypeAnimal keyword (FormID: {:X})", kActorTypeAnimalKeywordFormId);
+			REX::ERROR("Failed to load ActorTypeAnimal keyword (FormID: {:X})", kActorTypeAnimalKeywordFormId);
 		}
 	}
 
@@ -150,7 +150,7 @@ bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
 	}
 
 	// If keywords failed to load, log warning and assume humanoid to prevent blocking all functionality
-	logger::warn("IsHumanoidActor: Keywords not loaded, defaulting to humanoid for actor {}", actorRef->GetDisplayFullName());
+	REX::WARN("IsHumanoidActor: Keywords not loaded, defaulting to humanoid for actor {}", actorRef->GetDisplayFullName());
 	return true;
 }
 

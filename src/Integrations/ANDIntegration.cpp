@@ -11,7 +11,7 @@ namespace Integrations
 
         const auto dataHandler = RE::TESDataHandler::GetSingleton();
         if (!dataHandler) {
-            logger::error("Failed to get TESDataHandler");
+            REX::ERROR("Failed to get TESDataHandler");
             return false;
         }
 
@@ -19,7 +19,7 @@ namespace Integrations
         const char* andModName = "Advanced Nudity Detection.esp";
         const auto andMod = dataHandler->LookupModByName(andModName);
         if (!andMod) {
-            logger::info("{} mod not found in load order, integration disabled", andModName);
+            REX::INFO("{} mod not found in load order, integration disabled", andModName);
             m_IsAvailable = false;
             return false;
         }
@@ -30,13 +30,13 @@ namespace Integrations
         auto ResolveAndCastFaction = [&](uint32_t baseId, const char* name) -> RE::TESFaction* {
             RE::FormID formId = Utilities::Forms::ResolveFormId(m_ANDModIndex, baseId);
             if (!formId) {
-                logger::warn("Failed to resolve A.N.D. faction: {} (0x{:08X})", name, baseId);
+                REX::WARN("Failed to resolve A.N.D. faction: {} (0x{:08X})", name, baseId);
                 return nullptr;
             }
             
             RE::TESFaction* faction = RE::TESForm::LookupByID<RE::TESFaction>(formId); 
             if(!faction) {
-                logger::warn("Resolved A.N.D. faction is not a TESFaction: {} (0x{:08X})", name, formId);
+                REX::WARN("Resolved A.N.D. faction is not a TESFaction: {} (0x{:08X})", name, formId);
                 return nullptr;
             }
             return faction;
@@ -53,27 +53,27 @@ namespace Integrations
 
         // Check if we resolved at least the core factions
         if (!m_ANDNudeFaction || !m_ANDToplessFaction || !m_ANDBottomlessFaction) {
-            logger::warn("Failed to resolve core A.N.D. factions, integration disabled");
+            REX::WARN("Failed to resolve core A.N.D. factions, integration disabled");
             m_IsAvailable = false;
             return false;
         }
 
         m_IsAvailable = true;
-        logger::info("A.N.D. Integration initialized successfully");
+        REX::INFO("A.N.D. Integration initialized successfully");
         return true;
     }
 
     float ANDIntegration::GetANDNudityScore(RE::Actor* actor)
     {
         if (!actor) {
-            logger::trace("GetANDNudityScore: Actor is null");
+            REX::TRACE("GetANDNudityScore: Actor is null");
             return 0.0f;
         }
 
         Locker locker(m_Lock);
 
         if (!m_IsAvailable) {
-            logger::trace("GetANDNudityScore: A.N.D. integration not available");
+            REX::TRACE("GetANDNudityScore: A.N.D. integration not available");
             return 0.0f;
         }
 
@@ -81,7 +81,7 @@ namespace Integrations
             return FetchActorNudityState(actor).calculatedScore;
         }
         catch (const std::exception& e) {
-            logger::error("GetANDNudityScore: Exception caught for actor {:08X}: {}",
+            REX::ERROR("GetANDNudityScore: Exception caught for actor {:08X}: {}",
                          actor->formID, e.what());
             return 0.0f;
         }
@@ -98,7 +98,7 @@ namespace Integrations
         // Check faction membership for each A.N.D. faction with error handling
         auto CheckFaction = [&](RE::TESFaction* faction, const char* factionName) -> bool {
             if (!faction) {
-                logger::trace("CheckFaction: {} faction is null", factionName);
+                REX::TRACE("CheckFaction: {} faction is null", factionName);
                 return false;
             }
 
@@ -106,7 +106,7 @@ namespace Integrations
                 return actor->GetFactionRank(faction, actor->IsPlayer()) > 0;
             }
             catch (const std::exception& e) {
-                logger::error("CheckFaction: Error checking {} faction for actor {:08X}: {}",
+                REX::ERROR("CheckFaction: Error checking {} faction for actor {:08X}: {}",
                              factionName, actor->formID, e.what());
                 return false;
             }
@@ -121,7 +121,7 @@ namespace Integrations
         // Step 1: Hard override for Nude
         if (state.isNude) {
             state.calculatedScore = baselines.Nude;
-            logger::trace("Actor {} is nude, score: {}", actor->GetDisplayFullName(), state.calculatedScore);
+            REX::TRACE("Actor {} is nude, score: {}", actor->GetDisplayFullName(), state.calculatedScore);
             return state;
         }
 
@@ -134,7 +134,7 @@ namespace Integrations
         state.isShowingUnderwear = CheckFaction(m_ANDShowingUnderwearFaction, "ShowingUnderwear");
 
 
-        logger::trace("Actor {} A.N.D. Nudity State - Nude: {}, Topless: {}, Bottomless: {}, ShowingChest: {}, ShowingAss: {}, ShowingGenitals: {}, ShowingBra: {}, ShowingUnderwear: {}",
+        REX::TRACE("Actor {} A.N.D. Nudity State - Nude: {}, Topless: {}, Bottomless: {}, ShowingChest: {}, ShowingAss: {}, ShowingGenitals: {}, ShowingBra: {}, ShowingUnderwear: {}",
                      actor->GetDisplayFullName(),
                      state.isNude,
                      state.isTopless,
@@ -181,7 +181,7 @@ namespace Integrations
         if (state.isTopless && state.isBottomless && !state.isNude) {
             // Use a synergy bonus that's proportional to the configured values
             baseScore = (baselines.Topless + baselines.Bottomless) * 0.74f;
-            logger::trace("Actor {} has topless+bottomless synergy, score: {}",
+            REX::TRACE("Actor {} has topless+bottomless synergy, score: {}",
                          actor->GetDisplayFullName(), baseScore);
         }
 
@@ -190,7 +190,7 @@ namespace Integrations
                                    baselines.ShowingChest + baselines.ShowingGenitals + baselines.ShowingAss});
         state.calculatedScore = std::clamp(baseScore, 0.0f, maxValue);
 
-        logger::trace("Actor {} nudity score: {} (chest:{}, front:{}, ass:{})",
+        REX::TRACE("Actor {} nudity score: {} (chest:{}, front:{}, ass:{})",
                      actor->GetDisplayFullName(), state.calculatedScore, chestScore, frontScore, assScore);
 
         return state;
@@ -215,7 +215,7 @@ namespace Integrations
 
         // If we have an A.N.D. score, return it directly
         if (andScore > 0.0f) {
-            logger::trace("Actor {} using A.N.D. nudity modifier: {}",
+            REX::TRACE("Actor {} using A.N.D. nudity modifier: {}",
                          actor->GetDisplayFullName(), andScore);
             return andScore;
         }
@@ -223,14 +223,14 @@ namespace Integrations
         // Fall back to legacy nudity detection
         if (IsActorNudeLegacy(actor)) {
             float nudeBaseline = settings->GetNudeArousalBaseline();
-            logger::trace("Actor {} using legacy nude baseline: {}", actor->GetDisplayFullName(), nudeBaseline);
+            REX::TRACE("Actor {} using legacy nude baseline: {}", actor->GetDisplayFullName(), nudeBaseline);
             return nudeBaseline;
         }
 
         // Check for erotic armor as secondary fallback
         const float eroticBaseline = GetActorEroticArmorBaselineLegacy(actor);
         if (eroticBaseline > 0.0f) {
-            logger::trace("Actor {} using erotic armor baseline: {}", actor->GetDisplayFullName(), eroticBaseline);
+            REX::TRACE("Actor {} using erotic armor baseline: {}", actor->GetDisplayFullName(), eroticBaseline);
             return eroticBaseline;
         }
 
@@ -242,14 +242,14 @@ namespace Integrations
         std::vector<float> contributions;
 
         if (!actor) {
-            logger::trace("GetANDFactionContributions: Actor is null");
+            REX::TRACE("GetANDFactionContributions: Actor is null");
             return contributions;
         }
 
         Locker locker(m_Lock);
 
         if (!m_IsAvailable) {
-            logger::trace("GetANDFactionContributions: A.N.D. integration not available");
+            REX::TRACE("GetANDFactionContributions: A.N.D. integration not available");
             return contributions;
         }
 
@@ -339,7 +339,7 @@ namespace Integrations
         contributions.push_back(braContrib);         // [6] ShowingBra
         contributions.push_back(underwearContrib);   // [7] ShowingUnderwear
 
-            logger::trace("Actor {} A.N.D. faction contributions: Nude:{:.1f}, Topless:{:.1f}, Bottomless:{:.1f}, Chest:{:.1f}, Ass:{:.1f}, Genitals:{:.1f}, Bra:{:.1f}, Underwear:{:.1f}",
+            REX::TRACE("Actor {} A.N.D. faction contributions: Nude:{:.1f}, Topless:{:.1f}, Bottomless:{:.1f}, Chest:{:.1f}, Ass:{:.1f}, Genitals:{:.1f}, Bra:{:.1f}, Underwear:{:.1f}",
                          actor->GetDisplayFullName(),
                          contributions[0], contributions[1], contributions[2], contributions[3],
                          contributions[4], contributions[5], contributions[6], contributions[7]);
@@ -347,7 +347,7 @@ namespace Integrations
             return contributions;
         }
         catch (const std::exception& e) {
-            logger::error("GetANDFactionContributions: Exception caught for actor {}: {}",
+            REX::ERROR("GetANDFactionContributions: Exception caught for actor {}: {}",
                          actor->GetDisplayFullName(), e.what());
             // Return empty vector on error
             return std::vector<float>();

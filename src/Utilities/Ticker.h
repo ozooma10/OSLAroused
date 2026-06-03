@@ -18,7 +18,7 @@ namespace Utilities
 				return;
 			}
 			m_Running = true;
-			logger::trace("Start Called with thread active state of: {}", m_ThreadActive);
+			REX::TRACE("Start Called with thread active state of: {}", m_ThreadActive);
 			if (!m_ThreadActive) {
 				std::thread tickerThread(&Ticker::RunLoop, this);
 				tickerThread.detach();

@@ -17,7 +17,7 @@ bool Papyrus::IsActorNaked(RE::StaticFunctionTag*, RE::Actor* actorRef)
 
 void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int sceneId, RE::reference_array<RE::Actor*> actorRefs)
 {
-	logger::trace("RegisterSceneStart: bIsOstim: {} sceneId: {} numActors: {}.", bIsOstim, sceneId, actorRefs.size());
+	REX::TRACE("RegisterSceneStart: bIsOstim: {} sceneId: {} numActors: {}.", bIsOstim, sceneId, actorRefs.size());
 
 	//convert actorRefs to actorHandles
 		// Convert actorRefs to actorHandles
@@ -27,7 +27,7 @@ void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int scen
 		if (actorRef) {
 			actorHandles.push_back(actorRef->GetHandle());
 		} else {
-			logger::warn("RegisterSceneStart: Null actor in scene participants list");
+			REX::WARN("RegisterSceneStart: Null actor in scene participants list");
 		}
 	}
 
@@ -41,13 +41,13 @@ void Papyrus::RegisterSceneStart(RE::StaticFunctionTag*, bool bIsOstim, int scen
 
 void Papyrus::RemoveScene(RE::StaticFunctionTag*, bool bIsOstim, int sceneId)
 {
-	logger::trace("RemoveScene: bIsOstim: {} sceneId: {}.", bIsOstim, sceneId);
+	REX::TRACE("RemoveScene: bIsOstim: {} sceneId: {}.", bIsOstim, sceneId);
 	SceneManager::GetSingleton()->RemoveScene(bIsOstim ? SceneManager::SceneFramework::kOStim : SceneManager::SceneFramework::kSexLab, sceneId);
 }
 
 void Papyrus::RegisterActorOrgasm(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
-	logger::trace("RegisterActorOrgasm: Actor: {}.", actorRef->GetDisplayFullName());
+	REX::TRACE("RegisterActorOrgasm: Actor: {}.", actorRef->GetDisplayFullName());
 	PersistedData::LastOrgasmTimeData::GetSingleton()->SetData(actorRef->formID, RE::Calendar::GetSingleton()->GetCurrentGameTime());
 }
 
@@ -72,12 +72,12 @@ bool Papyrus::RemoveKeywordFromForm(RE::StaticFunctionTag*, RE::TESForm* form, R
 bool Papyrus::FormHasKeywordString(RE::StaticFunctionTag*, RE::TESForm* form, RE::BSFixedString keyword)
 {
 	if (!form) {
-		logger::error("FormHasKeywordString received none obj.");
+		REX::ERROR("FormHasKeywordString received none obj.");
 		return false;
 	}
 	RE::BGSKeywordForm* keywords = form->As<RE::BGSKeywordForm>();
 	if (!keywords) {
-		logger::error("Keywords cast failed.");
+		REX::ERROR("Keywords cast failed.");
 		return false;
 	}
 	const char* p1 = keyword.data();
