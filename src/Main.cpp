@@ -24,7 +24,7 @@ namespace
 		{
 			report_and_fail("Unable to lookup SKSE logs directory.");
 		}
-		*path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
+		*path /= SKSE::PluginVersionData::GetSingleton()->GetPluginName();
 		*path += L".log";
 
 		std::shared_ptr<spdlog::logger> log;
@@ -103,9 +103,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 {
 	InitializeLogging();
 
-	auto* plugin = SKSE::PluginDeclaration::GetSingleton();
-	auto version = plugin->GetVersion();
-	SKSE::log::info("{} {} is loading...", plugin->GetName(), version);
+	const auto* plugin = SKSE::PluginVersionData::GetSingleton();
+	const auto version = plugin->GetPluginVersion();
+	SKSE::log::info("{} {} is loading...", plugin->GetPluginName(), version.string());
 
 	SKSE::Init(skse);
 
@@ -113,6 +113,6 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 	InitializeSerialization();
 	InitializePapyrus();
 
-	SKSE::log::info("{} has finished loading.", plugin->GetName());
+	SKSE::log::info("{} has finished loading.", plugin->GetPluginName());
 	return true;
 }

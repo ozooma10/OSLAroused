@@ -533,6 +533,11 @@ FodyWeavers.xsd
 
 build/
 
+# xmake
+.xmake/
+vsxmake*/
+compile_commands.json
+
 contrib/Distribution/**/*.dll
 contrib/Distribution/**/*.pdb
 contrib/Distribution/PapyrusRelease/*.pex
