@@ -13,7 +13,6 @@
 
 using namespace RE::BSScript;
 using namespace SKSE::log;
-using namespace SKSE::stl;
 
 namespace
 {
