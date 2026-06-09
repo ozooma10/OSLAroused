@@ -1,28 +1,28 @@
 #pragma once
 
+#include <atomic>
+#include <chrono>
+#include <functional>
+#include <mutex>
+#include <thread>
+
 namespace Utilities
 {
 	class Ticker
 	{
 	public:
 		Ticker(std::function<void()> onTick, std::chrono::milliseconds interval) :
-			m_OnTick(onTick),
-			m_Interval(interval),
-			m_Running(false),
-			m_ThreadActive(false)
+			m_OnTick(std::move(onTick)),
+			m_Interval(interval)
 		{}
 
 		void Start()
 		{
-			if (m_Running) {
-				return;
+			if (m_Running.exchange(true)) {
+				return;  // already running
 			}
-			m_Running = true;
-			REX::TRACE("Start Called with thread active state of: {}", m_ThreadActive.load());
-			if (!m_ThreadActive) {
-				std::thread tickerThread(&Ticker::RunLoop, this);
-				tickerThread.detach();
-			}
+			REX::TRACE("Ticker started");
+			std::thread([this] { RunLoop(); }).detach();
 		}
 
 		void Stop()
@@ -30,35 +30,38 @@ namespace Utilities
 			m_Running = false;
 		}
 
+		bool IsRunning() const
+		{
+			return m_Running;
+		}
+
 		void UpdateInterval(std::chrono::milliseconds newInterval)
 		{
-			m_IntervalMutex.lock();
+			std::scoped_lock lock(m_IntervalMutex);
 			m_Interval = newInterval;
-			m_IntervalMutex.unlock();
 		}
 
 	private:
 		void RunLoop()
 		{
-			m_ThreadActive = true;
 			while (m_Running) {
-				std::thread runnerThread(m_OnTick);
-				runnerThread.detach();
-
-				m_IntervalMutex.lock();
-				std::chrono::milliseconds interval = m_Interval;
-				m_IntervalMutex.unlock();
+				std::chrono::milliseconds interval;
+				{
+					std::scoped_lock lock(m_IntervalMutex);
+					interval = m_Interval;
+				}
 				std::this_thread::sleep_for(interval);
+
+				if (m_Running && m_OnTick) {
+					m_OnTick();
+				}
 			}
-			m_ThreadActive = false;
 		}
 
 		std::function<void()> m_OnTick;
 		std::chrono::milliseconds m_Interval;
-
-		std::atomic<bool> m_ThreadActive;
-		std::atomic<bool> m_Running;
 		std::mutex m_IntervalMutex;
+		std::atomic<bool> m_Running{ false };
 	};
 
 }
