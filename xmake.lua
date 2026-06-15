@@ -1,5 +1,5 @@
 -- include subprojects
-includes("lib/commonlibsse")
+includes("lib/CommonLibVR")
 
 -- set project constants
 set_project("OSLAroused")
@@ -57,10 +57,12 @@ end)
 
 -- the SKSE plugin
 target("OSLAroused", function()
-    add_rules("commonlibsse.plugin", {
+    add_rules("commonlibsse-ng.plugin", {
         name = "OSLAroused",
         author = "ozooma10",
         description = "High-Performance Arousal Framework. Support for both Sexlab and OStim."
+        -- no `options` table => CommonLibSSE-NG defaults: struct-Independent +
+        -- AddressLibrary version-independence => single DLL for Skyrim SE / AE / VR.
     })
     add_rules("oslaroused.deploy")
 
@@ -80,7 +82,7 @@ if has_config("build_tests") then
         set_default(false)
 
         -- link against the same CommonLibSSE static library as the plugin
-        add_deps("commonlibsse")
+        add_deps("commonlibsse-ng")
         add_packages("catch2")
 
         -- all plugin sources plus the test sources, matching the old CMake test target

@@ -28,7 +28,7 @@ namespace RuntimeEvents
 			static OnModCallbackEvent g_ModCallbackEventHandler;
 			auto modCallbackEventSource = SKSE::GetModCallbackEventSource();
 			if(!modCallbackEventSource) {
-				REX::ERROR("Failed to get ModCallbackEventSource for OnModCallbackEvent registration");
+				SKSE::log::error("Failed to get ModCallbackEventSource for OnModCallbackEvent registration");
 				return false;
 			}
 
@@ -63,6 +63,22 @@ namespace WorldChecks
 
 		float LastNearbyArousalUpdateGameTime = -1.f;
 
+		// LastScannedActors is written on the main thread (from the arousal tick) and
+		// read from the Papyrus VM thread (GetLastScannedActors), so it is guarded.
+		std::vector<RE::ActorHandle> GetLastScannedActors() const
+		{
+			std::scoped_lock lock(m_ScannedActorsLock);
+			return LastScannedActors;
+		}
+
+		void SetLastScannedActors(std::vector<RE::ActorHandle> actors)
+		{
+			std::scoped_lock lock(m_ScannedActorsLock);
+			LastScannedActors = std::move(actors);
+		}
+
+	private:
 		std::vector<RE::ActorHandle> LastScannedActors;
+		mutable std::mutex m_ScannedActorsLock;
 	};
 }

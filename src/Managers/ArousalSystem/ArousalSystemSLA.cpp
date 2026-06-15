@@ -103,7 +103,7 @@ float ArousalSystemSLA::ModifyArousal(RE::Actor* actorRef, float value, bool bSe
 		exposure = exposure * std::pow(Settings::kSLADecayBase, -timeSinceUpdate / timeRateHalfLife) + modifiedValue;
 	}
 
-	REX::TRACE("[{}] - ModifyArousal: {} + {} = {}", actorRef->GetDisplayFullName(), exposure - modifiedValue, modifiedValue, exposure);
+	SKSE::log::trace("[{}] - ModifyArousal: {} + {} = {}", actorRef->GetDisplayFullName(), exposure - modifiedValue, modifiedValue, exposure);
 
 	return SetArousal(actorRef, exposure, bSendEvent);
 }
@@ -175,7 +175,7 @@ float ArousalSystemSLA::ModifyLibido(RE::Actor* actorRef, float value)
 {
 	if(!actorRef) { return 0.f; }
 
-	REX::TRACE("[{}] - ModifyLibido: {} + {} = {}", actorRef->GetDisplayFullName(), GetLibido(actorRef), value, GetLibido(actorRef) + value);
+	SKSE::log::trace("[{}] - ModifyLibido: {} + {} = {}", actorRef->GetDisplayFullName(), GetLibido(actorRef), value, GetLibido(actorRef) + value);
 	float val = GetLibido(actorRef) + value;
 	return SetLibido(actorRef, val);
 }
@@ -278,7 +278,7 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 		// Scale to 0.0-1.0 range (configured Nude baseline = 1.0 scale)
 		float maxNudeScore = Settings::GetSingleton()->GetANDFactionBaseline(Integrations::ANDFactionIndex::NUDE);
 		nudityScale = maxNudeScore > 0.0f ? std::min(1.0f, andScore / maxNudeScore) : 0.0f;
-		REX::TRACE("AND Integration: Actor {} has nudity score {} / {} (scale {})",
+		SKSE::log::trace("AND Integration: Actor {} has nudity score {} / {} (scale {})",
 		             nakedRef->GetDisplayFullName(), andScore, maxNudeScore, nudityScale);
 	}
 
@@ -288,7 +288,7 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 	if (nakedBase && (genderPreference == nakedBase->GetSex() || genderPreference == 2))
 	{
 		float exposureGain = 4 * exposureScale * nudityScale;
-		REX::TRACE("Actor {} gaining {} exposure for seeing {} naked (base: 4, scale: {}, nudity: {})",
+		SKSE::log::trace("Actor {} gaining {} exposure for seeing {} naked (base: 4, scale: {}, nudity: {})",
 			actorRef->GetDisplayFullName(), exposureGain, nakedRef->GetDisplayFullName(), exposureScale, nudityScale);
 		//The main updateloop runs GetArousal so dont need to send an event here
 		ModifyArousal(actorRef, exposureGain, false);
@@ -296,7 +296,7 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 	else
 	{
 		float exposureGain = 2 * exposureScale * nudityScale;
-		REX::TRACE("Actor {} gaining {} exposure for seeing {} naked (base: 2, scale: {}, nudity: {})",
+		SKSE::log::trace("Actor {} gaining {} exposure for seeing {} naked (base: 2, scale: {}, nudity: {})",
 			actorRef->GetDisplayFullName(), exposureGain, nakedRef->GetDisplayFullName(), exposureScale, nudityScale);
 		ModifyArousal(actorRef, exposureGain, false);
 	}
@@ -306,7 +306,7 @@ void ArousalSystemSLA::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nak
 	if (PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(nakedRef->formID, false))
 	{
 		float exhibitionistGain = 2 * exposureScale * nudityScale;
-		REX::TRACE("Actor {} gaining {} exposure for being an exhibitionist to {} (scale: {}, nudity: {})",
+		SKSE::log::trace("Actor {} gaining {} exposure for being an exhibitionist to {} (scale: {}, nudity: {})",
 			nakedRef->GetDisplayFullName(), exhibitionistGain, actorRef->GetDisplayFullName(), exposureScale, nudityScale);
 		ModifyArousal(nakedRef, exhibitionistGain, false);
 	}
