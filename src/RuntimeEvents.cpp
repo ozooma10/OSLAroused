@@ -85,14 +85,44 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 	SceneManager::GetSingleton()->UpdateSceneSpectators(spectatingActors);
 }
 
-void WorldChecks::ArousalUpdateLoop()
+namespace
 {
-	float curHours = RE::Calendar::GetSingleton()->GetHoursPassed();
+	// Bounds outstanding world-update tasks to one, so ticks can't pile up while
+	// the game isn't draining the SKSE task queue (e.g. at the main menu) or if a
+	// scan ever outlasts the tick interval.
+	std::atomic<bool> g_arousalUpdatePending{ false };
+}
+
+// Runs the actual world scan on the main game thread (marshalled from the
+// background ticker by WorldChecks::ArousalUpdateLoop). Every engine read below
+// requires a loaded world and the main thread.
+static void RunWorldArousalUpdate()
+{
+	// Bail out if there is no loaded game world yet (main menu / load transition),
+	// where these engine singletons are null. This is the crash that was being
+	// hit: RE::Calendar::GetSingleton() returned null and GetHoursPassed()
+	// dereferenced it on the background ticker thread.
+	auto* calendar = RE::Calendar::GetSingleton();
+	auto* player = RE::PlayerCharacter::GetSingleton();
+	if (!calendar || !player) {
+		return;
+	}
+
+	auto* ticker = WorldChecks::ArousalUpdateTicker::GetSingleton();
+	const float curHours = calendar->GetHoursPassed();
+
+	// First tick after load: establish the time baseline and skip, so we don't
+	// apply a full (clamped) day of elapsed game time on the very first update.
+	if (ticker->LastUpdatePollGameTime < 0.f) {
+		ticker->LastUpdatePollGameTime = curHours;
+		ticker->LastNearbyArousalUpdateGameTime = curHours;
+		return;
+	}
 
 	// Clamp to 24 hours (1 full day) to allow proper convergence while preventing extreme jumps
-	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime, 0.f, 24.f);
-	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime, 0.f, 24.f);
-	WorldChecks::ArousalUpdateTicker::GetSingleton()->LastUpdatePollGameTime = curHours;
+	float elapsedGameTimeSinceLastCheck = std::clamp(curHours - ticker->LastUpdatePollGameTime, 0.f, 24.f);
+	float elapsedGameTimeSinceLastNearbyArousalCheck = std::clamp(curHours - ticker->LastNearbyArousalUpdateGameTime, 0.f, 24.f);
+	ticker->LastUpdatePollGameTime = curHours;
 
 	if (elapsedGameTimeSinceLastCheck <= 0) {
 		return;
@@ -103,16 +133,11 @@ void WorldChecks::ArousalUpdateLoop()
 	if (activeScenes.size() > 0) {
 		HandleAdultScenes(activeScenes, elapsedGameTimeSinceLastCheck);
 	}
-	
-	auto player = RE::PlayerCharacter::GetSingleton();
-	if (!player) {
-		return;
-	}
 
 	// Perform nearby arousal updates if 0.1 game hours (6 minutes at default timescale) have passed
 	bool performNearbyArousalUpdates = elapsedGameTimeSinceLastNearbyArousalCheck > Settings::GetSingleton()->GetArousalUpdateInterval();
 	if (performNearbyArousalUpdates) {
-		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastNearbyArousalUpdateGameTime = curHours;
+		ticker->LastNearbyArousalUpdateGameTime = curHours;
 	}
 
 
@@ -198,8 +223,24 @@ void WorldChecks::ArousalUpdateLoop()
 
 		//If we are updating all nearby actors, then we want to update the stored nearby actors array, and emit the sla_UpdateComplete event
 		Papyrus::Events::SendUpdateCompleteEvent(static_cast<float>(nearbyActors.size()));
-		WorldChecks::ArousalUpdateTicker::GetSingleton()->LastScannedActors = nearbyActors;
+		ticker->LastScannedActors = nearbyActors;
 	}
+}
+
+void WorldChecks::ArousalUpdateLoop()
+{
+	// The ticker invokes this on a detached background thread (see Utilities::Ticker).
+	// None of the world/engine state touched by the update (Calendar, TES, cell
+	// reference lists, actor AI/detection, faction data) is safe to read off the
+	// main game thread, so marshal the real work onto the main thread via the SKSE
+	// task interface - the same pattern Papyrus.cpp uses for actor mutations.
+	if (g_arousalUpdatePending.exchange(true)) {
+		return;  // a previous update is still queued/running; skip this tick
+	}
+	SKSE::GetTaskInterface()->AddTask([]() {
+		RunWorldArousalUpdate();
+		g_arousalUpdatePending.store(false);
+	});
 }
 
 std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)

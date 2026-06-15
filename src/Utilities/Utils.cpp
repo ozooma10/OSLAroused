@@ -249,9 +249,14 @@ void Utilities::logInvalidArgsVerbose(const char* fnName) {
 void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float radius,
     std::function<RE::BSContainer::ForEachResult(RE::TESObjectREFR& ref)> callback) {
 
+    auto* tesSingleton = RE::TES::GetSingleton();
+    if (!tesSingleton) {
+        // No loaded world (main menu / load transition); nothing to iterate.
+        return;
+    }
+
     if (origin && radius > 0.0f) {
         const auto originPos = origin->GetPosition();
-        auto* tesSingleton = RE::TES::GetSingleton();
         auto* interiorCell = tesSingleton->interiorCell;
         if (interiorCell) {
             interiorCell->ForEachReferenceInRange(originPos, radius,
@@ -285,7 +290,7 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
             }
         }
     } else {
-        RE::TES::GetSingleton()->ForEachReference([&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
+        tesSingleton->ForEachReference([&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
     }
 }
 

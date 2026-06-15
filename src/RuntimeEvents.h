@@ -55,9 +55,13 @@ namespace WorldChecks
 			return &singleton;
 		}
 
-		float LastUpdatePollGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
+		// Baselined lazily on the first update tick (see RunWorldArousalUpdate in
+		// RuntimeEvents.cpp). A negative sentinel means "not yet baselined"; this
+		// also avoids touching RE::Calendar (null at the main menu) during the
+		// singleton's construction at kDataLoaded.
+		float LastUpdatePollGameTime = -1.f;
 
-		float LastNearbyArousalUpdateGameTime = RE::Calendar::GetSingleton()->GetHoursPassed();
+		float LastNearbyArousalUpdateGameTime = -1.f;
 
 		std::vector<RE::ActorHandle> LastScannedActors;
 	};
