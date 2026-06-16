@@ -16,7 +16,7 @@ add_rules("plugin.vsxmake.autoupdate")
 -- silence the MSVC warnings that the previous CMake build also suppressed
 if is_plat("windows") then
     -- NOGDI prevents <wingdi.h> from defining the `ERROR` macro, which would
-    -- otherwise clobber REX::ERROR (the fork's log API uses uppercase names).
+    -- otherwise collide with identifiers named ERROR pulled in via CommonLibSSE.
     add_defines("_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS", "WIN32_LEAN_AND_MEAN", "NOMINMAX", "NOGDI", "UNICODE", "_UNICODE")
     add_cxxflags("cl::/permissive-", "cl::/Zc:preprocessor", "cl::/EHsc")
     add_cxxflags("cl::/wd4251", "cl::/wd4275", "cl::/wd4267", "cl::/wd4244", "cl::/wd4996")
