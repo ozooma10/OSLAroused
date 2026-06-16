@@ -181,16 +181,16 @@ void PapyrusConfig::SetDeviceTypeBaseline(RE::StaticFunctionTag*, int deviceType
 		arousalBaselineConfig.Belt = newVal;
 		break;
 	case DeviceType::Collar:
-		arousalBaselineConfig.Belt = newVal;
+		arousalBaselineConfig.Collar = newVal;
 		break;
 	case DeviceType::LegCuffs:
-		arousalBaselineConfig.Belt = newVal;
+		arousalBaselineConfig.LegCuffs = newVal;
 		break;
 	case DeviceType::ArmCuffs:
-		arousalBaselineConfig.Belt = newVal;
+		arousalBaselineConfig.ArmCuffs = newVal;
 		break;
 	case DeviceType::Bra:
-		arousalBaselineConfig.Belt = newVal;
+		arousalBaselineConfig.Bra = newVal;
 		break;
 	case DeviceType::Gag:
 		arousalBaselineConfig.Gag = newVal;
