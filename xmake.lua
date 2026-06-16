@@ -43,6 +43,7 @@ rule("oslaroused.deploy", function()
         -- semicolon-separated list of MO2 mod folders, same env var as the old build
         local targets = os.getenv("SkyrimPluginTargets")
         if targets then
+            local contrib = path.join(os.projectdir(), "contrib", "Distribution")
             for _, dir in ipairs(path.splitenv(targets)) do
                 local plugindir = path.join(dir, "SKSE", "Plugins")
                 os.mkdir(plugindir)
@@ -50,6 +51,18 @@ rule("oslaroused.deploy", function()
                 if os.isfile(target:symbolfile()) then
                     os.cp(target:symbolfile(), plugindir)
                 end
+
+                -- deploy the loose game-data files as a Data-folder overlay (MO2 mod root):
+                --   Assets/*        -> mod root (ESP/ESM + interface/Translations/...)
+                --   Config/*.ini    -> SKSE/Plugins/
+                --   PapyrusRelease/ -> Scripts/
+                -- (fomod/Images/PapyrusSources/Plugin* are packaging/dev artifacts; the
+                --  Devious Devices patch is FOMOD-optional, so neither is auto-deployed.)
+                os.cp(path.join(contrib, "Assets", "*"), dir)
+                os.cp(path.join(contrib, "Config", "*.ini"), plugindir)
+                local scriptdir = path.join(dir, "Scripts")
+                os.mkdir(scriptdir)
+                os.cp(path.join(contrib, "PapyrusRelease", "*.pex"), scriptdir)
             end
         end
     end)
