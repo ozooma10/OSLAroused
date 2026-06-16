@@ -178,28 +178,28 @@ void ActorStateManager::HandlePlayerArousalUpdated(RE::Actor* actorRef, float ne
 	{
 		if (m_WasPlayerDispleased)
 		{
-			RE::DebugNotification("$OSL_NotificationArousal20Displeased");
+			RE::SendHUDMessage::ShowHUDMessage("$OSL_NotificationArousal20Displeased");
 			m_WasPlayerDispleased = false;
 		}
 		else
 		{
-			RE::DebugNotification("$OSL_NotificationArousal20");
+			RE::SendHUDMessage::ShowHUDMessage("$OSL_NotificationArousal20");
 		}
 		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
 	}
 	else if (newArousal >= 90 && (m_PreviousPlayerArousal < 90 || m_LastNotificationTime + 0.2 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
 	{
-		RE::DebugNotification("$OSL_NotificationArousal90");
+		RE::SendHUDMessage::ShowHUDMessage("$OSL_NotificationArousal90");
 		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
 	}
 	else if (newArousal >= 70 && (m_PreviousPlayerArousal < 70 || m_LastNotificationTime + 0.3 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
 	{
-		RE::DebugNotification("$OSL_NotificationArousal70");
+		RE::SendHUDMessage::ShowHUDMessage("$OSL_NotificationArousal70");
 		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
 	}
 	else if (newArousal >= 50 && (m_PreviousPlayerArousal < 50 || m_LastNotificationTime + 0.4 <= RE::Calendar::GetSingleton()->GetDaysPassed()))
 	{
-		RE::DebugNotification("$OSL_NotificationArousal50");
+		RE::SendHUDMessage::ShowHUDMessage("$OSL_NotificationArousal50");
 		m_LastNotificationTime = RE::Calendar::GetSingleton()->GetDaysPassed();
 	}
 
