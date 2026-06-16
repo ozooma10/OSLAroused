@@ -1,4 +1,5 @@
 #include "PersistedData.h"
+#include "Settings.h"
 #include "Managers/SceneManager.h"
 
 #include <algorithm>
@@ -319,29 +320,44 @@ namespace PersistedData
 
 	void SanitizeLoadedData()
 	{
-		// Arousal and base libido are always in [0, 100]; a non-finite (NaN/inf) value would propagate through every calculation, so reset it to 0.
+		// The mode active when the save was written decides the neutral defaults and valid ranges
+		// SettingsData stores the mode as a raw int where 0 == OSL (see SettingsData::GetArousalMode);
+		// it is deserialized earlier in LoadCallback, so it is already populated here.
+		const bool bSLAMode = SettingsData::GetSingleton()->GetArousalMode() != 0;
+
+		std::size_t corrected = 0;
+
+		// Arousal/Exposure is always in [0, 100] in both modes (every SetArousal path clamps to it).
+		// A non-finite (NaN/inf) value would propagate through every calculation, so reset it to 0.
 		const auto clampScore = [](float value) -> float {
 			if (!std::isfinite(value)) {
 				return 0.f;
 			}
 			return std::clamp(value, 0.f, 100.f);
 		};
-
-		std::size_t corrected = 0;
 		corrected += ArousalData::GetSingleton()->SanitizeValues(clampScore);
-		corrected += BaseLibidoData::GetSingleton()->SanitizeValues(clampScore);
 
-		// A multiplier of 0 (or negative/non-finite) is the classic "arousal is stuck" pathology: every ModifyArousal gain is multiplied to nothing.
-		// Reset those to the mode-appropriate neutral default and clamp the rest to a sane range.
-		// SettingsData stores the mode as a raw int where 0 == OSL (see SettingsData::GetArousalMode).
-		// OSL's neutral multiplier is 1.0; SLA's neutral ExposureRate default is 2.0.
-		const bool bSLAMode = SettingsData::GetSingleton()->GetArousalMode() != 0;
-		const float defaultMultiplier = bSLAMode ? 2.f : 1.f;
+		// BaseLibido is "libido" (OSL) / "time rate" (SLA); both store [0, 100]. Reset a corrupt entry
+		// to whatever GetLibido() treats as "no record" in that mode: 0 (OSL) / 10 (SLA).
+		const float defaultLibido = bSLAMode ? 10.f : 0.f;
+		corrected += BaseLibidoData::GetSingleton()->SanitizeValues([&](float value) -> float {
+			if (!std::isfinite(value)) {
+				return defaultLibido;
+			}
+			return std::clamp(value, 0.f, 100.f);
+		});
+
+		// ArousalMultiplier is "multiplier" (OSL: neutral 1.0, valid [0, 100]) / "exposure rate"
+		// (SLA: neutral = configurable DefaultExposureRate, valid [0, 10]), matching SetArousalMultiplier's clamp in each mode. 
+		// 0 is a legal stored value in both, so only negative/non-finite entries are reset to the neutral default;  
+		// in-range values (including 0) are preserved.
+		const float defaultMultiplier = bSLAMode ? Settings::GetSingleton()->GetDefaultExposureRate() : 1.f;
+		const float maxMultiplier = bSLAMode ? 10.f : 100.f;
 		corrected += ArousalMultiplierData::GetSingleton()->SanitizeValues([&](float value) -> float {
-			if (!std::isfinite(value) || value <= 0.f) {
+			if (!std::isfinite(value) || value < 0.f) {
 				return defaultMultiplier;
 			}
-			return std::clamp(value, 0.01f, 100.f);
+			return std::clamp(value, 0.f, maxMultiplier);
 		});
 
 		// Timestamps are game-time-in-days snapshots; a negative or non-finite value means "no valid record" which we represent as 0 
