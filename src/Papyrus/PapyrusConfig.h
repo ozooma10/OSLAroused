@@ -36,6 +36,10 @@ namespace PapyrusConfig
 
 	float GetUpdateIntervalRealTimeSeconds(RE::StaticFunctionTag* base);
 
+	//Sleep effect (player arousal gain after sleeping; 0 disables)
+	void SetSleepArousalGain(RE::StaticFunctionTag* base, float newVal);
+	float GetSleepArousalGain(RE::StaticFunctionTag* base);
+
 	// Utilities
 	RE::BSFixedString RoundFloat(RE::StaticFunctionTag* base, float value, int decimals);
 

@@ -72,6 +72,7 @@ namespace
 			case SKSE::MessagingInterface::kDataLoaded:  // All ESM/ESL/ESP plugins have loaded, main menu is now active
 				RuntimeEvents::OnEquipEvent::RegisterEvent();
 				RuntimeEvents::OnModCallbackEvent::RegisterEvent();
+				RuntimeEvents::OnSleepStopEvent::RegisterEvent();
 				Config::GetSingleton()->LoadINIs();
 				Utilities::Factions::GetSingleton()->Initialize();
 				// Initialize A.N.D. Integration after config is loaded

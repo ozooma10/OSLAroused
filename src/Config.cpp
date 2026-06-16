@@ -92,6 +92,11 @@ bool Config::LoadINI(std::string fileName, bool useDefaults)
     loadFloat("ANDIntegration", "ShowingUnderwearBaseline", 8.0f, baselines.ShowingUnderwear);
     Settings::GetSingleton()->SetANDFactionBaselines(baselines);
 
+    // Sleep effect settings (player gains arousal after sleeping; 0 disables)
+    float sleepArousalGain = Settings::GetSingleton()->GetSleepArousalGain();
+    loadFloat("SleepEffect", "SleepArousalGain", 10.0f, sleepArousalGain);
+    Settings::GetSingleton()->SetSleepArousalGain(sleepArousalGain);
+
     // Get the log level from the System section
     const char *logLevelStr = getLatestValue("System", "LogLevel");
     if (logLevelStr == nullptr && useDefaults) {
@@ -265,6 +270,31 @@ bool Config::SaveANDFactionBaseline(int index, float value)
     }
 
     SKSE::log::debug("SaveANDFactionBaseline: Saved {}={} to INI", keyName, value);
+    return true;
+}
+
+bool Config::SaveSleepArousalGain(float value)
+{
+    CSimpleIniA ini(false, true, false);
+    // Load the custom INI first to preserve other settings
+    ini.LoadFile(kCustomIniPath);
+
+    char valueStr[32];
+    snprintf(valueStr, sizeof(valueStr), "%.1f", value);
+
+    SI_Error rc = ini.SetValue("SleepEffect", "SleepArousalGain", valueStr, nullptr, true);
+    if (rc < 0) {
+        SKSE::log::error("SaveSleepArousalGain: Failed to set value in INI. Error: {}", rc);
+        return false;
+    }
+
+    rc = ini.SaveFile(kCustomIniPath);
+    if (rc < 0) {
+        SKSE::log::error("SaveSleepArousalGain: Failed to save INI file. Error: {}", rc);
+        return false;
+    }
+
+    SKSE::log::debug("SaveSleepArousalGain: Saved SleepArousalGain={} to INI", value);
     return true;
 }
 

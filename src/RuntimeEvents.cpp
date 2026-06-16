@@ -57,6 +57,34 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 	return RE::BSEventNotifyControl::kContinue;
 }
 
+RE::BSEventNotifyControl RuntimeEvents::OnSleepStopEvent::ProcessEvent(const RE::TESSleepStopEvent* sleepStopEvent, RE::BSTEventSource<RE::TESSleepStopEvent>*)
+{
+	if (!sleepStopEvent) {
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	//Interrupted sleep (e.g. attacked while sleeping) does not count as restful arousal gain
+	if (sleepStopEvent->interrupted) {
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	const float sleepGain = Settings::GetSingleton()->GetSleepArousalGain();
+	if (sleepGain <= 0.f) {
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	//Sleep is player-driven, so the effect applies to the player only
+	auto player = RE::PlayerCharacter::GetSingleton();
+	if (!player) {
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	SKSE::log::trace("OnSleepStopEvent: applying sleep arousal gain {} to player", sleepGain);
+	Arousal::ModifyArousal(player, sleepGain);
+
+	return RE::BSEventNotifyControl::kContinue;
+}
+
 
 std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source);
 

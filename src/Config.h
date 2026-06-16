@@ -30,6 +30,7 @@ public:
     bool RegisterKeyword(std::string keywordEditorId);
     bool SaveKeywordBaseline(RE::FormID keywordFormId, float value);
     bool SaveANDFactionBaseline(int index, float value);
+    bool SaveSleepArousalGain(float value);
 
 private:
     bool LoadINI(std::string filename, bool useDefaults);

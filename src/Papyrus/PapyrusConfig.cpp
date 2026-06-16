@@ -268,6 +268,18 @@ float PapyrusConfig::GetUpdateIntervalRealTimeSeconds(RE::StaticFunctionTag* bas
 	return Utilities::GameTimeToRealSeconds(Settings::GetSingleton()->GetArousalUpdateInterval());
 }
 
+void PapyrusConfig::SetSleepArousalGain(RE::StaticFunctionTag* base, float newVal)
+{
+	SKSE::log::trace("SetSleepArousalGain: {}", newVal);
+	Settings::GetSingleton()->SetSleepArousalGain(newVal);
+	Config::GetSingleton()->SaveSleepArousalGain(newVal);
+}
+
+float PapyrusConfig::GetSleepArousalGain(RE::StaticFunctionTag* base)
+{
+	return Settings::GetSingleton()->GetSleepArousalGain();
+}
+
 RE::BSFixedString PapyrusConfig::RoundFloat(RE::StaticFunctionTag* base, float value, int decimals)
 {
 	// Clamp decimals to something sane
@@ -317,7 +329,10 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("SetSLADefaultExposureRate", "OSLArousedNativeConfig", SetSLADefaultExposureRate);
 
 	vm->RegisterFunction("GetUpdateIntervalRealTimeSeconds", "OSLArousedNativeConfig", GetUpdateIntervalRealTimeSeconds);
-	
+
+	vm->RegisterFunction("SetSleepArousalGain", "OSLArousedNativeConfig", SetSleepArousalGain);
+	vm->RegisterFunction("GetSleepArousalGain", "OSLArousedNativeConfig", GetSleepArousalGain);
+
 	vm->RegisterFunction("RoundFloat", "OSLArousedNativeConfig", RoundFloat);
 	return true;
 }

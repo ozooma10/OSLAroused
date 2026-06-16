@@ -317,6 +317,19 @@ public:
 		return m_ArousalUpdateInterval;
 	}
 
+	// Arousal the player gains when finishing a (non-interrupted) sleep.
+	// 0 disables the sleep effect entirely.
+	void SetSleepArousalGain(float newVal)
+	{
+		Locker locker(m_Lock);
+		m_SleepArousalGain = std::clamp(newVal, 0.f, 100.f);
+	}
+	float GetSleepArousalGain() const
+	{
+		Locker locker(m_Lock);
+		return m_SleepArousalGain;
+	}
+
 private:
 
 	float m_ArousalUpdateInterval = 0.1f;
@@ -346,6 +359,9 @@ private:
 	//SLA property
 	float m_TimeRateHalfLife = 2.f;
 	float m_DefaultExposureRate = 2.f;
+
+	// Sleep effect (player only). 0 disables.
+	float m_SleepArousalGain = 10.f;
 
 	mutable Lock m_Lock;
 };

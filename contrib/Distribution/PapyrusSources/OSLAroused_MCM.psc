@@ -50,6 +50,8 @@ int OrgasmArousalLossOid
 int SceneEndArousalNoOrgasmOid
 int SceneEndArousalOrgasmOid
 
+int SleepArousalGainOid
+
 ;Rate of Change
 int ArousalRateOfChangeOid
 int LibidoRateOfChangeOid
@@ -354,6 +356,7 @@ function SettingsLeftColumn()
     OrgasmArousalLossOid = AddSliderOption("$OSL_OrgasmLoss", -Main.OrgasmArousalChange, "{1}")
     SceneEndArousalNoOrgasmOid = AddSliderOption("$OSL_SceneEndNoOrgasm", Main.SceneEndArousalNoOrgasmChange, "{1}")
     SceneEndArousalOrgasmOid = AddSliderOption("$OSL_SceneEndSLSO", Main.SceneEndArousalOrgasmChange, "{1}")
+    SleepArousalGainOid = AddSliderOption("$OSL_SleepGain", OSLArousedNativeConfig.GetSleepArousalGain(), "{1}")
 endfunction
 
 function SettingsRightColumn()
@@ -888,6 +891,8 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoSceneEndNoOrgasm")
         elseif(optionId == SceneEndArousalOrgasmOid)
             SetInfoText("$OSL_InfoSceneEndSLSO")
+        elseif(optionId == SleepArousalGainOid)
+            SetInfoText("$OSL_InfoSleepGain")
         elseif(optionId == ArousalRateOfChangeOid)
             SetInfoText("$OSL_InfoArousalRate")
         elseif(optionId == LibidoRateOfChangeOid)
@@ -1111,6 +1116,11 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogStartValue(Main.SceneEndArousalOrgasmChange)
             SetSliderDialogDefaultValue(0)
             SetSliderDialogRange(-100, 50)
+        elseif(option == SleepArousalGainOid)
+            SetSliderDialogStartValue(OSLArousedNativeConfig.GetSleepArousalGain())
+            SetSliderDialogDefaultValue(10)
+            SetSliderDialogRange(0, 100)
+            SetSliderDialogInterval(1)
         elseif(option == ArousalRateOfChangeOid)
             SetSliderDialogStartValue(Main.ArousalChangeRate)
             SetSliderDialogDefaultValue(50)
@@ -1254,6 +1264,9 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == SceneEndArousalOrgasmOid)
             Main.SceneEndArousalOrgasmChange = value
             SetSliderOptionValue(SceneEndArousalOrgasmOid, value, "{1}")
+        elseif(option == SleepArousalGainOid)
+            OSLArousedNativeConfig.SetSleepArousalGain(value)
+            SetSliderOptionValue(SleepArousalGainOid, value, "{1}")
         elseif(option == ArousalRateOfChangeOid)
             Main.SetArousalChangeRate(value)
             SetSliderOptionValue(ArousalRateOfChangeOid, value, "{1}")

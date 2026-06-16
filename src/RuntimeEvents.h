@@ -36,6 +36,22 @@ namespace RuntimeEvents
 			return true;
 		}
 	};
+
+	class OnSleepStopEvent : public RE::BSTEventSink<RE::TESSleepStopEvent>
+	{
+		virtual RE::BSEventNotifyControl ProcessEvent(const RE::TESSleepStopEvent* sleepStopEvent, RE::BSTEventSource<RE::TESSleepStopEvent>*) override;
+
+	public:
+		static bool RegisterEvent() {
+			static OnSleepStopEvent g_SleepStopEventHandler;
+			auto ScriptEventSource = RE::ScriptEventSourceHolder::GetSingleton();
+			if (!ScriptEventSource) {
+				return false;
+			}
+			ScriptEventSource->AddEventSink(&g_SleepStopEventHandler);
+			return true;
+		}
+	};
 }
 
 namespace WorldChecks

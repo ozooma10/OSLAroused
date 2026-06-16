@@ -42,6 +42,10 @@ function SetSLADefaultExposureRate(float newVal) global native
 
 float function GetUpdateIntervalRealTimeSeconds() global native
 
+;Sleep effect: arousal the player gains after a full (non-interrupted) sleep. 0 disables.
+function SetSleepArousalGain(float newVal) global native
+float function GetSleepArousalGain() global native
+
 ;A.N.D. Integration Settings
 function SetUseANDIntegration(bool enabled) global native
 bool function GetUseANDIntegration() global native
