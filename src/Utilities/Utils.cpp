@@ -164,15 +164,15 @@ void Utilities::Keywords::DistributeKeywords()
 {
 	const auto keywordData = PersistedData::ArmorKeywordData::GetSingleton()->GetData();
 
-	REX::INFO("Trying To Distribute {} Keywords", keywordData.size());
+	SKSE::log::info("Trying To Distribute {} Keywords", keywordData.size());
 
 	std::map<RE::FormID, RE::BGSKeyword*> subFormCache;
 
 	for (const auto& [formId, subForms] : keywordData) {
-		REX::INFO("Trying to find formid {:X}", formId);
+		SKSE::log::info("Trying to find formid {:X}", formId);
 		auto form = RE::TESForm::LookupByID(formId);
 		if (!form) {
-			REX::WARN("Form is null");
+			SKSE::log::warn("Form is null");
 			continue;
 		}
 
@@ -243,7 +243,7 @@ std::set<RE::FormID> Utilities::Actor::GetWornArmorKeywords(RE::Actor* actorRef,
 }
 
 void Utilities::logInvalidArgsVerbose(const char* fnName) {
-	REX::ERROR("{} was called with invalid arguments!", fnName);
+	SKSE::log::error("{} was called with invalid arguments!", fnName);
 }
 
 void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float radius,
@@ -260,7 +260,7 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
         auto* interiorCell = tesSingleton->interiorCell;
         if (interiorCell) {
             interiorCell->ForEachReferenceInRange(originPos, radius,
-                                                  [&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
+                                                  [&](RE::TESObjectREFR* a_ref) { return a_ref ? callback(*a_ref) : RE::BSContainer::ForEachResult::kContinue; });
         } else {
             if (const auto gridLength = tesSingleton->gridCells ? tesSingleton->gridCells->length : 0; gridLength > 0) {
                 const float yPlus = originPos.y + radius;
@@ -277,8 +277,8 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
                                 const RE::NiPoint2 worldPos{cellCoords->worldX, cellCoords->worldY};
                                 if (worldPos.x < xPlus && (worldPos.x + 4096.0f) > xMinus && worldPos.y < yPlus &&
                                     (worldPos.y + 4096.0f) > yMinus) {
-                                    cell->ForEachReferenceInRange(originPos, radius, [&](RE::TESObjectREFR& a_ref) {
-                                        return callback(a_ref);
+                                    cell->ForEachReferenceInRange(originPos, radius, [&](RE::TESObjectREFR* a_ref) {
+                                        return a_ref ? callback(*a_ref) : RE::BSContainer::ForEachResult::kContinue;
                                     });
                                 }
                             }
@@ -290,7 +290,7 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
             }
         }
     } else {
-        tesSingleton->ForEachReference([&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
+        tesSingleton->ForEachReference([&](RE::TESObjectREFR* a_ref) { return a_ref ? callback(*a_ref) : RE::BSContainer::ForEachResult::kContinue; });
     }
 }
 
@@ -322,11 +322,11 @@ void Utilities::Factions::SetFactionRank(RE::Actor* actorRef, FactionType factio
 	}
 
 	if (!faction) {
-		//REX::WARN("Faction {} not found", (int)factionType);
+		//SKSE::log::warn("Faction {} not found", (int)factionType);
 		return;
 	}
 
-	//REX::TRACE("Setting faction {} to {}", faction->GetFullName(), rank);
+	//SKSE::log::trace("Setting faction {} to {}", faction->GetFullName(), rank);
 
 	actorRef->AddToFaction(faction, rank);
 }
@@ -358,12 +358,12 @@ int Utilities::Factions::GetFactionRank(RE::Actor* actorRef, FactionType faction
 		break;
 	}
 	if (!faction) {
-		REX::WARN("Faction {} not found", (int)factionType);
+		SKSE::log::warn("Faction {} not found", (int)factionType);
 		return -2;
 	}
 
 	int result = actorRef->GetFactionRank(faction, actorRef->IsPlayer());
-	//REX::TRACE("Getting {} from Faction {}", result, faction->GetFullName());
+	//SKSE::log::trace("Getting {} from Faction {}", result, faction->GetFullName());
 	return result;
 }
 

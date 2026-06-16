@@ -36,11 +36,11 @@ bool ActorStateManager::GetActorNaked(RE::Actor* actorRef)
 void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked)
 {
 	if (!actorRef) {
-		REX::WARN("ActorNakedStateChanged called with null actor");
+		SKSE::log::warn("ActorNakedStateChanged called with null actor");
 		return;
 	}
 
-	REX::TRACE("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
+	SKSE::log::trace("ActorNakedStateChanged: Actor: {} Naked: {}", actorRef->GetDisplayFullName(), newNaked);
 	m_ActorNakedStateCache.UpdateItem(actorRef, newNaked);
 	Papyrus::Events::SendActorNakedUpdatedEvent(actorRef, newNaked);
 
@@ -57,6 +57,7 @@ bool ActorStateManager::GetActorSpectatingNaked(RE::Actor* actorRef)
 		return false;
 	}
 
+	std::scoped_lock lock(m_SpectatingLock);
 	auto it = m_NakedSpectatingMap.find(actorRef);
 	if (it != m_NakedSpectatingMap.end()) {
 		// Check if spectating is still recent (within 0.1 game hours)
@@ -74,6 +75,7 @@ float ActorStateManager::GetSpectatingMaxNudityScore(RE::Actor* actorRef)
 		return 0.0f;
 	}
 
+	std::scoped_lock lock(m_SpectatingLock);
 	auto it = m_NakedSpectatingMap.find(actorRef);
 	if (it != m_NakedSpectatingMap.end()) {
 		// Check if spectating is still recent (within 0.1 game hours)
@@ -90,38 +92,53 @@ void ActorStateManager::UpdateActorsSpectating(std::map<RE::Actor*, float> spect
 	float currentTime = RE::Calendar::GetSingleton()->GetCurrentGameTime();
 	const float timeoutThreshold = 0.1f; // 6 minutes at default timescale
 
-	// First pass: Remove spectators who are no longer actively viewing OR timed out
-	for (auto itr = m_NakedSpectatingMap.begin(); itr != m_NakedSpectatingMap.end();) {
-		bool isStillSpectating = spectatorNudityScores.find(itr->first) != spectatorNudityScores.end();
-		bool isTimedOut = (currentTime - itr->second.lastUpdateTime) >= timeoutThreshold;
+	// Collect the actors whose libido cache needs invalidating, and apply that
+	// AFTER releasing m_SpectatingLock. ActorLibidoModifiersUpdated takes the libido
+	// cache's mutex, and that cache's miss callback reads this map under
+	// m_SpectatingLock - invalidating while holding m_SpectatingLock would invert the
+	// lock order and can deadlock against the Papyrus VM thread.
+	std::vector<RE::Actor*> actorsToInvalidate;
 
-		if (!isStillSpectating || isTimedOut) {
-			// Purge libido modifier cache for OSL mode
-			if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
-				oslSystem->ActorLibidoModifiersUpdated(itr->first);
+	{
+		std::scoped_lock lock(m_SpectatingLock);
+
+		// First pass: Remove spectators who are no longer actively viewing OR timed out
+		for (auto itr = m_NakedSpectatingMap.begin(); itr != m_NakedSpectatingMap.end();) {
+			bool isStillSpectating = spectatorNudityScores.find(itr->first) != spectatorNudityScores.end();
+			bool isTimedOut = (currentTime - itr->second.lastUpdateTime) >= timeoutThreshold;
+
+			if (!isStillSpectating || isTimedOut) {
+				actorsToInvalidate.push_back(itr->first);
+				itr = m_NakedSpectatingMap.erase(itr);
+			} else {
+				itr++;
 			}
-			itr = m_NakedSpectatingMap.erase(itr);
-		} else {
-			itr++;
+		}
+
+		// Second pass: Update or add active spectators
+		for (const auto& [spectator, maxNudityScore] : spectatorNudityScores) {
+			auto it = m_NakedSpectatingMap.find(spectator);
+			bool isNewSpectator = (it == m_NakedSpectatingMap.end());
+			float oldScore = isNewSpectator ? 0.0f : it->second.maxNudityScore;
+
+			// Update or create spectating data
+			SpectatingData data;
+			data.maxNudityScore = maxNudityScore;
+			data.lastUpdateTime = currentTime;
+			m_NakedSpectatingMap[spectator] = data;
+
+			// Invalidate cache if new spectator or if nudity score changed significantly (>3 points)
+			if (isNewSpectator || std::abs(maxNudityScore - oldScore) > 3.0f) {
+				actorsToInvalidate.push_back(spectator);
+			}
 		}
 	}
 
-	// Second pass: Update or add active spectators
-	for (const auto& [spectator, maxNudityScore] : spectatorNudityScores) {
-		auto it = m_NakedSpectatingMap.find(spectator);
-		bool isNewSpectator = (it == m_NakedSpectatingMap.end());
-		float oldScore = isNewSpectator ? 0.0f : it->second.maxNudityScore;
-
-		// Update or create spectating data
-		SpectatingData data;
-		data.maxNudityScore = maxNudityScore;
-		data.lastUpdateTime = currentTime;
-		m_NakedSpectatingMap[spectator] = data;
-
-		// Invalidate cache if new spectator or if nudity score changed significantly (>5 points)
-		if (isNewSpectator || std::abs(maxNudityScore - oldScore) > 3.0f) {
-			if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
-				oslSystem->ActorLibidoModifiersUpdated(spectator);
+	// Purge libido modifier caches for OSL mode, now that m_SpectatingLock is released.
+	if (!actorsToInvalidate.empty()) {
+		if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+			for (auto* actor : actorsToInvalidate) {
+				oslSystem->ActorLibidoModifiersUpdated(actor);
 			}
 		}
 	}
@@ -136,13 +153,13 @@ bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
 	if (!m_CreatureKeyword) {
 		m_CreatureKeyword = (RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId);
 		if (!m_CreatureKeyword) {
-			REX::ERROR("Failed to load ActorTypeCreature keyword (FormID: {:X})", kActorTypeCreatureKeywordFormId);
+			SKSE::log::error("Failed to load ActorTypeCreature keyword (FormID: {:X})", kActorTypeCreatureKeywordFormId);
 		}
 	}
 	if (!m_AnimalKeyword) {
 		m_AnimalKeyword = (RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId);
 		if (!m_AnimalKeyword) {
-			REX::ERROR("Failed to load ActorTypeAnimal keyword (FormID: {:X})", kActorTypeAnimalKeywordFormId);
+			SKSE::log::error("Failed to load ActorTypeAnimal keyword (FormID: {:X})", kActorTypeAnimalKeywordFormId);
 		}
 	}
 
@@ -151,7 +168,7 @@ bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
 	}
 
 	// If keywords failed to load, log warning and assume humanoid to prevent blocking all functionality
-	REX::WARN("IsHumanoidActor: Keywords not loaded, defaulting to humanoid for actor {}", actorRef->GetDisplayFullName());
+	SKSE::log::warn("IsHumanoidActor: Keywords not loaded, defaulting to humanoid for actor {}", actorRef->GetDisplayFullName());
 	return true;
 }
 
@@ -192,6 +209,10 @@ void ActorStateManager::HandlePlayerArousalUpdated(RE::Actor* actorRef, float ne
 
 void ActorStateManager::OnActorArousalUpdated(RE::Actor* actorRef, float newArousal)
 {
+	if (!actorRef) {
+		return;
+	}
+
 	if (actorRef->IsPlayer()) {
 		HandlePlayerArousalUpdated(actorRef, newArousal);
 	}

@@ -21,9 +21,9 @@ namespace
 		auto path = log_directory();
 		if (!path)
 		{
-			report_and_fail("Unable to lookup SKSE logs directory.");
+			SKSE::stl::report_and_fail("Unable to lookup SKSE logs directory.");
 		}
-		*path /= SKSE::PluginVersionData::GetSingleton()->GetPluginName();
+		*path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
 		*path += L".log";
 
 		std::shared_ptr<spdlog::logger> log;
@@ -46,18 +46,18 @@ namespace
 
 	void InitializeSerialization()
 	{
-		REX::TRACE("Initializing cosave serialization...");
+		SKSE::log::trace("Initializing cosave serialization...");
 		auto* serialization = SKSE::GetSerializationInterface();
 		serialization->SetUniqueID(PersistedData::kArousalDataKey);
 		serialization->SetSaveCallback(PersistedData::SaveCallback);
 		serialization->SetRevertCallback(PersistedData::RevertCallback);
 		serialization->SetLoadCallback(PersistedData::LoadCallback);
-		REX::TRACE("Cosave serialization initialized.");
+		SKSE::log::trace("Cosave serialization initialized.");
 	}
 
 	void InitializePapyrus()
 	{
-		REX::TRACE("Initializing Papyrus binding...");
+		SKSE::log::trace("Initializing Papyrus binding...");
 		const auto papyrus = SKSE::GetPapyrusInterface();
 		papyrus->Register(Papyrus::RegisterFunctions);
 		papyrus->Register(PapyrusInterface::RegisterFunctions);
@@ -102,9 +102,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 {
 	InitializeLogging();
 
-	const auto* plugin = SKSE::PluginVersionData::GetSingleton();
-	const auto version = plugin->GetPluginVersion();
-	REX::INFO("{} {} is loading...", plugin->GetPluginName(), version.string());
+	const auto* plugin = SKSE::PluginDeclaration::GetSingleton();
+	const auto version = plugin->GetVersion();
+	SKSE::log::info("{} {} is loading...", plugin->GetName(), version.string());
 
 	SKSE::Init(skse);
 
@@ -112,6 +112,6 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 	InitializeSerialization();
 	InitializePapyrus();
 
-	REX::INFO("{} has finished loading.", plugin->GetPluginName());
+	SKSE::log::info("{} has finished loading.", plugin->GetName());
 	return true;
 }

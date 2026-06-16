@@ -69,12 +69,12 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 	std::set<RE::ActorHandle> spectatingActors;
 	for (const auto scene : activeScenes) {
 		if (scene.Participants.size() <= 0) {
-			REX::WARN("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
+			SKSE::log::warn("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
 			continue;
 		}
 
 		if(!scene.Participants[0].get()) {
-			REX::WARN("HandleAdultScenes: Skipping sceneid: {} first participant is null", scene.SceneId);
+			SKSE::log::warn("HandleAdultScenes: Skipping sceneid: {} first participant is null", scene.SceneId);
 			continue;
 		}
 		const auto spectators = GetNearbySpectatingActors(scene.Participants[0].get().get(), scanDistance);
@@ -129,7 +129,7 @@ static void RunWorldArousalUpdate()
 	}
 
 	const auto activeScenes = SceneManager::GetSingleton()->GetAllScenes();
-	//REX::TRACE("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
+	//SKSE::log::trace("ArousalUpdateLoop: Found {} active scenes. ElapsedTimeSinceLastCheck: {}", activeScenes.size(), elapsedGameTimeSinceLastCheck);
 	if (activeScenes.size() > 0) {
 		HandleAdultScenes(activeScenes, elapsedGameTimeSinceLastCheck);
 	}
@@ -172,7 +172,7 @@ static void RunWorldArousalUpdate()
 			nudityScore = Integrations::ANDIntegration::GetSingleton()->GetANDNudityScore(actor);
 			isNakedOrPartiallyNude = (nudityScore > 0.0f);
 			if (isNakedOrPartiallyNude) {
-				REX::TRACE("ArousalUpdateLoop: Actor {} has AND nudity score {}",
+				SKSE::log::trace("ArousalUpdateLoop: Actor {} has AND nudity score {}",
 				             actor->GetDisplayFullName(), nudityScore);
 			}
 		} else {
@@ -181,7 +181,7 @@ static void RunWorldArousalUpdate()
 			if (isNakedOrPartiallyNude) {
 				// For legacy mode, treat as full nudity (use configured Nude baseline)
 				nudityScore = Settings::GetSingleton()->GetANDFactionBaseline(Integrations::ANDFactionIndex::NUDE);
-				REX::TRACE("ArousalUpdateLoop: Actor {} is naked (legacy check)",
+				SKSE::log::trace("ArousalUpdateLoop: Actor {} is naked (legacy check)",
 				             actor->GetDisplayFullName());
 			}
 		}
@@ -223,7 +223,7 @@ static void RunWorldArousalUpdate()
 
 		//If we are updating all nearby actors, then we want to update the stored nearby actors array, and emit the sla_UpdateComplete event
 		Papyrus::Events::SendUpdateCompleteEvent(static_cast<float>(nearbyActors.size()));
-		ticker->LastScannedActors = nearbyActors;
+		ticker->SetLastScannedActors(nearbyActors);
 	}
 }
 
@@ -248,7 +248,7 @@ std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)
 	std::vector<RE::ActorHandle> nearbyActors;
 
 	if (!source || !source->parentCell) {
-		REX::WARN("GetNearbyActorsInCell - source can not be null");
+		SKSE::log::warn("GetNearbyActorsInCell - source can not be null");
 		return nearbyActors;
 	}
 
@@ -271,7 +271,7 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 	std::vector<RE::Actor*> nearbyActors;
 
 	if (!source || !source->parentCell) {
-		REX::WARN("GetNearbySpectatingActors - source can not be null");
+		SKSE::log::warn("GetNearbySpectatingActors - source can not be null");
 		return nearbyActors;
 	}
 
@@ -310,11 +310,11 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	REX::DEBUG("OnModCallbackEvent: Received ModCallbackEvent: EventName: {}", eventName);
+	SKSE::log::debug("OnModCallbackEvent: Received ModCallbackEvent: EventName: {}", eventName);
 
 	// Check if AND integration is enabled
 	if (Settings::GetSingleton()->GetUseANDIntegration() && Integrations::ANDIntegration::GetSingleton()->IsAvailable()) {
-		REX::DEBUG("Processing OSLA_ANDUpdate: AND factions recalculated, triggering arousal recalculation");
+		SKSE::log::debug("Processing OSLA_ANDUpdate: AND factions recalculated, triggering arousal recalculation");
 
 		// Get the arousal system (only OSL mode supports libido modifier cache)
 		auto& arousalSystem = ArousalManager::GetSingleton()->GetArousalSystem();
@@ -327,7 +327,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 				// Update player's libido cache
 				oslSystem->ActorLibidoModifiersUpdated(player);
 				float newBaseline = oslSystem->GetBaselineArousal(player); // Force baseline recalculation
-				REX::TRACE("OSLA_ANDUpdate: Updated player libido cache, new baseline arousal: {}", newBaseline);
+				SKSE::log::trace("OSLA_ANDUpdate: Updated player libido cache, new baseline arousal: {}", newBaseline);
 
 				// Update all nearby actors' libido cache
 				const auto nearbyActors = GetNearbyActorsInCell(player);
@@ -341,7 +341,7 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 					}
 				}
 
-				REX::DEBUG("OSLA_ANDUpdate: Updated libido cache for {} nearby actors", nearbyActors.size());
+				SKSE::log::debug("OSLA_ANDUpdate: Updated libido cache for {} nearby actors", nearbyActors.size());
 			}
 		}
 	}

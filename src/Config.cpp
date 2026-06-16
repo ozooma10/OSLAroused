@@ -24,7 +24,7 @@ void Config::LoadINIs()
     }
     else
     {
-        REX::ERROR("Failed to load INI file.");
+        SKSE::log::error("Failed to load INI file.");
         m_ConfigLoaded = false;
         return;
     }
@@ -110,24 +110,24 @@ bool Config::LoadINI(std::string fileName, bool useDefaults)
         switch (m_LogLevel)
         {
         case spdlog::level::trace:
-            REX::INFO("Log Level: Trace");
+            SKSE::log::info("Log Level: Trace");
             break;
         case spdlog::level::debug:
-            REX::INFO("Log Level: Debug");
+            SKSE::log::info("Log Level: Debug");
             break;
         case spdlog::level::info:
-            REX::INFO("Log Level: Info");
+            SKSE::log::info("Log Level: Info");
             break;
         case spdlog::level::warn:
-            REX::INFO("Log Level: Warn");
+            SKSE::log::info("Log Level: Warn");
             break;
         default:
-            REX::INFO("Log Level: Error");
+            SKSE::log::info("Log Level: Error");
             break;
         }
     }
 
-    REX::INFO("Trying to Register {} Keywords", keywords.size());
+    SKSE::log::info("Trying to Register {} Keywords", keywords.size());
     // Iterate and log each section name
     for (auto &keyword : keywords)
     {
@@ -141,7 +141,7 @@ bool Config::LoadINI(std::string fileName, bool useDefaults)
         }
         else
         {
-            REX::WARN("Keyword: {} failed to register. Failed to find Keyword Form.", keyword.pItem);
+            SKSE::log::warn("Keyword: {} failed to register. Failed to find Keyword Form.", keyword.pItem);
         }
     }
 
@@ -161,7 +161,7 @@ bool Config::RegisterKeyword(std::string keywordEditorId)
     auto keywordForm = RE::TESForm::LookupByEditorID<RE::BGSKeyword>(keywordEditorId);
     if (!keywordForm)
     {
-        REX::ERROR("RegisterKeyword: Failed to find keyword form.");
+        SKSE::log::error("RegisterKeyword: Failed to find keyword form.");
         return false;
     }
 
@@ -182,14 +182,14 @@ bool Config::RegisterKeyword(std::string keywordEditorId)
     rc = ini.SetValue(kKeywordSection, kKeywordKey, keywordEditorId.c_str());
     if (rc < 0)
     {
-        REX::ERROR("RegisterKeyword: Failed to set value in INI file. Error: {}", rc);
+        SKSE::log::error("RegisterKeyword: Failed to set value in INI file. Error: {}", rc);
         return false;
     }
 
     rc = ini.SaveFile(kCustomIniPath);
     if (rc < 0)
     {
-        REX::ERROR("RegisterKeyword: Failed to save INI file. Error: {}", rc);
+        SKSE::log::error("RegisterKeyword: Failed to save INI file. Error: {}", rc);
         return false;
     }
 
@@ -200,7 +200,7 @@ bool Config::SaveKeywordBaseline(RE::FormID keywordFormId, float value)
 {
     const auto* keywordEntry = FindRegisteredKeyword(keywordFormId);
     if (!keywordEntry) {
-        REX::ERROR("SaveKeywordBaseline: Keyword {:X} is not registered.", keywordFormId);
+        SKSE::log::error("SaveKeywordBaseline: Keyword {:X} is not registered.", keywordFormId);
         return false;
     }
 
@@ -212,17 +212,17 @@ bool Config::SaveKeywordBaseline(RE::FormID keywordFormId, float value)
 
     SI_Error rc = ini.SetValue(kKeywordBaselineSection, keywordEntry->EditorId.c_str(), valueStr, nullptr, true);
     if (rc < 0) {
-        REX::ERROR("SaveKeywordBaseline: Failed to set value in INI. Error: {}", rc);
+        SKSE::log::error("SaveKeywordBaseline: Failed to set value in INI. Error: {}", rc);
         return false;
     }
 
     rc = ini.SaveFile(kCustomIniPath);
     if (rc < 0) {
-        REX::ERROR("SaveKeywordBaseline: Failed to save INI file. Error: {}", rc);
+        SKSE::log::error("SaveKeywordBaseline: Failed to save INI file. Error: {}", rc);
         return false;
     }
 
-    REX::DEBUG("SaveKeywordBaseline: Saved {}={} to INI", keywordEntry->EditorId, value);
+    SKSE::log::debug("SaveKeywordBaseline: Saved {}={} to INI", keywordEntry->EditorId, value);
     return true;
 }
 
@@ -240,7 +240,7 @@ bool Config::SaveANDFactionBaseline(int index, float value)
     case 6: keyName = "ShowingBraBaseline"; break;
     case 7: keyName = "ShowingUnderwearBaseline"; break;
     default:
-        REX::ERROR("SaveANDFactionBaseline: Invalid index {}", index);
+        SKSE::log::error("SaveANDFactionBaseline: Invalid index {}", index);
         return false;
     }
 
@@ -254,17 +254,17 @@ bool Config::SaveANDFactionBaseline(int index, float value)
 
     SI_Error rc = ini.SetValue("ANDIntegration", keyName, valueStr, nullptr, true);
     if (rc < 0) {
-        REX::ERROR("SaveANDFactionBaseline: Failed to set value in INI. Error: {}", rc);
+        SKSE::log::error("SaveANDFactionBaseline: Failed to set value in INI. Error: {}", rc);
         return false;
     }
 
     rc = ini.SaveFile("Data/SKSE/Plugins/OSLAroused_Custom.ini");
     if (rc < 0) {
-        REX::ERROR("SaveANDFactionBaseline: Failed to save INI file. Error: {}", rc);
+        SKSE::log::error("SaveANDFactionBaseline: Failed to save INI file. Error: {}", rc);
         return false;
     }
 
-    REX::DEBUG("SaveANDFactionBaseline: Saved {}={} to INI", keyName, value);
+    SKSE::log::debug("SaveANDFactionBaseline: Saved {}={} to INI", keyName, value);
     return true;
 }
 

@@ -49,9 +49,9 @@ namespace PersistedData
 		{
 			Locker locker(m_Lock);
 			for (const auto& [formId, value] : m_Data) {
-				REX::INFO("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+				SKSE::log::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
 			}
-			REX::INFO("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+			SKSE::log::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
 		}
 	};
 
@@ -62,9 +62,9 @@ namespace PersistedData
 		{
 			Locker locker(m_Lock);
 			for (const auto& [formId, value] : m_Data) {
-				REX::INFO("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+				SKSE::log::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
 			}
-			REX::INFO("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+			SKSE::log::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
 		}
 	};
 
@@ -75,9 +75,9 @@ namespace PersistedData
 		{
 			Locker locker(m_Lock);
 			for (const auto& [formId, value] : m_Data) {
-				REX::INFO("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
+				SKSE::log::info("Dump Row From {} - FormID: {} - value: {}", GetType(), formId, value);
 			}
-			REX::INFO("{} Rows Dumped For Type {}", m_Data.size(), GetType());
+			SKSE::log::info("{} Rows Dumped For Type {}", m_Data.size(), GetType());
 		}
 	};
 
@@ -111,7 +111,7 @@ namespace PersistedData
 
 		virtual void DumpToLog() override
 		{
-			REX::INFO("{} Rows Not Dumped For List Type {}", m_Data.size(), GetType());
+			SKSE::log::info("{} Rows Not Dumped For List Type {}", m_Data.size(), GetType());
 		}
 	};
 

@@ -52,6 +52,9 @@ private:
 	Utilities::LRUCache<RE::Actor*, bool> m_ActorNakedStateCache;
 
 	std::map<RE::Actor*, SpectatingData> m_NakedSpectatingMap;
+	// Guards m_NakedSpectatingMap: written on the main thread (UpdateActorsSpectating,
+	// from the arousal tick) and read from the Papyrus VM thread via the libido path.
+	std::mutex m_SpectatingLock;
 
 	RE::BGSKeyword* m_CreatureKeyword;
 	RE::BGSKeyword* m_AnimalKeyword;

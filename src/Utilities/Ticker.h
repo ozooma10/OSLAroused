@@ -21,7 +21,7 @@ namespace Utilities
 			if (m_Running.exchange(true)) {
 				return;  // already running
 			}
-			REX::TRACE("Ticker started");
+			SKSE::log::trace("Ticker started");
 			std::thread([this] { RunLoop(); }).detach();
 		}
 

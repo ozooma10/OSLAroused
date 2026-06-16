@@ -15,59 +15,59 @@ WornDeviceField GetWornDevices(RE::Actor* actorRef, RE::TESForm* equipmentToIgno
 	for (const auto keywordFormId : wornArmorKeywordIds) {
 		//Soup World USA
 		if (keywordFormId == DI->ToysPelvis || keywordFormId == DI->DDBelt) {
-			REX::DEBUG("{} Belt", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Belt", actorRef->GetDisplayFullName());
 			wornDevices.Belt = true;
 		} else if (keywordFormId == DI->ToysArms || keywordFormId == DI->DDArmCuffs) {
-			REX::DEBUG("{} ToysArms", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} ToysArms", actorRef->GetDisplayFullName());
 			wornDevices.ArmCuffs = true;
 		} else if (keywordFormId == DI->ToysEyes || keywordFormId == DI->DDBlindfold) {
-			REX::DEBUG("{} ToysEyes", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} ToysEyes", actorRef->GetDisplayFullName());
 			wornDevices.Blindfold = true;
 		} else if (keywordFormId == DI->DDBondageMittens) {
-			REX::DEBUG("{} BondageMittens", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} BondageMittens", actorRef->GetDisplayFullName());
 			wornDevices.BondageMittens = true;
 		} else if (keywordFormId == DI->ToysFeet || keywordFormId == DI->DDBoots) {
-			REX::DEBUG("{} Boots", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Boots", actorRef->GetDisplayFullName());
 			wornDevices.Boots = true;
 		} else if (keywordFormId == DI->ToysBreasts || keywordFormId == DI->DDBra) {
-			REX::DEBUG("{} Bra", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Bra", actorRef->GetDisplayFullName());
 			wornDevices.Bra = true;
 		} else if (keywordFormId == DI->ToysTorso || keywordFormId == DI->DDCorset) {
-			REX::DEBUG("{} Corset", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Corset", actorRef->GetDisplayFullName());
 			wornDevices.Corset = true;
 		} else if (keywordFormId == DI->ToysMouth || keywordFormId == DI->DDGag) {
-			REX::DEBUG("{} Gag", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Gag", actorRef->GetDisplayFullName());
 			wornDevices.Gag = true;
 		} else if (keywordFormId == DI->ToysHands || keywordFormId == DI->DDGloves) {
-			REX::DEBUG("{} Gloves", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Gloves", actorRef->GetDisplayFullName());
 			wornDevices.Gloves = true;
 		} else if (keywordFormId == DI->DDHarness) {
-			REX::DEBUG("{} Harness", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Harness", actorRef->GetDisplayFullName());
 			wornDevices.Harness = true;
 		} else if (keywordFormId == DI->ToysWrists || keywordFormId == DI->DDHeavyBondage) {
-			REX::DEBUG("{} HeavyBondage", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} HeavyBondage", actorRef->GetDisplayFullName());
 			wornDevices.HeavyBondage = true;
 		} else if (keywordFormId == DI->DDHood) {
-			REX::DEBUG("{} Hood", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Hood", actorRef->GetDisplayFullName());
 			wornDevices.Hood = true;
 		} else if (keywordFormId == DI->ToysLegs || keywordFormId == DI->DDLegCuffs) {
-			REX::DEBUG("{} LegCuffs", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} LegCuffs", actorRef->GetDisplayFullName());
 			wornDevices.LegCuffs = true;
 		} else if (keywordFormId == DI->ToysNipples || keywordFormId == DI->DDPiercingsNipple) {
-			REX::DEBUG("{} PiercingsNipple", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} PiercingsNipple", actorRef->GetDisplayFullName());
 			wornDevices.PiercingsNipple = true;
 		} else if (keywordFormId == DI->ToysGenital || keywordFormId == DI->DDPiercingsVaginal) {
-			REX::DEBUG("{} PiercingsVaginal", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} PiercingsVaginal", actorRef->GetDisplayFullName());
 			wornDevices.PiercingsVaginal = true;
 		} else if (keywordFormId == DI->ToysAnal || keywordFormId == DI->DDPlugAnal || keywordFormId == DI->SLA_AnalPlug
 			|| keywordFormId == DI->SLA_AnalPlugTail || keywordFormId == DI->SLA_AnalPlugBeads) {
-			REX::DEBUG("{} PlugAnal", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} PlugAnal", actorRef->GetDisplayFullName());
 			wornDevices.PlugAnal = true;
 		} else if (keywordFormId == DI->ToysVaginal || keywordFormId == DI->DDPlugVaginal) {
-			REX::DEBUG("{} PlugVaginal", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} PlugVaginal", actorRef->GetDisplayFullName());
 			wornDevices.PlugVaginal = true;
 		} else if (keywordFormId == DI->DDSuit) {
-			REX::DEBUG("{} Suit", actorRef->GetDisplayFullName());
+			SKSE::log::debug("{} Suit", actorRef->GetDisplayFullName());
 			wornDevices.Suit = true;
 		}
 	}

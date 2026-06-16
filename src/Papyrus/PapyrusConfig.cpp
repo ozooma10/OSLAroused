@@ -9,25 +9,25 @@
 
 void PapyrusConfig::SetMinLibidoValue(RE::StaticFunctionTag*, bool bPlayerVal, float newVal)
 {
-	REX::TRACE("SetMinLibidoValue: {} {}", bPlayerVal, newVal);
+	SKSE::log::trace("SetMinLibidoValue: {} {}", bPlayerVal, newVal);
 	Settings::GetSingleton()->SetMinLibidoValue(bPlayerVal, newVal);
 }
 
 void PapyrusConfig::SetArousalChangeRate(RE::StaticFunctionTag*, float newVal)
 {
-	REX::TRACE("SetArousalChangeRate: {}", newVal);
+	SKSE::log::trace("SetArousalChangeRate: {}", newVal);
 	Settings::GetSingleton()->SetArousalChangeRate(newVal);
 }
 
 void PapyrusConfig::SetLibidoChangeRate(RE::StaticFunctionTag*, float newVal)
 {
-	REX::TRACE("SetLibidoChangeRate: {}", newVal);
+	SKSE::log::trace("SetLibidoChangeRate: {}", newVal);
 	Settings::GetSingleton()->SetLibidoChangeRate(newVal);
 }
 
 void PapyrusConfig::SetSceneParticipantBaseline(RE::StaticFunctionTag*, float newVal)
 {
-	REX::TRACE("SetSceneParticipantBaseline: {}", newVal);
+	SKSE::log::trace("SetSceneParticipantBaseline: {}", newVal);
 	Settings::GetSingleton()->SetSceneParticipantBaseline(newVal);
 
 	// Clear cache when scene baseline changes
@@ -38,7 +38,7 @@ void PapyrusConfig::SetSceneParticipantBaseline(RE::StaticFunctionTag*, float ne
 
 void PapyrusConfig::SetSceneViewingBaseline(RE::StaticFunctionTag*, float newVal)
 {
-	REX::TRACE("SetSceneViewingBaseline: {}", newVal);
+	SKSE::log::trace("SetSceneViewingBaseline: {}", newVal);
 	Settings::GetSingleton()->SetSceneViewingBaseline(newVal);
 
 	// Clear cache when scene baseline changes
@@ -49,13 +49,13 @@ void PapyrusConfig::SetSceneViewingBaseline(RE::StaticFunctionTag*, float newVal
 
 void PapyrusConfig::SetSceneVictimGainsArousal(RE::StaticFunctionTag*, bool newVal)
 {
-	REX::TRACE("SetSceneVictimGainsArousal: {}", newVal);
+	SKSE::log::trace("SetSceneVictimGainsArousal: {}", newVal);
 	Settings::GetSingleton()->SetSceneVictimGainsArousal(newVal);
 }
 
 void PapyrusConfig::SetBeingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 {
-	REX::TRACE("SetBeingNudeBaseline: {}", newVal);
+	SKSE::log::trace("SetBeingNudeBaseline: {}", newVal);
 	Settings::GetSingleton()->SetNudeArousalBaseline(newVal);
 
 	// Clear cache when nude baseline changes
@@ -66,7 +66,7 @@ void PapyrusConfig::SetBeingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 
 void PapyrusConfig::SetViewingNudeBaseline(RE::StaticFunctionTag*, float newVal)
 {
-	REX::TRACE("SetViewingNudeBaseline: {}", newVal);
+	SKSE::log::trace("SetViewingNudeBaseline: {}", newVal);
 	Settings::GetSingleton()->SetNudeViewingBaseline(newVal);
 
 	// Clear cache when nude viewing baseline changes
@@ -81,7 +81,7 @@ void PapyrusConfig::SetEroticArmorBaseline(RE::StaticFunctionTag*, float newVal,
         Utilities::logInvalidArgsVerbose(__FUNCTION__);
         return;
     }
-	REX::TRACE("SetEroticArmorBaseline: {} {}", newVal, keyword->formID);
+	SKSE::log::trace("SetEroticArmorBaseline: {} {}", newVal, keyword->formID);
 
 	Settings::GetSingleton()->SetEroticArmorBaseline(newVal, keyword);
 	Config::GetSingleton()->SaveKeywordBaseline(keyword->formID, newVal);
@@ -99,21 +99,21 @@ float PapyrusConfig::GetEroticArmorBaseline(RE::StaticFunctionTag*, RE::BGSKeywo
 	}
 
 	const auto baseline = Settings::GetSingleton()->GetEroticArmorBaseline(keyword);
-	REX::TRACE("GetEroticArmorBaseline: {} {}", keyword->formID, baseline);
+	SKSE::log::trace("GetEroticArmorBaseline: {} {}", keyword->formID, baseline);
 	return baseline;
 }
 
 // A.N.D. Integration functions
 void PapyrusConfig::SetUseANDIntegration(RE::StaticFunctionTag*, bool enabled)
 {
-	REX::TRACE("SetUseANDIntegration: {}", enabled);
+	SKSE::log::trace("SetUseANDIntegration: {}", enabled);
 	Settings::GetSingleton()->SetUseANDIntegration(enabled);
 }
 
 bool PapyrusConfig::GetUseANDIntegration(RE::StaticFunctionTag*)
 {
 	bool result = Settings::GetSingleton()->GetUseANDIntegration();
-	REX::TRACE("GetUseANDIntegration: {}", result);
+	SKSE::log::trace("GetUseANDIntegration: {}", result);
 	return result;
 }
 
@@ -125,7 +125,7 @@ bool PapyrusConfig::IsANDIntegrationEnabled(RE::StaticFunctionTag*)
 
 void PapyrusConfig::SetANDFactionBaseline(RE::StaticFunctionTag*, int factionIndex, float value)
 {
-	REX::TRACE("SetANDFactionBaseline: index={}, value={}", factionIndex, value);
+	SKSE::log::trace("SetANDFactionBaseline: index={}, value={}", factionIndex, value);
 	Settings::GetSingleton()->SetANDFactionBaseline(factionIndex, value);
 
 	// Clear libido modifier cache for OSL mode when A.N.D. baselines change
@@ -138,7 +138,7 @@ void PapyrusConfig::SetANDFactionBaseline(RE::StaticFunctionTag*, int factionInd
 float PapyrusConfig::GetANDFactionBaseline(RE::StaticFunctionTag*, int factionIndex)
 {
 	float result = Settings::GetSingleton()->GetANDFactionBaseline(factionIndex);
-	REX::TRACE("GetANDFactionBaseline: index={}, result={}", factionIndex, result);
+	SKSE::log::trace("GetANDFactionBaseline: index={}, result={}", factionIndex, result);
 	return result;
 }
 
@@ -246,20 +246,20 @@ bool PapyrusConfig::IsInOSLMode(RE::StaticFunctionTag* base)
 
 void PapyrusConfig::SetInOSLMode(RE::StaticFunctionTag* base, bool newVal)
 {
-	REX::TRACE("SetInOSLMode: {}", newVal);
+	SKSE::log::trace("SetInOSLMode: {}", newVal);
 	PersistedData::SettingsData::GetSingleton()->SetArousalMode((int)(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA));
 	ArousalManager::GetSingleton()->SetArousalSystem(newVal ? IArousalSystem::ArousalMode::kOSL : IArousalSystem::ArousalMode::kSLA, true);
 }
 
 void PapyrusConfig::SetSLATimeRateHalfLife(RE::StaticFunctionTag* base, float newVal)
 {
-	REX::TRACE("SetSLATimeRateHalfLife: {}", newVal);
+	SKSE::log::trace("SetSLATimeRateHalfLife: {}", newVal);
 	Settings::GetSingleton()->SetTimeRateHalfLife(newVal);
 }
 
 void PapyrusConfig::SetSLADefaultExposureRate(RE::StaticFunctionTag* base, float newVal)
 {
-	REX::TRACE("SetSLADefaultExposureRate: {}", newVal);
+	SKSE::log::trace("SetSLADefaultExposureRate: {}", newVal);
 	Settings::GetSingleton()->SetDefaultExposureRate(newVal);
 }
 
