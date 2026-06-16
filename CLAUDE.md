@@ -12,6 +12,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The user will manually build the project when needed. Focus on code analysis, suggestions, and modifications without triggering builds.
 
+## Branch Naming Convention
+
+When creating a git branch, use a `type/short-description` format with a kebab-case description. Use these type prefixes:
+- `feat/` — new features
+- `fix/` — bug fixes
+- `chore/` — tooling, build, and maintenance
+- `docs/` — documentation changes
+- `refactor/` — code restructuring with no behavior change
+
+Examples: `feat/sla-exposure-decay`, `fix/ticker-main-thread-marshalling`, `chore/bump-commonlibsse`.
+
 ## Project Overview
 
 OSLAroused is a high-performance arousal framework for Skyrim Special Edition that provides both native (OSL) and SexLab Aroused (SLA) compatibility modes. It's a SKSE64 plugin written in C++23 with Papyrus script components for in-game integration.
