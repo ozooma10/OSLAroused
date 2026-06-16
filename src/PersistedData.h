@@ -24,6 +24,25 @@ namespace PersistedData
 			m_Data[formId] = value;
 		}
 
+
+		//Runs sanitizer over stored values inplace, replacing each with the value sanitizer() returns. 
+		//Used for post-load self-healing of corrupt/out-of-range persisted values. 
+		//Returns the number of values that were actually changed.
+		template <typename Fn>
+		std::size_t SanitizeValues(Fn sanitizer)
+		{
+			Locker locker(m_Lock);
+			std::size_t corrected = 0;
+			for (auto& [formId, value] : m_Data) {
+				T newValue = sanitizer(value);
+				if (newValue != value) {
+					value = newValue;
+					++corrected;
+				}
+			}
+			return corrected;
+		}
+
 		virtual const char* GetType() = 0;
 
 		virtual bool Save(SKSE::SerializationInterface* serializationInterface, std::uint32_t type, std::uint32_t version);
@@ -280,6 +299,11 @@ namespace PersistedData
 	void SaveCallback(SKSE::SerializationInterface* serializationInterface);
 	void LoadCallback(SKSE::SerializationInterface* serializationInterface);
 	void RevertCallback(SKSE::SerializationInterface* serializationInterface);
+
+	// Post-load self-healing: clamps/repairs persisted per-actor values that could otherwise leave arousal permanently stuck
+	// (e.g. a multiplier of 0 that freezes all arousal gains, or out-of-range/non-finite values from a corrupted or externally edited save).
+	// Safe to call after LoadCallback.
+	void SanitizeLoadedData();
 
 	void ResetSystemForModeSwitch();
 };

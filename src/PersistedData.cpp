@@ -1,6 +1,9 @@
 #include "PersistedData.h"
 #include "Managers/SceneManager.h"
 
+#include <algorithm>
+#include <cmath>
+
 namespace PersistedData
 {
 	//BaseData is based off how powerof3's did it in Afterlife
@@ -308,7 +311,52 @@ namespace PersistedData
 			}
 		}
 
+		//Self-heal any corrupt/stuck persisted values before they reach the arousal system
+		SanitizeLoadedData();
+
 		SKSE::log::trace("OSLArousal Data loaded");
+	}
+
+	void SanitizeLoadedData()
+	{
+		// Arousal and base libido are always in [0, 100]; a non-finite (NaN/inf) value would propagate through every calculation, so reset it to 0.
+		const auto clampScore = [](float value) -> float {
+			if (!std::isfinite(value)) {
+				return 0.f;
+			}
+			return std::clamp(value, 0.f, 100.f);
+		};
+
+		std::size_t corrected = 0;
+		corrected += ArousalData::GetSingleton()->SanitizeValues(clampScore);
+		corrected += BaseLibidoData::GetSingleton()->SanitizeValues(clampScore);
+
+		// A multiplier of 0 (or negative/non-finite) is the classic "arousal is stuck" pathology: every ModifyArousal gain is multiplied to nothing.
+		// Reset those to the mode-appropriate neutral default and clamp the rest to a sane range.
+		// SettingsData stores the mode as a raw int where 0 == OSL (see SettingsData::GetArousalMode).
+		// OSL's neutral multiplier is 1.0; SLA's neutral ExposureRate default is 2.0.
+		const bool bSLAMode = SettingsData::GetSingleton()->GetArousalMode() != 0;
+		const float defaultMultiplier = bSLAMode ? 2.f : 1.f;
+		corrected += ArousalMultiplierData::GetSingleton()->SanitizeValues([&](float value) -> float {
+			if (!std::isfinite(value) || value <= 0.f) {
+				return defaultMultiplier;
+			}
+			return std::clamp(value, 0.01f, 100.f);
+		});
+
+		// Timestamps are game-time-in-days snapshots; a negative or non-finite value means "no valid record" which we represent as 0 
+		// (treated as the epoch / "never" elsewhere).
+		const auto clampTimestamp = [](float value) -> float {
+			return std::isfinite(value) && value >= 0.f ? value : 0.f;
+		};
+		corrected += LastCheckTimeData::GetSingleton()->SanitizeValues(clampTimestamp);
+		corrected += LastOrgasmTimeData::GetSingleton()->SanitizeValues(clampTimestamp);
+
+		if (corrected > 0) {
+			SKSE::log::warn("SanitizeLoadedData repaired {} corrupt/stuck persisted value(s) on load", corrected);
+		} else {
+			SKSE::log::trace("SanitizeLoadedData: all persisted values within expected ranges");
+		}
 	}
 
 	void RevertCallback(SKSE::SerializationInterface*)
