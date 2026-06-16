@@ -461,6 +461,22 @@ function BaselineStatusPage()
         AddTextOption("$OSL_NotInOSLMode", "0", OPTION_FLAG_DISABLED)
         return
     endif
+
+    ; --- Diagnostics summary: the current value, the target it moves toward, and any
+    ; reason it might look "stuck" (gains multiplier, lock, exhibitionist). The
+    ; contribution breakdown below explains how the baseline target is built up.
+    AddHeaderOption("$OSL_DiagnosticsHeader")
+    AddTextOption("$OSL_CurrentArousal", OSLArousedNativeConfig.RoundFloat(OSLArousedNative.GetArousal(PuppetActor), 1))
+    AddTextOption("$OSL_BaselineArousal", OSLArousedNativeConfig.RoundFloat(OSLArousedNative.GetArousalBaseline(PuppetActor), 1))
+    AddTextOption("$OSL_Libido", OSLArousedNativeConfig.RoundFloat(OSLArousedNative.GetLibido(PuppetActor), 1))
+    AddTextOption("$OSL_ArousalMultiplier", "x" + OSLArousedNativeConfig.RoundFloat(OSLArousedNative.GetArousalMultiplier(PuppetActor), 2))
+    if(OSLArousedNative.IsActorArousalLocked(PuppetActor))
+        AddTextOption("$OSL_ArousalLocked", "$OSL_Yes")
+    endif
+    if(OSLArousedNative.IsActorExhibitionist(PuppetActor))
+        AddTextOption("$OSL_IsExhibitionist", "$OSL_Yes")
+    endif
+
     AddHeaderOption("$OSL_BaselineContributions")
 
     ; Check if AND integration is available and enabled
