@@ -113,6 +113,7 @@ int[] RegisteredKeywordOids
 int[] RegisteredKeywordBaselineOids
 
 int RegisterKeywordOid
+int SelectedArmorClothingOid
 
 ;------ Baseline Explain -------
 int ExplainNakedOid
@@ -339,6 +340,7 @@ function KeywordPage()
         endif
         index += 1
     endwhile
+    SelectedArmorClothingOid = AddToggleOption("$OSL_CountsAsClothing", false, OPTION_FLAG_DISABLED)
 endfunction
 
 function UIPage()
@@ -682,6 +684,12 @@ event OnOptionSelect(int optionId)
             SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
         endif
     ElseIf (CurrentPage == "$OSL_Keywords")
+        if(SelectedArmor && optionId == SelectedArmorClothingOid && OSLArousedNativeConfig.IsInOSLMode())
+            bool newState = !OSLArousedNative.GetArmorCountsAsClothing(SelectedArmor)
+            OSLArousedNative.SetArmorCountsAsClothing(SelectedArmor, newState)
+            SetToggleOptionValue(SelectedArmorClothingOid, newState)
+            return
+        endif
         int index = 0
         bool bBreak = false
         while((index < RegisteredKeywordOids.Length) && !bBreak)
@@ -844,6 +852,8 @@ event OnOptionHighlight(int optionId)
     elseif(CurrentPage == "$OSL_Keywords")
         if(optionId == RegisterKeywordOid)
             SetInfoText("$OSL_InfoRegisterKeyword")
+        elseif(optionId == SelectedArmorClothingOid)
+            SetInfoText("$OSL_InfoCountsAsClothing")
         else
             int index = 0
             while(index < RegisteredKeywordBaselineOids.Length)
@@ -1475,6 +1485,11 @@ endevent
 function LoadArmorList()
     SelectedArmor = none
 
+    ; Clear the clothing toggle so cancelling the armor menu can't leave it enabled showing
+    ; the previously-selected armor's flag. ArmorSelected() re-enables/re-syncs it on accept.
+    SetToggleOptionValue(SelectedArmorClothingOid, false)
+    SetOptionFlags(SelectedArmorClothingOid, OPTION_FLAG_DISABLED)
+
     Actor player = Game.GetPlayer()
     Form[] equippedArmor = OSLArousedNativeActor.GetAllEquippedArmor(player)
     int index = 0
@@ -1512,6 +1527,16 @@ function ArmorSelected()
         endif
         index += 1
     endwhile
+
+    ; "Counts as clothing" suppression is only wired into OSL/native arousal mode, so the
+    ; toggle stays disabled in SLA mode rather than persisting a flag that does nothing.
+    if(OSLArousedNativeConfig.IsInOSLMode())
+        SetOptionFlags(SelectedArmorClothingOid, OPTION_FLAG_NONE)
+        SetToggleOptionValue(SelectedArmorClothingOid, OSLArousedNative.GetArmorCountsAsClothing(SelectedArmor))
+    else
+        SetOptionFlags(SelectedArmorClothingOid, OPTION_FLAG_DISABLED)
+        SetToggleOptionValue(SelectedArmorClothingOid, false)
+    endif
 endfunction
 
 bool function CheckKeyword(Keyword armorKeyword, int oid)

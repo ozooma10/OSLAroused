@@ -80,6 +80,10 @@ namespace Utilities
 
 		bool IsNaked(RE::Actor* actorRef);
 
+		// True if the actor is wearing any armor flagged "counts as clothing"
+		// (CountsAsClothingData). Such pieces suppress the wearer's nudity arousal.
+		bool IsWearingClothingOverride(RE::Actor* actorRef);
+
 		inline bool IsNakedCached(RE::Actor* actorRef)
 		{
 			return ActorStateManager::GetSingleton()->GetActorNaked(actorRef);

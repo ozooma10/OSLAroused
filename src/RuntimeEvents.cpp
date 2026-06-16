@@ -1,4 +1,5 @@
 #include "RuntimeEvents.h"
+#include "PersistedData.h"
 #include "Settings.h"
 #include "Managers/ArousalManager.h"
 #include "Managers/ArousalSystem/ArousalSystemOSL.h"
@@ -47,6 +48,14 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 						ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
 						break;
 					}
+				}
+			}
+
+			//A "counts as clothing" piece toggles nudity suppression for the wearer.
+			//It may not be body/cuirass armor, so refresh the baseline cache directly.
+			if (PersistedData::CountsAsClothingData::GetSingleton()->GetData(armor->formID, false)) {
+				if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+					oslSystem->ActorLibidoModifiersUpdated(static_cast<RE::Actor*>(equipEvent->actor.get()));
 				}
 			}
 		}
@@ -212,6 +221,17 @@ static void RunWorldArousalUpdate()
 				SKSE::log::trace("ArousalUpdateLoop: Actor {} is naked (legacy check)",
 				             actor->GetDisplayFullName());
 			}
+		}
+
+		// A worn piece flagged "counts as clothing" makes the wearer read as clothed to
+		// everyone: a flagged-but-nude actor is neither a spectator nudity source nor an
+		// exhibitionist source. (Their own nudity baseline is suppressed separately in
+		// ANDIntegration::GetNudityBaselineModifier.) Checked only for already-detected-nude
+		// actors so the worn-inventory walk is skipped for the clothed majority. Calling
+		// IsWearingClothingOverride here is main-thread-safe (RunWorldArousalUpdate is marshalled).
+		if (isNakedOrPartiallyNude && Utilities::Actor::IsWearingClothingOverride(actor)) {
+			isNakedOrPartiallyNude = false;
+			nudityScore = 0.0f;
 		}
 
 		// If the actor is naked or partially nude, get nearby spectators to update spectator array

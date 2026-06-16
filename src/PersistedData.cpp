@@ -210,6 +210,11 @@ namespace PersistedData
 			SKSE::log::critical("Failed to save Is Actor Exhibitionist Data");
 		}
 
+		const auto countsAsClothingData = CountsAsClothingData::GetSingleton();
+		if (!countsAsClothingData->Save(serializationInterface, kCountsAsClothingDataKey, kSerializationVersion)) {
+			SKSE::log::critical("Failed to save Counts As Clothing Data");
+		}
+
 		const auto settingsData = SettingsData::GetSingleton();
 		if (!settingsData->Save(serializationInterface, kSettingsDataKey, kSerializationVersion)) {
 			SKSE::log::critical("Failed to save Settings Data");
@@ -295,6 +300,14 @@ namespace PersistedData
 					auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
 					if (!isActorExhibitionistData->Load(serializationInterface)) {
 						SKSE::log::critical("Failed to Load IsActorExhibitionist Data"sv);
+					}
+				}
+				break;
+			case kCountsAsClothingDataKey:
+				{
+					auto countsAsClothingData = CountsAsClothingData::GetSingleton();
+					if (!countsAsClothingData->Load(serializationInterface)) {
+						SKSE::log::critical("Failed to Load CountsAsClothing Data"sv);
 					}
 				}
 				break;
@@ -393,6 +406,8 @@ namespace PersistedData
 		isArousalLockedData->Clear();
 		auto isActorExhibitionistData = IsActorExhibitionistData::GetSingleton();
 		isActorExhibitionistData->Clear();
+		auto countsAsClothingData = CountsAsClothingData::GetSingleton();
+		countsAsClothingData->Clear();
 		auto settingsData = SettingsData::GetSingleton();
 		settingsData->Clear();
 

@@ -202,6 +202,12 @@ namespace Integrations
             return 0.0f;
         }
 
+        // A worn piece flagged "counts as clothing" suppresses nudity arousal entirely,
+        // regardless of A.N.D. or legacy detection.
+        if (Utilities::Actor::IsWearingClothingOverride(actor)) {
+            return 0.0f;
+        }
+
         const auto settings = Settings::GetSingleton();
 
         // Check if A.N.D. integration is enabled in settings

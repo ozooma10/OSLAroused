@@ -2,6 +2,7 @@
 
 #include "PersistedData.h"
 #include "Managers/ArousalManager.h"
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
 #include "Utilities/Utils.h"
 #include <Settings.h>
 #include <Integrations/DevicesIntegration.h>
@@ -253,6 +254,29 @@ void PapyrusInterface::SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Ac
 	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Exhibitionist, exhibitionist ? 0 : -2);
 }
 
+bool PapyrusInterface::GetArmorCountsAsClothing(RE::StaticFunctionTag* base, RE::TESForm* armorForm)
+{
+	// Guard against non-armor forms: the flag is keyed by armor FormID and only ever read
+	// back for worn armor, so a non-armor form would only create a never-honored phantom entry.
+	if (!armorForm || !armorForm->IsArmor()) {
+		return false;
+	}
+	return PersistedData::CountsAsClothingData::GetSingleton()->GetData(armorForm->formID, false);
+}
+
+void PapyrusInterface::SetArmorCountsAsClothing(RE::StaticFunctionTag* base, RE::TESForm* armorForm, bool countsAsClothing)
+{
+	if (!armorForm || !armorForm->IsArmor()) {
+		return;
+	}
+	PersistedData::CountsAsClothingData::GetSingleton()->SetData(armorForm->formID, countsAsClothing);
+
+	// The flag changes nudity suppression for any wearer; clear cached OSL baselines so it applies immediately
+	if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+		oslSystem->ClearAllLibidoModifiers();
+	}
+}
+
 bool PapyrusInterface::IsActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef)
 {
 	if (!actorRef) {
@@ -384,6 +408,9 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("IsActorExhibitionist", "OSLArousedNative", IsActorExhibitionist);
 	vm->RegisterFunction("SetActorExhibitionist", "OSLArousedNative", SetActorExhibitionist);
+
+	vm->RegisterFunction("GetArmorCountsAsClothing", "OSLArousedNative", GetArmorCountsAsClothing);
+	vm->RegisterFunction("SetArmorCountsAsClothing", "OSLArousedNative", SetArmorCountsAsClothing);
 
 	vm->RegisterFunction("GetActorTimeRate", "OSLArousedNative", GetActorTimeRate);
 	vm->RegisterFunction("SetActorTimeRate", "OSLArousedNative", SetActorTimeRate);

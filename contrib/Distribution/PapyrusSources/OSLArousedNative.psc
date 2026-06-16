@@ -103,6 +103,10 @@ function UpdateHourlySceneViewerArousalModifier(float arousalMod) global native
 bool function AddKeywordToForm(Form form, Keyword keyword) global native
 bool function RemoveKeywordFromForm(Form form, Keyword keyword) global native
 
+; Flag a worn armor piece as "counts as clothing" to suppress its wearer's nudity arousal
+bool function GetArmorCountsAsClothing(Form armorForm) global native
+function SetArmorCountsAsClothing(Form armorForm, bool countsAsClothing) global native
+
 bool function FormHasKeywordString(form form, string kwd) global native
 string[] function GetRegisteredKeywords() global native
 bool function RegisterNewKeyword(string kwd) global native

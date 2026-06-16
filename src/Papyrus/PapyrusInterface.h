@@ -46,6 +46,10 @@ namespace PapyrusInterface
 	bool IsActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	void SetActorExhibitionist(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool exhibitionist);
 
+	//Flag a worn armor piece as "counts as clothing" to suppress its wearer's nudity arousal
+	bool GetArmorCountsAsClothing(RE::StaticFunctionTag* base, RE::TESForm* armorForm);
+	void SetArmorCountsAsClothing(RE::StaticFunctionTag* base, RE::TESForm* armorForm, bool countsAsClothing);
+
 	bool IsActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	void SetActorArousalLocked(RE::StaticFunctionTag* base, RE::Actor* actorRef, bool locked);
 

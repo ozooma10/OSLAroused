@@ -213,6 +213,23 @@ bool Utilities::Actor::IsNaked(RE::Actor* actorRef)
 	return !hasBodyArmor;
 }
 
+bool Utilities::Actor::IsWearingClothingOverride(RE::Actor* actorRef)
+{
+	if (!actorRef) {
+		return false;
+	}
+
+	bool hasClothingOverride = false;
+	const auto countsAsClothingData = PersistedData::CountsAsClothingData::GetSingleton();
+	ForEachWornArmor(actorRef, [&](RE::TESObjectARMO* armor) {
+		if (countsAsClothingData->GetData(armor->formID, false)) {
+			hasClothingOverride = true;
+		}
+	});
+
+	return hasClothingOverride;
+}
+
 std::vector<RE::TESForm*> Utilities::Actor::GetWornArmor(RE::Actor* actorRef)
 {
 	std::vector<RE::TESForm*> wornArmorForms;

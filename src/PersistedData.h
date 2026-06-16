@@ -283,6 +283,22 @@ namespace PersistedData
 		}
 	};
 
+	// Keyed by ARMOR FormID (not actor): true means the worn piece "counts as
+	// clothing" and suppresses nudity arousal for its wearer.
+	class CountsAsClothingData final : public BaseFormBool
+	{
+	public:
+		static CountsAsClothingData* GetSingleton()
+		{
+			static CountsAsClothingData singleton;
+			return &singleton;
+		}
+		const char* GetType() override
+		{
+			return "CountsAsClothing";
+		}
+	};
+
 	constexpr std::uint32_t kSerializationVersion = 1;
 	constexpr std::uint32_t kArousalDataKey = 'OSLA';
 	constexpr std::uint32_t kBaseLibidoDataKey = 'OSLB';
@@ -292,6 +308,7 @@ namespace PersistedData
 	constexpr std::uint32_t kArmorKeywordDataKey = 'OSLK';
 	constexpr std::uint32_t kIsArousalLockedDataKey = 'OSLL';
 	constexpr std::uint32_t kIsActorExhibitionistDataKey = 'OSLE';
+	constexpr std::uint32_t kCountsAsClothingDataKey = 'OSLG';
 	constexpr std::uint32_t kSettingsDataKey = 'OSLS';
 
 	std::string DecodeTypeCode(std::uint32_t typeCode);
