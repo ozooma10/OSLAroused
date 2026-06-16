@@ -7,3 +7,5 @@ copy /y OSLAroused_ENGLISH.txt OSLAroused_JAPANESE.txt
 copy /y OSLAroused_ENGLISH.txt OSLAroused_POLISH.txt
 copy /y OSLAroused_ENGLISH.txt OSLAroused_RUSSIAN.txt
 copy /y OSLAroused_ENGLISH.txt OSLAroused_SPANISH.txt
+copy /y OSLAroused_ENGLISH.txt OSLAroused_KOREAN.txt
+copy /y OSLAroused_ENGLISH.txt OSLAroused_PORTUGUESE.txt

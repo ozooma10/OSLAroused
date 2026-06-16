@@ -316,7 +316,7 @@ function KeywordPage()
     AddHeaderOption("$OSL_KeywordManagement")
     RegisterKeywordOid = AddInputOption("$OSL_RegisterNewKeyword", "$OSL_Register", 0)
     ArmorListMenuOid = AddMenuOption("$OSL_LoadArmorList", "")
-    AddHeaderOption("Keyword Baselines")
+    AddHeaderOption("$OSL_KeywordBaselines")
     int index = 0
     while(index < RegisteredKeywords.Length)
         Keyword kw = RegisteredKeywords[index] as Keyword
