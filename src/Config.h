@@ -31,9 +31,13 @@ public:
     bool SaveKeywordBaseline(RE::FormID keywordFormId, float value);
     bool SaveANDFactionBaseline(int index, float value);
     bool SaveSleepArousalGain(float value);
+    bool SaveSpectatorArousalGain(float value);
 
 private:
     bool LoadINI(std::string filename, bool useDefaults);
+    // Ensures the canonical SexLab Aroused / SLS armor keywords are registered if
+    // their forms exist in the load order, even when the user's INI omits them.
+    void BackfillKnownKeywords();
     bool IsKeywordRegistered(RE::FormID keywordFormId) const;
     const KeywordEntry* FindRegisteredKeyword(RE::FormID keywordFormId) const;
     bool m_ConfigLoaded = false;

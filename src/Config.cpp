@@ -31,6 +31,32 @@ void Config::LoadINIs()
 
     // Load Custom INI - only override values that are explicitly present
     LoadINI("Data/SKSE/Plugins/OSLAroused_Custom.ini", false);
+
+    // Ensure the standard SLA/SLS keywords are registered even if the INIs omit them
+    BackfillKnownKeywords();
+}
+
+void Config::BackfillKnownKeywords()
+{
+    // Canonical SexLab Aroused / SexLab SLS keywords. Registering these when their
+    // forms exist (regardless of INI contents) means standard aroused-armor mods work
+    // out of the box and survive a user trimming OSLAroused.ini.
+    static constexpr const char* kKnownKeywords[] = {
+        "EroticArmor",
+        "_SLS_BikiniArmor",
+        "SLA_ArmorPretty",
+        "SLA_ArmorHalfNaked",
+        "SLA_ArmorSpendex",
+        "SLA_HasStockings",
+    };
+
+    for (const char* editorId : kKnownKeywords) {
+        auto keywordForm = RE::TESForm::LookupByEditorID<RE::BGSKeyword>(editorId);
+        if (keywordForm && !IsKeywordRegistered(keywordForm->formID)) {
+            m_RegisteredKeywordEditorIds.emplace_back(keywordForm->formID, editorId);
+            SKSE::log::info("BackfillKnownKeywords: auto-registered keyword {}", editorId);
+        }
+    }
 }
 
 bool Config::LoadINI(std::string fileName, bool useDefaults)
@@ -96,6 +122,11 @@ bool Config::LoadINI(std::string fileName, bool useDefaults)
     float sleepArousalGain = Settings::GetSingleton()->GetSleepArousalGain();
     loadFloat("SleepEffect", "SleepArousalGain", 10.0f, sleepArousalGain);
     Settings::GetSingleton()->SetSleepArousalGain(sleepArousalGain);
+
+    // OSL-mode direct spectator arousal gain (0 disables)
+    float spectatorArousalGain = Settings::GetSingleton()->GetSpectatorArousalGain();
+    loadFloat("SpectatorArousal", "SpectatorArousalGain", 2.0f, spectatorArousalGain);
+    Settings::GetSingleton()->SetSpectatorArousalGain(spectatorArousalGain);
 
     // Get the log level from the System section
     const char *logLevelStr = getLatestValue("System", "LogLevel");
@@ -295,6 +326,31 @@ bool Config::SaveSleepArousalGain(float value)
     }
 
     SKSE::log::debug("SaveSleepArousalGain: Saved SleepArousalGain={} to INI", value);
+    return true;
+}
+
+bool Config::SaveSpectatorArousalGain(float value)
+{
+    CSimpleIniA ini(false, true, false);
+    // Load the custom INI first to preserve other settings
+    ini.LoadFile(kCustomIniPath);
+
+    char valueStr[32];
+    snprintf(valueStr, sizeof(valueStr), "%.1f", value);
+
+    SI_Error rc = ini.SetValue("SpectatorArousal", "SpectatorArousalGain", valueStr, nullptr, true);
+    if (rc < 0) {
+        SKSE::log::error("SaveSpectatorArousalGain: Failed to set value in INI. Error: {}", rc);
+        return false;
+    }
+
+    rc = ini.SaveFile(kCustomIniPath);
+    if (rc < 0) {
+        SKSE::log::error("SaveSpectatorArousalGain: Failed to save INI file. Error: {}", rc);
+        return false;
+    }
+
+    SKSE::log::debug("SaveSpectatorArousalGain: Saved SpectatorArousalGain={} to INI", value);
     return true;
 }
 

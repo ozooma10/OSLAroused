@@ -46,6 +46,10 @@ float function GetUpdateIntervalRealTimeSeconds() global native
 function SetSleepArousalGain(float newVal) global native
 float function GetSleepArousalGain() global native
 
+;OSL mode: direct, lasting arousal an observer gains per interval while seeing nudity. 0 disables.
+function SetSpectatorArousalGain(float newVal) global native
+float function GetSpectatorArousalGain() global native
+
 ;A.N.D. Integration Settings
 function SetUseANDIntegration(bool enabled) global native
 bool function GetUseANDIntegration() global native

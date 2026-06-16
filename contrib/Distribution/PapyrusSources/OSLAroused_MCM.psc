@@ -31,6 +31,7 @@ int MinLibidoNPCOid
 ;Baseline
 int BeingNudeBaselineOid
 int ViewingNudeBaselineOid
+int SpectatorArousalGainOid
 int EroticArmorBaselineOid
 int SceneParticipantBaselineOid
 int SceneViewerBaselineOid
@@ -379,6 +380,7 @@ function SettingsRightColumn()
         endif
 
         ViewingNudeBaselineOid = AddSliderOption("$OSL_ViewingNude", Main.ViewingNudityBaselineIncrease, "{1}")
+        SpectatorArousalGainOid = AddSliderOption("$OSL_SpectatorGain", OSLArousedNativeConfig.GetSpectatorArousalGain(), "{1}")
 
         EroticArmorBaselineOid = AddTextOption("$OSL_EroticArmor", "See Keywords", OPTION_FLAG_DISABLED)
         AddHeaderOption("$OSL_DeviceGains")
@@ -875,6 +877,8 @@ event OnOptionHighlight(int optionId)
             SetInfoText("$OSL_InfoNude")
         elseif(optionId == ViewingNudeBaselineOid)
             SetInfoText("$OSL_InfoViewingNude")
+        elseif(optionId == SpectatorArousalGainOid)
+            SetInfoText("$OSL_InfoSpectatorGain")
         elseif(optionId == EroticArmorBaselineOid)
             SetInfoText("$OSL_InfoErotic")
         elseif(optionId == SceneViewerBaselineOid)
@@ -1092,6 +1096,11 @@ event OnOptionSliderOpen(int option)
             SetSliderDialogStartValue(Main.ViewingNudityBaselineIncrease)
             SetSliderDialogDefaultValue(20)
             SetSliderDialogRange(0, 50)
+        elseif(option == SpectatorArousalGainOid)
+            SetSliderDialogStartValue(OSLArousedNativeConfig.GetSpectatorArousalGain())
+            SetSliderDialogDefaultValue(2)
+            SetSliderDialogRange(0, 25)
+            SetSliderDialogInterval(0.5)
         elseif(option == DeviceBaselineGainValueOid)
             SetSliderDialogStartValue(Main.DeviceBaselineModifications[SelectedDeviceTypeId])
             SetSliderDialogDefaultValue(Main.DeviceBaselineModifications[SelectedDeviceTypeId])
@@ -1246,6 +1255,9 @@ event OnOptionSliderAccept(int option, float value)
         elseif(option == ViewingNudeBaselineOid)
             Main.SetViewingNudeBaseline(value)
             SetSliderOptionValue(ViewingNudeBaselineOid, value, "{1}")
+        elseif(option == SpectatorArousalGainOid)
+            OSLArousedNativeConfig.SetSpectatorArousalGain(value)
+            SetSliderOptionValue(SpectatorArousalGainOid, value, "{1}")
         elseif(option == DeviceBaselineGainValueOid)
             Main.SetDeviceTypeBaselineChange(SelectedDeviceTypeId, value)
             SetSliderOptionValue(DeviceBaselineGainValueOid, value)

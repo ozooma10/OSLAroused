@@ -40,6 +40,10 @@ namespace PapyrusConfig
 	void SetSleepArousalGain(RE::StaticFunctionTag* base, float newVal);
 	float GetSleepArousalGain(RE::StaticFunctionTag* base);
 
+	//OSL-mode direct spectator arousal gain (0 disables)
+	void SetSpectatorArousalGain(RE::StaticFunctionTag* base, float newVal);
+	float GetSpectatorArousalGain(RE::StaticFunctionTag* base);
+
 	// Utilities
 	RE::BSFixedString RoundFloat(RE::StaticFunctionTag* base, float value, int decimals);
 

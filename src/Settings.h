@@ -330,6 +330,20 @@ public:
 		return m_SleepArousalGain;
 	}
 
+	// Direct, lasting arousal an OSL-mode observer gains per update interval while
+	// witnessing a naked actor (on top of the passive viewing-baseline lift).
+	// Scaled by elapsed time, nudity level and gender preference. 0 disables.
+	void SetSpectatorArousalGain(float newVal)
+	{
+		Locker locker(m_Lock);
+		m_SpectatorArousalGain = std::clamp(newVal, 0.f, 100.f);
+	}
+	float GetSpectatorArousalGain() const
+	{
+		Locker locker(m_Lock);
+		return m_SpectatorArousalGain;
+	}
+
 private:
 
 	float m_ArousalUpdateInterval = 0.1f;
@@ -362,6 +376,9 @@ private:
 
 	// Sleep effect (player only). 0 disables.
 	float m_SleepArousalGain = 10.f;
+
+	// OSL-mode direct spectator arousal gain per interval. 0 disables.
+	float m_SpectatorArousalGain = 2.f;
 
 	mutable Lock m_Lock;
 };

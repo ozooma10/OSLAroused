@@ -280,6 +280,18 @@ float PapyrusConfig::GetSleepArousalGain(RE::StaticFunctionTag* base)
 	return Settings::GetSingleton()->GetSleepArousalGain();
 }
 
+void PapyrusConfig::SetSpectatorArousalGain(RE::StaticFunctionTag* base, float newVal)
+{
+	SKSE::log::trace("SetSpectatorArousalGain: {}", newVal);
+	Settings::GetSingleton()->SetSpectatorArousalGain(newVal);
+	Config::GetSingleton()->SaveSpectatorArousalGain(newVal);
+}
+
+float PapyrusConfig::GetSpectatorArousalGain(RE::StaticFunctionTag* base)
+{
+	return Settings::GetSingleton()->GetSpectatorArousalGain();
+}
+
 RE::BSFixedString PapyrusConfig::RoundFloat(RE::StaticFunctionTag* base, float value, int decimals)
 {
 	// Clamp decimals to something sane
@@ -332,6 +344,9 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("SetSleepArousalGain", "OSLArousedNativeConfig", SetSleepArousalGain);
 	vm->RegisterFunction("GetSleepArousalGain", "OSLArousedNativeConfig", GetSleepArousalGain);
+
+	vm->RegisterFunction("SetSpectatorArousalGain", "OSLArousedNativeConfig", SetSpectatorArousalGain);
+	vm->RegisterFunction("GetSpectatorArousalGain", "OSLArousedNativeConfig", GetSpectatorArousalGain);
 
 	vm->RegisterFunction("RoundFloat", "OSLArousedNativeConfig", RoundFloat);
 	return true;

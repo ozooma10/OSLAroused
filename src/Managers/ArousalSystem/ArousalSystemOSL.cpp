@@ -198,7 +198,70 @@ float ArousalSystemOSL::UpdateActorLibido(RE::Actor* actorRef, float gameHoursPa
 
 void ArousalSystemOSL::HandleSpectatingNaked(RE::Actor* actorRef, RE::Actor* nakedRef, float elapsedGameTimeSinceLastUpdate)
 {
-    //NO-OP SLA only
+    if (!actorRef || !nakedRef) {
+        return;
+    }
+    if (Utilities::Actor::IsDead(actorRef) || Utilities::Actor::IsDead(nakedRef)) {
+        return;
+    }
+
+    // Player-focused effect. NPCs floor their libido high (default 80), so a crowd-wide
+    // direct gain would just pin every nearby NPC near 100 in nude-heavy areas. Restrict
+    // it to the player - either as the observer (actorRef) or, for the exhibitionist
+    // branch, as the one being seen (nakedRef). Bailing here also skips the AND/faction
+    // lookups below for the common NPC<->NPC pair, which is the bulk of the scan.
+    if (!actorRef->IsPlayerRef() && !nakedRef->IsPlayerRef()) {
+        return;
+    }
+
+    const auto settings = Settings::GetSingleton();
+
+    // Direct, lasting arousal gain for witnessing nudity. This complements the
+    // passive viewing-baseline lift in CalculateActorLibidoModifier: the baseline
+    // makes the observer aroused *while* watching, this leaves a residue that
+    // persists (and slowly normalizes) after they look away. 0 disables.
+    const float baseGain = settings->GetSpectatorArousalGain();
+    if (baseGain <= 0.f) {
+        return;
+    }
+
+    // Scale by elapsed time (this is called every tick, not at the SLA cadence).
+    // Reaches full gain at the configured update interval.
+    const float updateInterval = settings->GetArousalUpdateInterval();
+    const float timeScale = updateInterval > 0.f ? std::min(1.f, elapsedGameTimeSinceLastUpdate / updateInterval) : 1.f;
+
+    // Scale by AND nudity level when available (partial nudity => partial gain).
+    float nudityScale = 1.0f;
+    if (settings->GetUseANDIntegration() && Integrations::ANDIntegration::GetSingleton()->IsAvailable()) {
+        const float andScore = Integrations::ANDIntegration::GetSingleton()->GetANDNudityScore(nakedRef);
+        const float maxNudeScore = settings->GetANDFactionBaseline(Integrations::ANDFactionIndex::NUDE);
+        nudityScale = maxNudeScore > 0.f ? std::min(1.f, andScore / maxNudeScore) : 0.f;
+    }
+
+    // Observer (player) gain. Skipped while the player is participating in a scene: the
+    // scene baselines/gains already drive arousal there, so this would double-dip.
+    if (actorRef->IsPlayerRef() && !Utilities::Actor::IsParticipatingInScene(actorRef)) {
+        // Full gain if the naked actor matches the observer's gender preference, else half.
+        const int genderPreference = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_GenderPreference);
+        const auto nakedBase = nakedRef->GetActorBase();
+        const bool matchesPreference = nakedBase && (genderPreference == nakedBase->GetSex() || genderPreference == 2);
+
+        const float gain = baseGain * timeScale * nudityScale * (matchesPreference ? 1.f : 0.5f);
+        if (gain > 0.f) {
+            //Main update loop runs GetArousal, so no need to send an event here
+            ModifyArousal(actorRef, gain, false);
+        }
+    }
+
+    // An exhibitionist player gains arousal from being seen (same player-only + not-in-scene gating).
+    if (nakedRef->IsPlayerRef()
+        && !Utilities::Actor::IsParticipatingInScene(nakedRef)
+        && PersistedData::IsActorExhibitionistData::GetSingleton()->GetData(nakedRef->formID, false)) {
+        const float exhibitionistGain = baseGain * timeScale * nudityScale * 0.5f;
+        if (exhibitionistGain > 0.f) {
+            ModifyArousal(nakedRef, exhibitionistGain, false);
+        }
+    }
 }
 
 
