@@ -336,8 +336,9 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 		auto actor = ref.As<RE::Actor>();
 		if (actor && actor != source && !actor->IsDisabled() && !actor->IsChild() && !Utilities::Actor::IsDead(actor) && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			//Enforce the outer radius as a hard cutoff, then check force distance / detection
-			if (sourceLocation.GetSquaredDistance(ref.GetPosition()) < radiusSq &&
-				(sourceLocation.GetSquaredDistance(ref.GetPosition()) < forceDetectDistance || (actor->RequestDetectionLevel(source, RE::DETECTION_PRIORITY::kNormal) > 0) || actor->IsPlayer())) {
+			const float distSq = sourceLocation.GetSquaredDistance(ref.GetPosition());
+			if (distSq < radiusSq &&
+				(distSq < forceDetectDistance || (actor->RequestDetectionLevel(source, RE::DETECTION_PRIORITY::kNormal) > 0) || actor->IsPlayer())) {
 				nearbyActors.push_back(actor);
 			}
 		}
