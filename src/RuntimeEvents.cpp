@@ -246,7 +246,7 @@ static void RunWorldArousalUpdate()
 					spectatorNudityScores[spectator] = std::max(it->second, nudityScore);
 				}
 
-				// HandleSpectatingNaked already scales gains based on AND score internally (SLA mode only)
+				// HandleSpectatingNaked scales gains by AND nudity score internally (both OSL and SLA modes)
 				ArousalManager::GetSingleton()->GetArousalSystem().HandleSpectatingNaked(spectator, actor, elapsedGameTimeSinceLastCheck);
 			}
 		}

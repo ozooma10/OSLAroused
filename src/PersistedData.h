@@ -317,9 +317,10 @@ namespace PersistedData
 	void LoadCallback(SKSE::SerializationInterface* serializationInterface);
 	void RevertCallback(SKSE::SerializationInterface* serializationInterface);
 
-	// Post-load self-healing: clamps/repairs persisted per-actor values that could otherwise leave arousal permanently stuck
-	// (e.g. a multiplier of 0 that freezes all arousal gains, or out-of-range/non-finite values from a corrupted or externally edited save).
-	// Safe to call after LoadCallback.
+	// Post-load self-healing: clamps/repairs persisted per-actor values that could otherwise corrupt
+	// the arousal system (out-of-range, negative, or non-finite values from a corrupted or externally
+	// edited save). Legitimate-but-extreme in-range values are preserved (e.g. a multiplier of 0, which
+	// is a valid "no arousal gains" setting). Safe to call after LoadCallback.
 	void SanitizeLoadedData();
 
 	void ResetSystemForModeSwitch();
