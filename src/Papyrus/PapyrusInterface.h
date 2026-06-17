@@ -39,6 +39,9 @@ namespace PapyrusInterface
 	bool IsViewingScene(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	bool IsWearingEroticArmor(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 
+	// True if the actor wears any armor flagged "counts as clothing" (nudity suppressed)
+	bool IsWearingClothingOverride(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+
 	// A.N.D. Integration debug function
 	float GetANDNudityScore(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	std::vector<float> GetANDFactionContributions(RE::StaticFunctionTag* base, RE::Actor* actorRef);

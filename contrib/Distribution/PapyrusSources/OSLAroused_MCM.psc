@@ -476,6 +476,14 @@ function BaselineStatusPage()
     if(OSLArousedNative.IsActorExhibitionist(PuppetActor))
         AddTextOption("$OSL_IsExhibitionist", "$OSL_Yes")
     endif
+    if(OSLArousedNative.IsNaked(PuppetActor))
+        AddTextOption("$OSL_NakedStatus", "$OSL_Yes")
+    else
+        AddTextOption("$OSL_NakedStatus", "$OSL_No")
+    endif
+    if(OSLArousedNative.IsWearingClothingOverride(PuppetActor))
+        AddTextOption("$OSL_ClothingOverrideActive", "$OSL_Yes")
+    endif
 
     AddHeaderOption("$OSL_BaselineContributions")
 

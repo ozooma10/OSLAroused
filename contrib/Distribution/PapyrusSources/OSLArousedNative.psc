@@ -128,6 +128,8 @@ bool function IsViewingNaked(Actor actor) global native
 bool function IsInScene(Actor actor) global native
 bool function IsViewingScene(Actor actor) global native
 bool function IsWearingEroticArmor(Actor actor) global native
+; True if the actor wears any armor flagged "counts as clothing" (its nudity arousal is suppressed)
+bool function IsWearingClothingOverride(Actor actor) global native
 float function WornDeviceBaselineGain(Actor actor) global native
 
 ;Gets the A.N.D. (Advanced Nudity Detection) nudity score for an actor (0-50)
