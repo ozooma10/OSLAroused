@@ -60,9 +60,15 @@ rule("oslaroused.deploy", function()
                 --  Devious Devices patch is FOMOD-optional, so neither is auto-deployed.)
                 os.cp(path.join(contrib, "Assets", "*"), dir)
                 os.cp(path.join(contrib, "Config", "*.ini"), plugindir)
-                local scriptdir = path.join(dir, "Scripts")
-                os.mkdir(scriptdir)
-                os.cp(path.join(contrib, "PapyrusRelease", "*.pex"), scriptdir)
+
+                -- PapyrusRelease is produced by a separate Papyrus compile step, so it may
+                -- not exist yet on a DLL-only build; only deploy scripts when present.
+                local papyrusdir = path.join(contrib, "PapyrusRelease")
+                if os.isdir(papyrusdir) then
+                    local scriptdir = path.join(dir, "Scripts")
+                    os.mkdir(scriptdir)
+                    os.cp(path.join(papyrusdir, "*.pex"), scriptdir)
+                end
             end
         end
     end)
