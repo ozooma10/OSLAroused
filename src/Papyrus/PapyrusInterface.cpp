@@ -217,6 +217,15 @@ bool PapyrusInterface::IsWearingEroticArmor(RE::StaticFunctionTag*, RE::Actor* a
 	return false;
 }
 
+bool PapyrusInterface::IsWearingClothingOverride(RE::StaticFunctionTag*, RE::Actor* actorRef)
+{
+    if (!actorRef) {
+        Utilities::logInvalidArgsVerbose(__FUNCTION__);
+        return false;
+    }
+	return Utilities::Actor::IsWearingClothingOverride(actorRef);
+}
+
 float PapyrusInterface::GetANDNudityScore(RE::StaticFunctionTag*, RE::Actor* actorRef)
 {
     if (!actorRef) {
@@ -270,6 +279,10 @@ void PapyrusInterface::SetArmorCountsAsClothing(RE::StaticFunctionTag* base, RE:
 		return;
 	}
 	PersistedData::CountsAsClothingData::GetSingleton()->SetData(armorForm->formID, countsAsClothing);
+
+	// The flag feeds IsNaked, so any wearer's cached naked state is now stale; drop it so the
+	// next fetch re-scans worn armor and reflects the new clothed/naked status immediately.
+	ActorStateManager::GetSingleton()->ClearAllNakedStates();
 
 	// The flag changes nudity suppression for any wearer; clear cached OSL baselines so it applies immediately
 	if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
@@ -427,6 +440,7 @@ bool PapyrusInterface::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("IsInScene", "OSLArousedNative", IsInScene);
 	vm->RegisterFunction("IsViewingScene", "OSLArousedNative", IsViewingScene);
 	vm->RegisterFunction("IsWearingEroticArmor", "OSLArousedNative", IsWearingEroticArmor);
+	vm->RegisterFunction("IsWearingClothingOverride", "OSLArousedNative", IsWearingClothingOverride);
 	vm->RegisterFunction("GetANDNudityScore", "OSLArousedNative", GetANDNudityScore);
 	vm->RegisterFunction("GetANDFactionContributions", "OSLArousedNative", GetANDFactionContributions);
 	vm->RegisterFunction("WornDeviceBaselineGain", "OSLArousedNative", WornDeviceBaselineGain);

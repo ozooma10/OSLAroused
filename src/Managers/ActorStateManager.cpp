@@ -50,6 +50,11 @@ void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNake
 	}
 }
 
+void ActorStateManager::ClearAllNakedStates()
+{
+	m_ActorNakedStateCache.ClearAll();
+}
+
 bool ActorStateManager::GetActorSpectatingNaked(RE::Actor* actorRef)
 {
 	if (!actorRef) {

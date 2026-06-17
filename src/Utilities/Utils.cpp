@@ -203,9 +203,15 @@ bool Utilities::Actor::IsNaked(RE::Actor* actorRef)
 		return true;
 	}
 
+	// A worn piece flagged "counts as clothing" makes the wearer read as clothed,
+	// even if it doesn't fill the body slot (e.g. a skimpy outfit). This keeps the
+	// canonical naked check consistent with the nudity-suppression applied in the
+	// arousal baseline (ANDIntegration::GetNudityBaselineModifier) and spectator paths.
 	bool hasBodyArmor = false;
+	const auto countsAsClothingData = PersistedData::CountsAsClothingData::GetSingleton();
 	ForEachWornArmor(actorRef, [&](RE::TESObjectARMO* armor) {
-		if (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kBody) || HasArmorCuirassKeyword(armor)) {
+		if (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kBody) || HasArmorCuirassKeyword(armor)
+			|| countsAsClothingData->GetData(armor->formID, false)) {
 			hasBodyArmor = true;
 		}
 	});

@@ -28,6 +28,10 @@ public:
 	bool GetActorNaked(RE::Actor* actorRef);
 	void ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked);
 
+	// Drop all cached naked states so they re-evaluate on next fetch. Used when a setting
+	// that feeds IsNaked changes globally (e.g. an armor's "counts as clothing" flag).
+	void ClearAllNakedStates();
+
 	bool GetActorSpectatingNaked(RE::Actor* actorRef);
 	float GetSpectatingMaxNudityScore(RE::Actor* actorRef);
 	void UpdateActorsSpectating(std::map<RE::Actor*, float> spectatorNudityScores);

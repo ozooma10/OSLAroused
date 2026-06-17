@@ -27,6 +27,9 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
+	SKSE::log::trace("OnEquipEvent: Actor {} {} armor {:08X}",
+	             equipActor->GetDisplayFullName(), equipEvent->equipped ? "equipped" : "unequipped", equipmentForm->formID);
+
 	auto player = RE::PlayerCharacter::GetSingleton();
 	if (!player) {
 		return RE::BSEventNotifyControl::kContinue;
@@ -52,8 +55,11 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 			}
 
 			//A "counts as clothing" piece toggles nudity suppression for the wearer.
-			//It may not be body/cuirass armor, so refresh the baseline cache directly.
+			//It may not be body/cuirass armor, so refresh the naked + baseline caches directly.
 			if (PersistedData::CountsAsClothingData::GetSingleton()->GetData(armor->formID, false)) {
+				SKSE::log::trace("OnEquipEvent: armor {:08X} counts as clothing; refreshing naked + libido caches for {}",
+				             armor->formID, equipActor->GetDisplayFullName());
+				ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
 				if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
 					oslSystem->ActorLibidoModifiersUpdated(static_cast<RE::Actor*>(equipEvent->actor.get()));
 				}
@@ -230,6 +236,8 @@ static void RunWorldArousalUpdate()
 		// actors so the worn-inventory walk is skipped for the clothed majority. Calling
 		// IsWearingClothingOverride here is main-thread-safe (RunWorldArousalUpdate is marshalled).
 		if (isNakedOrPartiallyNude && Utilities::Actor::IsWearingClothingOverride(actor)) {
+			SKSE::log::trace("ArousalUpdateLoop: Actor {} flipped to clothed by clothing override (nudityScore {} -> 0)",
+			             actor->GetDisplayFullName(), nudityScore);
 			isNakedOrPartiallyNude = false;
 			nudityScore = 0.0f;
 		}
