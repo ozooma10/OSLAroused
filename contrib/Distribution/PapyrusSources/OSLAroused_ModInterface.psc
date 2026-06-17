@@ -2,7 +2,7 @@
 scriptname OSLAroused_ModInterface hidden
 
 int function GetVersion() global
-    return 282 ;2.8.2
+    return 290 ;2.9.0
 endfunction
 
 function SetUseOSLArousalMode(bool val) global
