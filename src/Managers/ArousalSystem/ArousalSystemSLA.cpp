@@ -8,6 +8,14 @@
 
 using namespace PersistedData;
 
+namespace
+{
+	// Minimum arousal change required to send an arousal updated event. 
+    // we lerp towards baseline in tiny increments, but dont need to send that every update,
+    // player is still always sent, this is just for npc actors
+	constexpr float kArousalEventEpsilon = 1.0f;
+}
+
 float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 {
 	if(!actorRef) { return 0.f; }
@@ -34,7 +42,8 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 	if (Utilities::Actor::IsDead(actorRef))
 	{
 		if (bUpdateState) {
-			Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, 0.0f);
+            // Dead actors go flacid, drive the native SOS event. (noraml per-cycle skipped)
+			ActorStateManager::GetSingleton()->UpdateSOSAnimation(actorRef, 0.0f);
 		}
 		return 0.0f;
 	}
@@ -53,10 +62,19 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 		newArousal = 100;
 	}
 
+	const int oldArousalRank = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_Arousal);
 	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
 
-	if (bUpdateState || LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f) == 0.f) {
-		Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
+	const bool firstCheck = LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f) == 0.f;
+	if (bUpdateState || firstCheck) {
+        // Drive SOS natively (deduped by bend bucket) 
+        // avoids round-tripping every actor through Papyrus OnActorArousalUpdated -> Debug.SendAnimationEvent.
+		ActorStateManager::GetSingleton()->UpdateSOSAnimation(actorRef, newArousal);
+
+        //Only emit arousal event when value changed beyond epsilon (or is player)
+		if (actorRef->IsPlayerRef() || firstCheck || std::abs(newArousal - static_cast<float>(oldArousalRank)) >= kArousalEventEpsilon) {
+			Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
+		}
 	}
 
 	ActorStateManager::GetSingleton()->OnActorArousalUpdated(actorRef, newArousal);

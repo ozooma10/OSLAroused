@@ -10,6 +10,14 @@
 
 using namespace PersistedData;
 
+namespace
+{
+    // Minimum arousal change required to send an arousal updated event. 
+    // we lerp towards baseline in tiny increments, but dont need to send that every update,
+    // player is still always sent, this is just for npc actors
+	constexpr float kArousalEventEpsilon = 1.0f;
+}
+
 float CalculateArousal(RE::Actor* actorRef, float gameHoursPassed)
 {
     float currentArousal = ArousalData::GetSingleton()->GetData(actorRef->formID, -2.f);
@@ -42,7 +50,8 @@ float ArousalSystemOSL::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 
     if (Utilities::Actor::IsDead(actorRef)) {
         if (bUpdateState) {
-            Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, 0.0f);
+            // Dead actors go flacid, drive the native SOS event. (noraml per-cycle skipped)
+            ActorStateManager::GetSingleton()->UpdateSOSAnimation(actorRef, 0.0f);
         }
         return 0.0f;
     }
@@ -90,6 +99,8 @@ float ArousalSystemOSL::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 	}
 
     value = std::clamp(value, 0.0f, 100.f);
+
+    const float oldValue = ArousalData::GetSingleton()->GetData(actorRef->formID, -1.f);
     ArousalData::GetSingleton()->SetData(actorRef->formID, value);
 
 	//OSL Mode sets both arousal and exposure to the same value
@@ -97,7 +108,14 @@ float ArousalSystemOSL::SetArousal(RE::Actor* actorRef, float value, bool bSendE
     Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Exposure, value);
 
     if (bSendEvent) {
-        Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, value);
+        // Drive SOS natively (deduped by bend bucket) 
+        // avoids round-tripping every actor through Papyrus OnActorArousalUpdated -> Debug.SendAnimationEvent.
+        ActorStateManager::GetSingleton()->UpdateSOSAnimation(actorRef, value);
+
+        //Only emit arousal event when value changed beyond epsilon (or is player)
+        if (actorRef->IsPlayerRef() || std::abs(value - oldValue) >= kArousalEventEpsilon) {
+            Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, value);
+        }
     }
 
     return value;
