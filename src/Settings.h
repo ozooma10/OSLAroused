@@ -344,6 +344,17 @@ public:
 		return m_SpectatorArousalGain;
 	}
 
+	void SetEnableSOSIntegration(bool newVal)
+	{
+		Locker locker(m_Lock);
+		m_EnableSOSIntegration = newVal;
+	}
+	bool GetEnableSOSIntegration() const
+	{
+		Locker locker(m_Lock);
+		return m_EnableSOSIntegration;
+	}
+
 private:
 
 	float m_ArousalUpdateInterval = 0.1f;
@@ -379,6 +390,9 @@ private:
 
 	// OSL-mode direct spectator arousal gain per interval. 0 disables.
 	float m_SpectatorArousalGain = 2.f;
+
+	// SOS integration, driven natively from arousal updates.
+	bool m_EnableSOSIntegration = true;
 
 	mutable Lock m_Lock;
 };

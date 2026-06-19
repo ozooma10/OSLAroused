@@ -123,6 +123,12 @@ bool PapyrusConfig::IsANDIntegrationEnabled(RE::StaticFunctionTag*)
 	return result;
 }
 
+void PapyrusConfig::SetSOSIntegrationEnabled(RE::StaticFunctionTag*, bool enabled)
+{
+	SKSE::log::trace("SetSOSIntegrationEnabled: {}", enabled);
+	Settings::GetSingleton()->SetEnableSOSIntegration(enabled);
+}
+
 void PapyrusConfig::SetANDFactionBaseline(RE::StaticFunctionTag*, int factionIndex, float value)
 {
 	SKSE::log::trace("SetANDFactionBaseline: index={}, value={}", factionIndex, value);
@@ -347,6 +353,8 @@ bool PapyrusConfig::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 
 	vm->RegisterFunction("SetSpectatorArousalGain", "OSLArousedNativeConfig", SetSpectatorArousalGain);
 	vm->RegisterFunction("GetSpectatorArousalGain", "OSLArousedNativeConfig", GetSpectatorArousalGain);
+
+	vm->RegisterFunction("SetSOSIntegrationEnabled", "OSLArousedNativeConfig", SetSOSIntegrationEnabled);
 
 	vm->RegisterFunction("RoundFloat", "OSLArousedNativeConfig", RoundFloat);
 	return true;

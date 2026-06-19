@@ -145,6 +145,7 @@ Function OnGameLoaded()
 	OSLArousedNativeConfig.SetSceneVictimGainsArousal(VictimGainsArousal)
 	OSLArousedNativeConfig.SetBeingNudeBaseline(NudityBaselineIncrease)
 	OSLArousedNativeConfig.SetViewingNudeBaseline(ViewingNudityBaselineIncrease)
+	OSLArousedNativeConfig.SetSOSIntegrationEnabled(EnableSOSIntegration)
 	MigrateLegacyEroticArmorBaseline()
 
 	OSLArousedNativeConfig.SetDeviceTypesBaseline1(DeviceBaselineModifications[0], DeviceBaselineModifications[1], DeviceBaselineModifications[2], DeviceBaselineModifications[3], DeviceBaselineModifications[4], DeviceBaselineModifications[5], DeviceBaselineModifications[6], DeviceBaselineModifications[7], DeviceBaselineModifications[8], DeviceBaselineModifications[9])
@@ -185,12 +186,11 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 
 		if EnableArousalStatBuffs
 			ApplyArousedEffects()
-		else  
+		else
 			RemoveAllArousalSpells()
 		endif
 	endif
-
-	UpdateSOSPosition(act, newArousal)
+	; SOS schlong-bend is now driven natively from the DLL (ActorStateManager::UpdateSOSAnimation)
 endevent
 
 event OnANDNudityUpdated()
@@ -217,6 +217,12 @@ function RunDebugLogic()
 		; OSLAroused_ModInterface.ModifyArousal(PlayerRef, 2.0, "Debug")
 		; SlaFrameworkStub.DebugActorState(PlayerRef)
 	endif
+endfunction
+
+; SOS integration toggle. Push to the DLL so the native SOS driver respects the MCM setting.
+function SetSOSIntegrationEnabled(bool enabled)
+	EnableSOSIntegration = enabled
+	OSLArousedNativeConfig.SetSOSIntegrationEnabled(enabled)
 endfunction
 
 ; ========== AROUSAL EFFECTS ===========
@@ -287,25 +293,6 @@ Event OnKeyUp(Int KeyCode, Float HoldTime)
         EndIf
     EndIf
 EndEvent
-
-function UpdateSOSPosition(Actor act, float arousal)
-	if(act == none || !EnableSOSIntegration)
-		return
-	elseif(act.IsDead())
-		Debug.SendAnimationEvent(act, "SOSFlaccid")
-		return
-	elseif(OSLArousedNative.IsInScene(act))
-		return
-	endif
-	int pos = ((arousal as int) / 4) - 14;
-	if(pos < -9)
-		Debug.SendAnimationEvent(act, "SOSFlaccid")
-	elseif(pos > 9)
-		Debug.SendAnimationEvent(act, "SOSBend9")
-	else
-		Debug.SendAnimationEvent(act, "SOSBend" + pos)
-	endif
-endfunction
 
 ; =========== SCENE RELATED =============
 function StartPCMasturbationScene()

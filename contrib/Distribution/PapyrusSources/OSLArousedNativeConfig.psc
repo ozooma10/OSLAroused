@@ -50,6 +50,9 @@ float function GetSleepArousalGain() global native
 function SetSpectatorArousalGain(float newVal) global native
 float function GetSpectatorArousalGain() global native
 
+;SOS integration. When enabled the DLL drives schlong bend natively.
+function SetSOSIntegrationEnabled(bool enabled) global native
+
 ;A.N.D. Integration Settings
 function SetUseANDIntegration(bool enabled) global native
 bool function GetUseANDIntegration() global native

@@ -44,6 +44,9 @@ namespace PapyrusConfig
 	void SetSpectatorArousalGain(RE::StaticFunctionTag* base, float newVal);
 	float GetSpectatorArousalGain(RE::StaticFunctionTag* base);
 
+	//sos integration toggle
+	void SetSOSIntegrationEnabled(RE::StaticFunctionTag* base, bool enabled);
+
 	// Utilities
 	RE::BSFixedString RoundFloat(RE::StaticFunctionTag* base, float value, int decimals);
 

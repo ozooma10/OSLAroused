@@ -699,7 +699,7 @@ event OnOptionSelect(int optionId)
             Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
             SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
         elseif(optionId == EnableSOSIntegrationOid)
-            Main.EnableSOSIntegration = !Main.EnableSOSIntegration
+            Main.SetSOSIntegrationEnabled(!Main.EnableSOSIntegration)
             SetToggleOptionValue(EnableSOSIntegrationOid, Main.EnableSOSIntegration)
         endif
     elseif(CurrentPage == "$OSL_Settings")
