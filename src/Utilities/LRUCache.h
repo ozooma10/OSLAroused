@@ -52,6 +52,18 @@ namespace Utilities
 			}
 		}
 
+		//Return the currently cached value WITHOUT computing on a miss (and without affecting
+		//LRU recency). Empty optional if the key is not cached. Used for change-detection.
+		std::optional<ValType> Peek(const KeyType& key) const
+		{
+			std::lock_guard<std::mutex> lock(m_Mutex);
+			const auto it = m_CacheData.find(key);
+			if (it != m_CacheData.end()) {
+				return (*it).second.first;
+			}
+			return std::nullopt;
+		}
+
 		//Remove item from cache so it will be recalculated on next fetch
 		void PurgeItem(const KeyType& key)
 		{
