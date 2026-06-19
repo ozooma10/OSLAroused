@@ -57,6 +57,13 @@ New-Item -ItemType Directory -Path $staging | Out-Null
 try {
     Copy-Item -Path (Join-Path $distSource "*") -Destination $staging -Recurse -Force
 
+    # Batch/script files are dev tooling, never runtime assets, and ship-time .bat files
+    # trip users' antivirus. Strip them unconditionally so none can leak into the archive.
+    Get-ChildItem -Path $staging -Include *.bat, *.cmd -Recurse | ForEach-Object {
+        Write-Host "Excluding $($_.Name)" -ForegroundColor DarkGray
+        Remove-Item $_.FullName -Force
+    }
+
     if (-not $IncludePdb) {
         Get-ChildItem -Path $staging -Filter *.pdb -Recurse | ForEach-Object {
             Write-Host "Excluding $($_.Name)" -ForegroundColor DarkGray
