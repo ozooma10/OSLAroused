@@ -50,6 +50,9 @@ public:
 	// comparies against the last notified value. The player always notifies.
 	bool ShouldNotifyArousalChange(RE::Actor* actorRef, float newArousal);
 
+	// reset the transient sos/arousal caches. needs to be reset on load/new game since engine resets animation state on load.
+	void ClearTransientActorState();
+
 	RE::Actor* GetMostArousedActorInLocation();
 
 private:

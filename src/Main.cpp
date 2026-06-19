@@ -9,6 +9,7 @@
 #include "Utilities/Utils.h"
 #include "Config.h"
 #include "Managers/ArousalManager.h"
+#include "Managers/ActorStateManager.h"
 #include "Integrations/ANDIntegration.h"
 
 using namespace RE::BSScript;
@@ -82,8 +83,14 @@ namespace
 			case SKSE::MessagingInterface::kNewGame:
 				//On new game, reset arousal manager
 				ArousalManager::GetSingleton()->SetArousalSystem(IArousalSystem::ArousalMode::kOSL, false);
+				//Drop transient SOS/arousal-event dedup caches (not persisted; engine resets anim state)
+				ActorStateManager::GetSingleton()->ClearTransientActorState();
 				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
+				//Drop transient SOS/arousal-event dedup caches so the first post-load cycle re-asserts
+				//SOS bends and arousal events (stale entries would otherwise suppress them)
+				ActorStateManager::GetSingleton()->ClearTransientActorState();
+
 				//Distribute Persisted Keywords
 				Utilities::Keywords::DistributeKeywords();
 

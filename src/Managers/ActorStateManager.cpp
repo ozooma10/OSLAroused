@@ -96,6 +96,18 @@ bool ActorStateManager::ShouldNotifyArousalChange(RE::Actor* actorRef, float new
 	return true;
 }
 
+void ActorStateManager::ClearTransientActorState()
+{
+	{
+		std::scoped_lock lock(m_SosStateLock);
+		m_SosStateCache.clear();
+	}
+	{
+		std::scoped_lock lock(m_LastSentArousalLock);
+		m_LastSentArousalCache.clear();
+	}
+}
+
 bool ActorStateManager::GetActorArousalLocked(RE::Actor* actorRef)
 {
 	if (!actorRef) {

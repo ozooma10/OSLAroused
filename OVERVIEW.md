@@ -152,9 +152,9 @@ All arousal data is saved per-character in SKSE co-saves:
 - `SetArousalExt(uint32_t formId, float value)`: Direct arousal setting
 - `ModifyArousalExt(uint32_t formId, float value)`: Modify with multiplier
 
-**Events:**
-- `OSLAroused_ActorArousalUpdated`: Fired on arousal changes
-- Includes actor reference and new arousal value
+**Events:** (SKSE ModEvents; register with `RegisterForModEvent`)
+- `OSLA_ActorArousalUpdated`: Fired when an actor's arousal changes by at least 1 point since the last notification (the player is notified on every update). Args: `(string eventName, string strArg, float newArousal, Form sender)` where `sender` is the actor.
+- `OSLA_ActorNakedUpdated`: Fired when an actor's naked state changes. Args: `(string eventName, string strArg, float isNaked, Form sender)` (`isNaked` is 1.0/0.0).
 
 ## Performance Considerations
 
