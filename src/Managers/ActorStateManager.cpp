@@ -47,30 +47,36 @@ void ActorStateManager::UpdateSOSAnimation(RE::Actor* actorRef, float arousal)
 		}
 	}
 
-	//skip if state is unchanged for this actor
+	//skip if the last *applied* state for this actor is unchanged
 	{
 		std::scoped_lock lock(m_SosStateLock);
 		auto it = m_SosStateCache.find(actorRef->formID);
 		if (it != m_SosStateCache.end() && it->second == desiredState) {
 			return;
 		}
-		m_SosStateCache[actorRef->formID] = desiredState;
 	}
 
 	const RE::BSFixedString animEvent = (desiredState == kSosFlaccidState)
 		? RE::BSFixedString("SOSFlaccid")
 		: RE::BSFixedString(("SOSBend" + std::to_string(desiredState)).c_str());
+	const RE::FormID formID = actorRef->formID;
 	auto actorHandle = actorRef->GetHandle();
-	SKSE::GetTaskInterface()->AddTask([actorHandle, animEvent]() {
+	SKSE::GetTaskInterface()->AddTask([actorHandle, animEvent, formID, desiredState]() {
 		auto actorPtr = actorHandle.get();
-		if (!actorPtr) {
-			return;
-		}
-		auto* actor = actorPtr.get();
+		auto* actor = actorPtr ? actorPtr.get() : nullptr;
 		if (!actor || !actor->Is3DLoaded()) {
+			// Couldn't apply (actor unloaded/not yet 3D-loaded). Leave the cache untouched so the
+			// next update re-attempts, instead of recording a bend that never landed and then
+			// having the dedup above suppress the real re-assert.
 			return;
 		}
 		actor->NotifyAnimationGraph(animEvent);
+		// Record the bend only now that it actually applied. Reach the singleton here instead of
+		// capturing `this` - the task outlives this call and this matches the deferred-work
+		// pattern used elsewhere (Papyrus::Events::Send*, RunWorldArousalUpdate).
+		auto* mgr = ActorStateManager::GetSingleton();
+		std::scoped_lock lock(mgr->m_SosStateLock);
+		mgr->m_SosStateCache[formID] = desiredState;
 	});
 }
 
