@@ -106,6 +106,11 @@ void ActorStateManager::ClearTransientActorState()
 		std::scoped_lock lock(m_LastSentArousalLock);
 		m_LastSentArousalCache.clear();
 	}
+	// The naked cache reflects the *previous session's* worn-armor state, which the loaded save
+	// can differ from (older/other save), and its key is a raw RE::Actor* - the player's address
+	// is a stable singleton, so a stale entry survives the load. Drop it so naked state re-scans
+	// from the loaded save's actual equipment on next fetch.
+	m_ActorNakedStateCache.ClearAll();
 }
 
 bool ActorStateManager::GetActorArousalLocked(RE::Actor* actorRef)
@@ -134,6 +139,13 @@ void ActorStateManager::ActorNakedStateChanged(RE::Actor* actorRef, bool newNake
 {
 	if (!actorRef) {
 		SKSE::log::warn("ActorNakedStateChanged called with null actor");
+		return;
+	}
+
+	// Change-detection: skip when the cached naked state already matches. This collapses the
+	// equip handler's body-slot + "counts as clothing" double-call into a single event, and
+	// drops the redundant unequip/equip churn that floods OnActorNakedUpdated in crowds.
+	if (const auto cached = m_ActorNakedStateCache.Peek(actorRef); cached.has_value() && *cached == newNaked) {
 		return;
 	}
 

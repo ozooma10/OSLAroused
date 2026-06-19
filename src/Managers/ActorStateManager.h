@@ -50,7 +50,9 @@ public:
 	// comparies against the last notified value. The player always notifies.
 	bool ShouldNotifyArousalChange(RE::Actor* actorRef, float newArousal);
 
-	// reset the transient sos/arousal caches. needs to be reset on load/new game since engine resets animation state on load.
+	// Drop per-actor in-memory caches (SOS bend, last-sent arousal, naked state) on load/new game.
+	// They reflect the previous session, which the loaded save can differ from; the engine also
+	// resets animation state, and the naked cache's raw Actor* key can alias reused addresses.
 	void ClearTransientActorState();
 
 	RE::Actor* GetMostArousedActorInLocation();

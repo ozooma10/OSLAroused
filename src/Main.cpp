@@ -10,6 +10,7 @@
 #include "Config.h"
 #include "Managers/ArousalManager.h"
 #include "Managers/ActorStateManager.h"
+#include "Managers/ArousalSystem/ArousalSystemOSL.h"
 #include "Integrations/ANDIntegration.h"
 
 using namespace RE::BSScript;
@@ -83,8 +84,12 @@ namespace
 			case SKSE::MessagingInterface::kNewGame:
 				//On new game, reset arousal manager
 				ArousalManager::GetSingleton()->SetArousalSystem(IArousalSystem::ArousalMode::kOSL, false);
-				//Drop transient SOS/arousal-event dedup caches (not persisted; engine resets anim state)
+				//Drop per-actor in-memory caches that reflect the previous session (see method comment)
 				ActorStateManager::GetSingleton()->ClearTransientActorState();
+				//Libido modifier cache is Actor*-keyed and equipment/device-derived - same staleness
+				if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+					oslSystem->ClearAllLibidoModifiers();
+				}
 				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
 				//Drop transient SOS/arousal-event dedup caches so the first post-load cycle re-asserts
@@ -97,6 +102,11 @@ namespace
 				//Loaded game so update arousal mode based off saved data
 				auto arousalMode = (IArousalSystem::ArousalMode)PersistedData::SettingsData::GetSingleton()->GetArousalMode();
 				ArousalManager::GetSingleton()->SetArousalSystem(arousalMode, false);
+				//Libido modifier cache is Actor*-keyed and reflects the previous session; clear it now
+				//that the loaded save's mode is active so stale per-actor baselines don't linger.
+				if (auto* oslSystem = dynamic_cast<ArousalSystemOSL*>(&ArousalManager::GetSingleton()->GetArousalSystem())) {
+					oslSystem->ClearAllLibidoModifiers();
+				}
 				break;
 			} }
 		))
