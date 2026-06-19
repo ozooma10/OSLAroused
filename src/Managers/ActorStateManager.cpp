@@ -2,12 +2,77 @@
 #include "Utilities/Utils.h"
 #include "Papyrus/Papyrus.h"
 #include "PersistedData.h"
+#include "Settings.h"
 #include "Managers/ArousalManager.h"
 #include "Managers/ArousalSystem/ArousalSystemOSL.h"
+
+namespace
+{
+	// sentinel sos value representing "flaccid". (outside the valid SOSBend [-9, 9] range)
+	constexpr int kSosFlaccidState = -100;
+}
 
 bool IsActorNaked(RE::Actor* actorRef)
 {
 	return Utilities::Actor::IsNaked(actorRef);
+}
+
+void ActorStateManager::UpdateSOSAnimation(RE::Actor* actorRef, float arousal)
+{
+	if (!actorRef || !Settings::GetSingleton()->GetEnableSOSIntegration()) {
+		return;
+	}
+
+	// get the desired sos state as an int. either kSosFlaccidState or a bend bucket in [-9, 9]
+	// should mirror the old UpdateSOSPosition mapping (pos = arousal/4 - 14, clamped), but with a sentinel for flaccid instead of bucket -10
+	int desiredState;
+	if (Utilities::Actor::IsDead(actorRef)) {
+		desiredState = kSosFlaccidState;
+	} else if (Utilities::Actor::IsParticipatingInScene(actorRef)) {
+		// in-scene animations own sos state, so drop any cached state so first update always re-asserts arousal-based bend when the scene ends.
+		std::scoped_lock lock(m_SosStateLock);
+		m_SosStateCache.erase(actorRef->formID);
+		return;
+	} else {
+		int pos = (static_cast<int>(arousal) / 4) - 14;
+		if (pos < -9) {
+			desiredState = kSosFlaccidState;
+		} else if (pos > 9) {
+			desiredState = 9;
+		} else {
+			desiredState = pos;
+		}
+	}
+
+	// Dedup: skip if the schlong is already in this state for this actor. This is what
+	// collapses a stable crowd from one animation event per actor per cycle to ~zero.
+	{
+		std::scoped_lock lock(m_SosStateLock);
+		auto it = m_SosStateCache.find(actorRef->formID);
+		if (it != m_SosStateCache.end() && it->second == desiredState) {
+			return;
+		}
+		m_SosStateCache[actorRef->formID] = desiredState;
+	}
+
+	// NotifyAnimationGraph must run on the main thread, so marshal it (mirrors the
+	// Papyrus::Events::Send* helpers and RunWorldArousalUpdate). Capture a handle so an
+	// actor that unloads before the task runs is simply skipped.
+	const RE::BSFixedString animEvent = (desiredState == kSosFlaccidState)
+		? RE::BSFixedString("SOSFlaccid")
+		: RE::BSFixedString(("SOSBend" + std::to_string(desiredState)).c_str());
+	auto actorHandle = actorRef->GetHandle();
+	SKSE::GetTaskInterface()->AddTask([actorHandle, animEvent]() {
+		auto actorPtr = actorHandle.get();
+		if (!actorPtr) {
+			return;
+		}
+		auto* actor = actorPtr.get();
+		if (!actor || !actor->Is3DLoaded()) {
+			return;
+		}
+		actor->NotifyAnimationGraph(animEvent);
+	});
 }
 
 bool ActorStateManager::GetActorArousalLocked(RE::Actor* actorRef)

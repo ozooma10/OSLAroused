@@ -41,6 +41,11 @@ public:
 
 	void OnActorArousalUpdated(RE::Actor* actorRef, float newArousal);
 
+	// Drive the actors SOS bend animation directly from the current arousal value
+	// deduped by bend bucket so an unchanged state emits notion.
+	// NotifyAnimationGraph call is marshalled to the main thread internally, so this is safe to call from the Papyrus VM thread.
+	void UpdateSOSAnimation(RE::Actor* actorRef, float arousal);
+
 	RE::Actor* GetMostArousedActorInLocation();
 
 private:
@@ -59,6 +64,11 @@ private:
 	// Guards m_NakedSpectatingMap: written on the main thread (UpdateActorsSpectating,
 	// from the arousal tick) and read from the Papyrus VM thread via the libido path.
 	std::mutex m_SpectatingLock;
+
+	// [formid, sosbendbucket] cache of last sent actor SOS state
+	// updated from both main and papyrusVM threads
+	std::unordered_map<RE::FormID, int> m_SosStateCache;
+	std::mutex m_SosStateLock;
 
 	RE::BGSKeyword* m_CreatureKeyword;
 	RE::BGSKeyword* m_AnimalKeyword;
