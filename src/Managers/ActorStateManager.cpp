@@ -10,6 +10,9 @@ namespace
 {
 	// sentinel sos value representing "flaccid". (outside the valid SOSBend [-9, 9] range)
 	constexpr int kSosFlaccidState = -100;
+
+	// minumum arousal change since last notification to re-fire OSLA_ActorArousalUpdated for npcs. player always notifies.
+	constexpr float kArousalEventEpsilon = 1.0f;
 }
 
 bool IsActorNaked(RE::Actor* actorRef)
@@ -44,8 +47,7 @@ void ActorStateManager::UpdateSOSAnimation(RE::Actor* actorRef, float arousal)
 		}
 	}
 
-	// Dedup: skip if the schlong is already in this state for this actor. This is what
-	// collapses a stable crowd from one animation event per actor per cycle to ~zero.
+	//skip if state is unchanged for this actor
 	{
 		std::scoped_lock lock(m_SosStateLock);
 		auto it = m_SosStateCache.find(actorRef->formID);
@@ -55,9 +57,6 @@ void ActorStateManager::UpdateSOSAnimation(RE::Actor* actorRef, float arousal)
 		m_SosStateCache[actorRef->formID] = desiredState;
 	}
 
-	// NotifyAnimationGraph must run on the main thread, so marshal it (mirrors the
-	// Papyrus::Events::Send* helpers and RunWorldArousalUpdate). Capture a handle so an
-	// actor that unloads before the task runs is simply skipped.
 	const RE::BSFixedString animEvent = (desiredState == kSosFlaccidState)
 		? RE::BSFixedString("SOSFlaccid")
 		: RE::BSFixedString(("SOSBend" + std::to_string(desiredState)).c_str());
@@ -73,6 +72,28 @@ void ActorStateManager::UpdateSOSAnimation(RE::Actor* actorRef, float arousal)
 		}
 		actor->NotifyAnimationGraph(animEvent);
 	});
+}
+
+bool ActorStateManager::ShouldNotifyArousalChange(RE::Actor* actorRef, float newArousal)
+{
+	if (!actorRef) {
+		return false;
+	}
+
+	const bool isPlayer = actorRef->IsPlayerRef();
+
+	std::scoped_lock lock(m_LastSentArousalLock);
+	auto it = m_LastSentArousalCache.find(actorRef->formID);
+	const bool firstTime = (it == m_LastSentArousalCache.end());
+
+	// NPCs notify only when arousal moved >= epsilon since the LAST notification (not the last
+	// cycle), so slow drift still eventually fires. The player always notifies (HUD bar).
+	if (!isPlayer && !firstTime && std::abs(newArousal - it->second) < kArousalEventEpsilon) {
+		return false;
+	}
+
+	m_LastSentArousalCache[actorRef->formID] = newArousal;
+	return true;
 }
 
 bool ActorStateManager::GetActorArousalLocked(RE::Actor* actorRef)

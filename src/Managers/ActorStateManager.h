@@ -46,6 +46,10 @@ public:
 	// NotifyAnimationGraph call is marshalled to the main thread internally, so this is safe to call from the Papyrus VM thread.
 	void UpdateSOSAnimation(RE::Actor* actorRef, float arousal);
 
+	// decides wheather to emit OSLA_ActorArousalUpdated for this actor given the new arousal value
+	// comparies against the last notified value. The player always notifies.
+	bool ShouldNotifyArousalChange(RE::Actor* actorRef, float newArousal);
+
 	RE::Actor* GetMostArousedActorInLocation();
 
 private:
@@ -69,6 +73,10 @@ private:
 	// updated from both main and papyrusVM threads
 	std::unordered_map<RE::FormID, int> m_SosStateCache;
 	std::mutex m_SosStateLock;
+
+	// last arousal value broadcast via OSLA_ActorArousalUpdated per actor
+	std::unordered_map<RE::FormID, float> m_LastSentArousalCache;
+	std::mutex m_LastSentArousalLock;
 
 	RE::BGSKeyword* m_CreatureKeyword;
 	RE::BGSKeyword* m_AnimalKeyword;

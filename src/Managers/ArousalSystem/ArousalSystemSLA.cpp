@@ -8,14 +8,6 @@
 
 using namespace PersistedData;
 
-namespace
-{
-	// Minimum arousal change required to send an arousal updated event. 
-    // we lerp towards baseline in tiny increments, but dont need to send that every update,
-    // player is still always sent, this is just for npc actors
-	constexpr float kArousalEventEpsilon = 1.0f;
-}
-
 float GetDaysSinceLastOrgasm(RE::Actor* actorRef)
 {
 	if(!actorRef) { return 0.f; }
@@ -62,17 +54,15 @@ float ArousalSystemSLA::GetArousal(RE::Actor* actorRef, bool bUpdateState)
 		newArousal = 100;
 	}
 
-	const int oldArousalRank = Utilities::Factions::GetSingleton()->GetFactionRank(actorRef, FactionType::sla_Arousal);
 	Utilities::Factions::GetSingleton()->SetFactionRank(actorRef, FactionType::sla_Arousal, newArousal);
 
 	const bool firstCheck = LastCheckTimeData::GetSingleton()->GetData(actorRef->formID, 0.f) == 0.f;
 	if (bUpdateState || firstCheck) {
-        // Drive SOS natively (deduped by bend bucket) 
-        // avoids round-tripping every actor through Papyrus OnActorArousalUpdated -> Debug.SendAnimationEvent.
+        // Drive SOS natively (deduped by bend bucket); avoids the Papyrus round-trip.
 		ActorStateManager::GetSingleton()->UpdateSOSAnimation(actorRef, newArousal);
 
-        //Only emit arousal event when value changed beyond epsilon (or is player)
-		if (actorRef->IsPlayerRef() || firstCheck || std::abs(newArousal - static_cast<float>(oldArousalRank)) >= kArousalEventEpsilon) {
+        // Only emit the public arousal event on a >= epsilon change since last notification.
+		if (ActorStateManager::GetSingleton()->ShouldNotifyArousalChange(actorRef, newArousal)) {
 			Papyrus::Events::SendActorArousalUpdatedEvent(actorRef, newArousal);
 		}
 	}
