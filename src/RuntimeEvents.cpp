@@ -134,6 +134,10 @@ namespace
 	// the game isn't draining the SKSE task queue (e.g. at the main menu) or if a
 	// scan ever outlasts the tick interval.
 	std::atomic<bool> g_arousalUpdatePending{ false };
+
+	// Same coalescing for A.N.D. nudity updates: a crowd fires one OSLA_ANDUpdate per nude
+	// actor, but we only need one nearby libido-cache refresh per burst.
+	std::atomic<bool> g_andRefreshPending{ false };
 }
 
 // Runs the actual world scan on the main game thread (marshalled from the
@@ -364,46 +368,57 @@ RE::BSEventNotifyControl RuntimeEvents::OnModCallbackEvent::ProcessEvent(const S
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	auto eventName = callbackEvent->eventName.c_str();
-	if (!eventName || !std::strcmp(eventName, "OSLA_ANDUpdate") == 0) {
+	const auto eventName = callbackEvent->eventName.c_str();
+	if (!eventName || std::strcmp(eventName, "OSLA_ANDUpdate") != 0) {
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	SKSE::log::debug("OnModCallbackEvent: Received ModCallbackEvent: EventName: {}", eventName);
+	// Only OSL mode maintains the libido modifier cache this refresh purges.
+	if (!Settings::GetSingleton()->GetUseANDIntegration() || !Integrations::ANDIntegration::GetSingleton()->IsAvailable()) {
+		return RE::BSEventNotifyControl::kContinue;
+	}
 
-	// Check if AND integration is enabled
-	if (Settings::GetSingleton()->GetUseANDIntegration() && Integrations::ANDIntegration::GetSingleton()->IsAvailable()) {
-		SKSE::log::debug("Processing OSLA_ANDUpdate: AND factions recalculated, triggering arousal recalculation");
+	// A.N.D. fires one update per nude actor, so a crowd produces a burst of these. Coalesce
+	// them: if a refresh is already queued, drop this one - the queued task covers it (mirrors
+	// g_arousalUpdatePending). The nearby scan + cache purge runs once on the main thread,
+	// where GetNearbyActorsInCell and the engine reads are safe.
+	if (g_andRefreshPending.exchange(true)) {
+		return RE::BSEventNotifyControl::kContinue;
+	}
 
-		// Get the arousal system (only OSL mode supports libido modifier cache)
+	SKSE::GetTaskInterface()->AddTask([]() {
+		// Re-arm immediately so updates arriving during this refresh queue the next one.
+		g_andRefreshPending.store(false);
+
 		auto& arousalSystem = ArousalManager::GetSingleton()->GetArousalSystem();
-		if (arousalSystem.GetMode() == IArousalSystem::ArousalMode::kOSL) {
-			auto* oslSystem = static_cast<ArousalSystemOSL*>(&arousalSystem);
+		if (arousalSystem.GetMode() != IArousalSystem::ArousalMode::kOSL) {
+			return;
+		}
+		auto* oslSystem = static_cast<ArousalSystemOSL*>(&arousalSystem);
 
-			// Get player and nearby actors to update their arousal
-			auto player = RE::PlayerCharacter::GetSingleton();
-			if (player) {
-				// Update player's libido cache
-				oslSystem->ActorLibidoModifiersUpdated(player);
-				float newBaseline = oslSystem->GetBaselineArousal(player); // Force baseline recalculation
-				SKSE::log::trace("OSLA_ANDUpdate: Updated player libido cache, new baseline arousal: {}", newBaseline);
+		auto player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return;
+		}
 
-				// Update all nearby actors' libido cache
-				const auto nearbyActors = GetNearbyActorsInCell(player);
-				for (const auto& actorHandle : nearbyActors) {
-					auto actorPtr = actorHandle.get();
-					if (actorPtr) {
-						auto actor = actorPtr.get();
-						if (actor && ActorStateManager::GetSingleton()->IsHumanoidActor(actor)) {
-							oslSystem->ActorLibidoModifiersUpdated(actor);
-						}
-					}
+		// Refresh the player's baseline, then invalidate nearby actors so their libido
+		// modifiers recompute against the new A.N.D. nudity state on next fetch.
+		oslSystem->ActorLibidoModifiersUpdated(player);
+		oslSystem->GetBaselineArousal(player);
+
+		const auto nearbyActors = GetNearbyActorsInCell(player);
+		for (const auto& actorHandle : nearbyActors) {
+			auto actorPtr = actorHandle.get();
+			if (actorPtr) {
+				auto* actor = actorPtr.get();
+				if (actor && ActorStateManager::GetSingleton()->IsHumanoidActor(actor)) {
+					oslSystem->ActorLibidoModifiersUpdated(actor);
 				}
-
-				SKSE::log::debug("OSLA_ANDUpdate: Updated libido cache for {} nearby actors", nearbyActors.size());
 			}
 		}
-	}
+
+		SKSE::log::debug("OSLA_ANDUpdate: refreshed libido cache for {} nearby actors", nearbyActors.size());
+	});
 
 	return RE::BSEventNotifyControl::kContinue;
 }
