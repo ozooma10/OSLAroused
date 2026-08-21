@@ -3,7 +3,7 @@ includes("lib/CommonLibVR")
 
 -- set project constants
 set_project("OSLAroused")
-set_version("2.9.2")
+set_version("2.9.3")
 set_license("Unlicense")
 set_languages("c++23")
 set_warnings("allextra")

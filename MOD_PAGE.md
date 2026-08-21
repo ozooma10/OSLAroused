@@ -50,12 +50,13 @@ Complete redesign of how arousal updates over time:
 - Both frameworks share the same arousal state
 
 ## Requirements
-- Address Library for SKSE
+- SKSE matching your Skyrim runtime
+- Address Library matching your Skyrim runtime
 - SkyUI
 
 ## Installation
 1. Install via mod manager using the included FOMOD
-2. Select correct version (AE or SSE) during installation
+2. Ensure the SKSE and Address Library versions match your Skyrim runtime; OSL Aroused uses one DLL for SE, AE, and VR
 3. Place towards bottom of load order - **MUST OVERWRITE ALL OTHER MODS** (like SLSO)
 4. **DO NOT INSTALL SexLab Aroused OR OAroused** - this is a replacement
 5. If you don't use mods requiring OAroused, you can disable OAroused.esp
