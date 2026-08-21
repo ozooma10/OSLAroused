@@ -264,9 +264,19 @@ void ActorStateManager::UpdateActorsSpectating(std::map<RE::Actor*, float> spect
 	}
 }
 
-bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
+bool ActorStateManager::IsMannequinActor(RE::Actor* actorRef)
 {
 	if (!actorRef) {
+		return false;
+	}
+
+	const auto* race = actorRef->GetRace();
+	return race && race->formID == kManakinRaceFormId;
+}
+
+bool ActorStateManager::IsHumanoidActor(RE::Actor* actorRef)
+{
+	if (!actorRef || IsMannequinActor(actorRef)) {
 		return false;
 	}
 

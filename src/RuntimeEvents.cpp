@@ -317,7 +317,9 @@ std::vector<RE::ActorHandle> GetNearbyActorsInCell(RE::Actor* source)
 	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
-		if (actor && !actor->IsDisabled() && !actor->IsChild() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+		if (actor && !actor->IsDisabled() && !actor->IsChild()
+			&& !ActorStateManager::IsMannequinActor(actor)
+			&& (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			nearbyActors.push_back(actor->GetHandle());
 		}
 		return RE::BSContainer::ForEachResult::kContinue;
@@ -346,7 +348,7 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
     Utilities::World::ForEachReferenceInRange(source, radius, [&](RE::TESObjectREFR& ref) {
 		auto refBase = ref.GetBaseObject();
 		auto actor = ref.As<RE::Actor>();
-		if (actor && actor != source && !actor->IsDisabled() && !actor->IsChild() && !Utilities::Actor::IsDead(actor) && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+		if (actor && actor != source && !actor->IsDisabled() && !actor->IsChild() && !Utilities::Actor::IsDead(actor) && !ActorStateManager::IsMannequinActor(actor) && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			//Enforce the outer radius as a hard cutoff, then check force distance / detection
 			const float distSq = sourceLocation.GetSquaredDistance(ref.GetPosition());
 			if (distSq < radiusSq &&

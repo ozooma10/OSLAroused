@@ -6,6 +6,7 @@ bool IsActorNaked(RE::Actor* actorRef);
 
 const static RE::FormID kActorTypeCreatureKeywordFormId = 0x13795;
 const static RE::FormID kActorTypeAnimalKeywordFormId = 0x13798;
+const static RE::FormID kManakinRaceFormId = 0x10760A;
 
 class ActorStateManager
 {
@@ -36,7 +37,10 @@ public:
 	float GetSpectatingMaxNudityScore(RE::Actor* actorRef);
 	void UpdateActorsSpectating(std::map<RE::Actor*, float> spectatorNudityScores);
 
-	//Returns true if actor is non-creature, non-animal npc
+	// Skyrim mannequins are NPC actors, but are display fixtures rather than arousal participants.
+	static bool IsMannequinActor(RE::Actor* actorRef);
+
+	// Returns true if actor is a living-character race handled by the arousal system.
 	bool IsHumanoidActor(RE::Actor* actorRef);
 
 	void OnActorArousalUpdated(RE::Actor* actorRef, float newArousal);
