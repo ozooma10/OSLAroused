@@ -2086,10 +2086,12 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 	int timeVibrated = 0
 	int vibAnimStarted = 0
 	bool[] cameraState
+	int vibExpressionPriority = 15
 
 	; Start base expression
 	sslBaseExpression expression = SexLab.RandomExpressionByTag("Pleasure")
-	ApplyExpression_v2(akActor, expression, 15, Math.Ceiling(Aroused.GetActorExposure(akActor)*0.6), openMouth=false) ;do not open mouth
+	int vibExpressionStrength = Math.Ceiling(Aroused.GetActorExposure(akActor)*0.6)
+	ApplyExpression_v2(akActor, expression, vibExpressionPriority, vibExpressionStrength, openMouth=false) ;do not open mouth
 	if Utility.RandomInt() <= (10*vibStrength) 
 		PlayThirdPersonAnimation(akActor, AnimSwitchKeyword(akActor, "Horny01"), 3, permitRestrictive=true)
 	EndIf
@@ -2102,6 +2104,9 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 
 	; Main Loop
 	While IsValidActor(akActor) && timeVibrated < GetVibrating(akActor) && (akActor.WornHasKeyword(zad_DeviousPlug) || akActor.WornHasKeyword(zad_DeviousPiercingsNipple) || akActor.WornHasKeyword(zad_DeviousPiercingsVaginal))
+		; Keep the vibration expression alive for libraries that expire expressions between ticks.
+		vibExpressionStrength = Math.Ceiling(Aroused.GetActorExposure(akActor)*0.6)
+		ApplyExpression_v2(akActor, expression, vibExpressionPriority, vibExpressionStrength, openMouth=(vibAnimStarted != 0))
 		; Log("XXX VibrateEffect: Begin Tick "+timeVibrated)
 		if (timeVibrated % 2) == 0 ; Make noise
 			; Log("XXX VibrateEffect: Making Noise")
@@ -2166,7 +2171,7 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 		;;;;;;;;;;
 		if (vibAnimStarted == 0) && Utility.RandomInt() <= (3+(VibStrength * 2)) && !IsAnimating(akActor)
 			; Log("XXX Starting Horny Idle")
-			ApplyExpression(akActor, expression, (Aroused.GetActorExposure(akActor) * 0.75) as Int, openMouth=true)
+			ApplyExpression_v2(akActor, expression, vibExpressionPriority, (Aroused.GetActorExposure(akActor) * 0.75) as Int, openMouth=true)
 			; Select animation
 			string randomAnim
 			if (nPiercings && !(vPlug || aPlug))
@@ -2183,7 +2188,7 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 		;;;;;;;;;;
 		if (vibAnimStarted != 0) && (timeVibrated - vibAnimStarted >= 6) ; Stop animation after 5 seconds.
 			; Log("XXX Stopping Horny Idle")
-			ApplyExpression_v2(akActor, expression,15, (timeVibrated / duration) * 75, openMouth=False)
+			ApplyExpression_v2(akActor, expression, vibExpressionPriority, vibExpressionStrength, openMouth=False)
 			EndThirdPersonAnimation(akActor, cameraState, permitRestrictive=true)
 			vibAnimStarted = 0
 			; Log("XXX VibrateEffect: Done stopping horny idle")
@@ -2205,7 +2210,7 @@ int Function VibrateEffect(actor akActor, int vibStrength, int duration, bool te
 	Sound.StopInstance(msID)
 	if IsValidActor(akActor)
 		; Reset expression
-		ResetExpressionRaw(akActor, 15)
+		ResetExpressionRaw(akActor, vibExpressionPriority)
 	EndIf
 	;;;;;;;;;;
 	; Make sure actor isn't stuck in animation

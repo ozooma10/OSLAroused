@@ -6,7 +6,7 @@ echo Building OSLAroused and Running Tests
 echo ========================================
 echo.
 
-REM Build mode: "debug" or "release" (release maps to xmake's releasedbg). Default: debug.
+REM Build mode: debug or release. Release maps to xmake's releasedbg mode.
 set BUILD_TYPE=%1
 if "%BUILD_TYPE%"=="" set BUILD_TYPE=debug
 
@@ -22,17 +22,21 @@ if /I "%BUILD_TYPE%"=="debug" (
 
 where xmake >nul 2>nul
 if !errorlevel! neq 0 (
-    echo ERROR: xmake was not found on PATH. Install from https://xmake.io
+    echo ERROR: xmake was not found on PATH. Install it from https://xmake.io
     exit /b 1
 )
 
 if /I "%2"=="clean" (
     echo Cleaning previous build...
     xmake clean -a
+    if !errorlevel! neq 0 (
+        echo ERROR: xmake clean failed!
+        exit /b !errorlevel!
+    )
     echo.
 )
 
-echo Step 1: Configuring xmake (mode=%XMAKE_MODE%, tests enabled)...
+echo Step 1: Configuring xmake ^(mode=%XMAKE_MODE%, tests enabled^)...
 echo -----------------------------------------------
 xmake f -m %XMAKE_MODE% --build_tests=y -y
 if !errorlevel! neq 0 (
@@ -54,16 +58,14 @@ echo Step 3: Running tests...
 echo -----------------------------------------------
 xmake run OSLArousedTests
 if !errorlevel! neq 0 (
+    set TEST_EXIT_CODE=!errorlevel!
     echo.
-    echo WARNING: Some tests failed. Check the output above for details.
-    echo You can filter tests by tag, e.g.:
-    echo   xmake run OSLArousedTests "[LRUCache]"
-    echo   xmake run OSLArousedTests "~[integration]~[e2e]"   ^(unit tests only^)
-) else (
-    echo.
-    echo SUCCESS: All tests passed!
+    echo ERROR: Some tests failed. Check the output above for details.
+    exit /b !TEST_EXIT_CODE!
 )
 
+echo.
+echo SUCCESS: All tests passed!
 echo.
 echo Build complete. Output is in: build/windows/x64/%XMAKE_MODE%/
 endlocal

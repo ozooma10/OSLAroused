@@ -541,6 +541,7 @@ compile_commands.json
 contrib/Distribution/**/*.dll
 contrib/Distribution/**/*.pdb
 contrib/Distribution/PapyrusRelease/*.pex
+contrib/Distribution/*.zip
 vcpkg_installed
 .gitconfig
 .claude/settings.local.json
