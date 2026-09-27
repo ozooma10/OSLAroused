@@ -89,6 +89,9 @@ float ArousalSystemSLA::SetArousal(RE::Actor* actorRef, float value, bool bSendE
 	if (bSendEvent) {
 		GetArousal(actorRef, bSendEvent);
 	}
+	else {
+		GetArousal(actorRef, false);
+	}
 
 	return value;
 }
